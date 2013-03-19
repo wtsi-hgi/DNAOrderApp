@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Bootstrap -->
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" />
+		<link rel="stylesheet" media="screen" href="css/bootstrap.min.css" />
+
+		{% block extrahead %}{% endblock %}
+	</head>
+	<body>
+		<h1> Hello Conan OBrien! </h1>
+		<div id="pageContainer">
+			{% block content %}
+			{% endblock %}
+		</div>
+	</body>
+</html>
