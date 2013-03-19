@@ -39,8 +39,8 @@ class Individual(models.Model):
 class PhenodbIdentifier(models.Model):
     phenodb_id = models.CharField(max_length=100, unique=True)
     individual = models.OneToOneField(Individual, primary_key=True)    
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.individual_string
@@ -55,8 +55,8 @@ class Collection(models.Model):
 class IndividualCollection(models.Model):
     individual = models.ForeignKey(Individual)
     collection = models.ForeignKey(Collection)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.individual_string
@@ -66,8 +66,8 @@ class AffectionStatusPhenotypeValue(models.Model):
     individual = models.ForeignKey(Individual)
     phenotype_value = models.SmallIntegerField()
     flagged = models.BooleanField() 
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
     
     def __unicode__(self):
@@ -78,8 +78,8 @@ class QualitativePhenotypeValue(models.Model):
     individual = models.ForeignKey(Individual)
     phenotype_value = models.CharField(max_length=200)
     flagged = models.BooleanField() 
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.phenotype_value
@@ -89,8 +89,8 @@ class QuantitativePhenotypeValue(models.Model):
     individual = models.ForeignKey(Individual)
     phenotype_value = models.DecimalField(max_digits=10, decimal_places=2)
     flagged = models.BooleanField() 
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return u'%f' % self.phenotype_value
@@ -103,8 +103,8 @@ class Study(models.Model):
     platform = models.ForeignKey(Platform)
     data_location = models.CharField(max_length=200)
     study_description = models.TextField()
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.study_name
@@ -112,14 +112,14 @@ class Study(models.Model):
 class Sample(models.Model):
     individual = models.ForeignKey(Individual)
     sample_id = models.CharField(max_length=100)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
 class StudySample(models.Model):
     study = models.ForeignKey(Study)
     sample = models.ForeignKey(Sample)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     
 class SampleFeatureType(models.Model):
@@ -143,8 +143,8 @@ class AffectionStatusSampleFeatureValue(models.Model):
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.SmallIntegerField()
     flagged = models.BooleanField() 
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
     
     def __unicode__(self):
@@ -155,8 +155,8 @@ class QualitativeSampleFeatureValue(models.Model):
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.CharField(max_length=200)
     flagged = models.BooleanField() 
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.sample_feature_value
@@ -166,8 +166,8 @@ class QuantitativeSampleFeatureValue(models.Model):
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DecimalField(max_digits=10, decimal_places=2)
     flagged = models.BooleanField() 
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return u'%f' % self.sample_feature_value    
@@ -178,8 +178,8 @@ class DateTimeSampleFeatureValue(models.Model):
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DateField()
     flagged = models.BooleanField()
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.sample_feature_value
@@ -196,8 +196,8 @@ class IndividualIdentifier(models.Model):
     individual = models.ForeignKey(Individual)
     individual_string = models.CharField(max_length=100)
     source = models.ForeignKey(Source)
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.individual_string
@@ -205,8 +205,8 @@ class IndividualIdentifier(models.Model):
 class QC(models.Model):
     qc_name = models.CharField(max_length=100, unique=True)
     qc_description = models.TextField()
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return self.qc_name
@@ -215,8 +215,8 @@ class SampleQC(models.Model):
     study_sample = models.ForeignKey(StudySample)
     qc = models.ForeignKey(QC)
     qc_pass = models.BooleanField()
-    date_created = models.DateTimeField()
-    last_updated = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
 class BulkUpload(models.Model):
     pass    
