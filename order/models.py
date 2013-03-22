@@ -1,44 +1,44 @@
 from django.db import models
 
+"""
+MODELS.PY
+
+CREATED BY James Morris
+
+Modified by Albertina Wong, March 22, 2013 to address the following issues:
+    - Adding longitudinal studies
+    - Datetime datatype for phenotypic data and sample data
+    - methodology field in Study
+    - changing study_desc to comments in Study
+    - adding definition field to Phenotype
+    - adding id, units to the phenotypical values
+    - adding units to sample values
+    - adding sanger_plate_id, sanger_sample_id, supplier_sample_name, supplier to Sample Table
+    - changing the FK specified between Study and Sample as a ManyToMany Relationship...unless each sample MUST BE 
+        LINK WITH A STUDY, in which case, then the FK is necessary...but couldn't we do something about that in a M2M 
+        relationship?
+    - removed flagged field from all the DataType Models
+"""
 
 """ ACTUAL DNA ORDER APP """
 
-class PlatformType(models.Model):
-    platform_type = models.CharField(max_length=100, unique=True)
-    
-    def __unicode__(self):
-        return self.platform_type
-    
-class Platform(models.Model):
-    platform_name = models.CharField(max_length=100, unique=True)
-    platform_type = models.ForeignKey(PlatformType)
-    platform_description = models.TextField()
-    
-    def __unicode__(self):
-        return self.platform_name
-
-class PhenotypeType(models.Model):
-    phenotype_type = models.CharField(max_length=100, unique=True)
-    
-    def __unicode__(self):
-        return self.phenotype_type
-
-class Phenotype(models.Model):
-    phenotype_name = models.CharField(max_length=100, unique=True)
-    phenotype_type = models.ForeignKey(PhenotypeType)
-    phenotype_description = models.TextField()
-
-    def __unicode__(self):
-        return self.phenotype_name
-    
 class Individual(models.Model):
     active = models.ForeignKey('self', null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+class Source(models.Model):
+    source_name = models.CharField(max_length=100, unique=True)
+    contact_name = models.CharField(max_length=100)
+    source_description = models.TextField()
     
-class PhenodbIdentifier(models.Model):
-    phenodb_id = models.CharField(max_length=100, unique=True)
-    individual = models.OneToOneField(Individual, primary_key=True)    
+    def __unicode__(self):
+        return self.source_name
+
+class IndividualIdentifier(models.Model):
+    individual = models.ForeignKey(Individual)
+    individual_string = models.CharField(max_length=100)
+    source = models.ForeignKey(Source)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -61,11 +61,33 @@ class IndividualCollection(models.Model):
     def __unicode__(self):
         return self.individual_string
 
+class PhenodbIdentifier(models.Model):
+    phenodb_id = models.CharField(max_length=100, unique=True)
+    individual = models.OneToOneField(Individual, primary_key=True)    
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    def __unicode__(self):
+        return self.individual_string
+    
+class PhenotypeType(models.Model):
+    phenotype_type = models.CharField(max_length=100, unique=True)
+    
+    def __unicode__(self):
+        return self.phenotype_type
+
+class Phenotype(models.Model):
+    phenotype_name = models.CharField(max_length=100, unique=True)
+    phenotype_type = models.ForeignKey(PhenotypeType)
+    phenotype_description = models.TextField()
+
+    def __unicode__(self):
+        return self.phenotype_name
+
 class AffectionStatusPhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.SmallIntegerField()
-    flagged = models.BooleanField() 
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
@@ -77,7 +99,6 @@ class QualitativePhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.CharField(max_length=200)
-    flagged = models.BooleanField() 
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -88,15 +109,37 @@ class QuantitativePhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.DecimalField(max_digits=10, decimal_places=2)
-    flagged = models.BooleanField() 
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return u'%f' % self.phenotype_value
+ 
+class DatePhenotypeValue(models.Model):
+    phenotype = models.ForeignKey(Phenotype)
+    individual = models.ForeignKey(Individual)
+    phenotype_value = models.DateField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return u'%s' % self.phenotype_value
 
 """ADDED AFTER THE MANIFEST WAS SHOWN TO JAMES"""
 
+class PlatformType(models.Model):
+    platform_type = models.CharField(max_length=100, unique=True)
+    
+    def __unicode__(self):
+        return self.platform_type
+    
+class Platform(models.Model):
+    platform_name = models.CharField(max_length=100, unique=True)
+    platform_type = models.ForeignKey(PlatformType)
+    platform_description = models.TextField()
+    
+    def __unicode__(self):
+        return self.platform_name
 
 class Study(models.Model):
     study_name = models.CharField(max_length=100, unique=True)
@@ -114,6 +157,9 @@ class Sample(models.Model):
     sample_id = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return self.individual
     
 class StudySample(models.Model):
     study = models.ForeignKey(Study)
@@ -121,6 +167,8 @@ class StudySample(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
+    def __unicode__(self):
+        return self.study
     
 class SampleFeatureType(models.Model):
     sample_feature_type = models.CharField(max_length=100, unique=True)
@@ -136,8 +184,6 @@ class SampleFeature(models.Model):
     def __unicode__(self):
         return self.phenotype_name    
     
-
-""" DATA TYPE """
 class AffectionStatusSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
@@ -172,8 +218,7 @@ class QuantitativeSampleFeatureValue(models.Model):
     def __unicode__(self):
         return u'%f' % self.sample_feature_value    
 
-'''ADDED DATETIME DATATYPE'''
-class DateTimeSampleFeatureValue(models.Model):
+class DateSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DateField()
@@ -182,25 +227,7 @@ class DateTimeSampleFeatureValue(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
-        return self.sample_feature_value
-    
-class Source(models.Model):
-    source_name = models.CharField(max_length=100, unique=True)
-    contact_name = models.CharField(max_length=100)
-    source_description = models.TextField()
-    
-    def __unicode__(self):
-        return self.source_name
-
-class IndividualIdentifier(models.Model):
-    individual = models.ForeignKey(Individual)
-    individual_string = models.CharField(max_length=100)
-    source = models.ForeignKey(Source)
-    date_created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-    
-    def __unicode__(self):
-        return self.individual_string
+        return u'%s' % self.sample_feature_value
 
 class QC(models.Model):
     qc_name = models.CharField(max_length=100, unique=True)
