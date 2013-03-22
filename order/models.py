@@ -163,7 +163,11 @@ class Study(models.Model):
 
 class Sample(models.Model):
     individual = models.ForeignKey(Individual)
+    supplier_name = models.CharField(max_length=100)
     sample_id = models.CharField(max_length=100)
+    sanger_plate_id = models.CharField(max_length=100)
+    sanger_sample_id = models.CharField(max_length=100)
+    supplier_sample_name = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
