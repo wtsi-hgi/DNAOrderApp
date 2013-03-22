@@ -197,7 +197,7 @@ class AffectionStatusSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.SmallIntegerField()
-    flagged = models.BooleanField() 
+    sample_unit = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
@@ -209,7 +209,7 @@ class QualitativeSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.CharField(max_length=200)
-    flagged = models.BooleanField() 
+    sample_unit = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -220,7 +220,7 @@ class QuantitativeSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DecimalField(max_digits=10, decimal_places=2)
-    flagged = models.BooleanField() 
+    sample_unit = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -231,7 +231,7 @@ class DateSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DateField()
-    flagged = models.BooleanField()
+    sample_unit = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
