@@ -145,7 +145,8 @@ class Study(models.Model):
     study_name = models.CharField(max_length=100, unique=True)
     platform = models.ForeignKey(Platform)
     data_location = models.CharField(max_length=200)
-    study_description = models.TextField()
+    methodology_desc = models.TextField()
+    commment = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
