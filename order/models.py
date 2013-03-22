@@ -89,6 +89,8 @@ class AffectionStatusPhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.SmallIntegerField()
+    phenotype_unit = models.CharField(max_length=100)
+    phenotype_set_id = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
@@ -100,6 +102,8 @@ class QualitativePhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.CharField(max_length=200)
+    phenotype_unit = models.CharField(max_length=100)
+    phenotype_set_id = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -110,6 +114,8 @@ class QuantitativePhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.DecimalField(max_digits=10, decimal_places=2)
+    phenotype_unit = models.CharField(max_length=100)
+    phenotype_set_id = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -120,6 +126,7 @@ class DatePhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
     phenotype_value = models.DateField()
+    phenotype_set_id = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
