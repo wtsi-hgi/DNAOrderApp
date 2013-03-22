@@ -80,6 +80,7 @@ class Phenotype(models.Model):
     phenotype_name = models.CharField(max_length=100, unique=True)
     phenotype_type = models.ForeignKey(PhenotypeType)
     phenotype_description = models.TextField()
+    phenotype_definition = models.TextField()  # Not too sure if should be CharField or TextField...should be unique
 
     def __unicode__(self):
         return self.phenotype_name
