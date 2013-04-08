@@ -9,9 +9,21 @@ from django.template import RequestContext
 def test(request):
     return render(request, 'order/base_test.html', {})
 
+# TRYING OUT BOOTSTRAP TUTORIAL
+def index(request):
+    return render(request, 'order/base.html', {})
+
+# About Page
+def about(request):
+    return render(request, 'order/about.html', {})
+
+# Project List Page
+def project_list(request):
+    return render(request, 'order/project-list.html', {})
+
 # Login / Sign Up Page
-def login_signup_page(request):
-    return render(request, 'order/login_signup_page.html', {})
+def signup(request):
+    return render(request, 'order/sign-up.html', {})
 
 # User Profile Page
 def user_profile(request):
@@ -24,7 +36,7 @@ def user_home(request):
 
 # POP-UP: Phenotype Selection Page
 def pheno_select(request):
-    return render(request, 'order/pheno_select.html', {})
+    return render(request, 'order/pheno-select.html', {})
 
 # POP-UP: Choose the method that the wells will be filled: Manual or Robot?
 

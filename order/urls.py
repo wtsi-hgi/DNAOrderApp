@@ -6,11 +6,25 @@ urlpatterns = patterns('',
 
     # Testing pages
     url(r'^test$', views.test, name='base_test'),
+    
+    # BOOTSTRAP TUTORIAL
+    url(r'^index$', views.index, name='index'),
+    
+    # About Page
+    url(r'^about$', views.about, name='about'),
+    
+    # Project List Page
+    url(r'^project-list$', views.project_list, name='project-list'),
+
+    # Pheno Select Page
+    url(r'^pheno-select$', views.pheno_select, name='pheno-select'),
+    
     # Login / Sign Up Page
-    url(r'^$', views.login_signup_page, name='login_signup_page'),
+    url(r'^sign-up$', views.signup, name='sign-up'),
 
 # User Profile Page
     url(r'^user_profile$', views.user_profile, name='user_profile_page'),
+
 
 # User Home Page, with the list of outgoing and incoming projects
     url(r'^user_home$', views.user_home, name='user_home'),
