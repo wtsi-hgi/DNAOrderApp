@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<title> WTSI &middot; DNA Order App &middot; Project List </title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		
+		<!-- Bootstrap -->
+		<link href="../../static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
+		<style type="text/css">
+			body {
+				padding-top: 60px;
+				padding-bottom: 40px;
+			}
+		</style>
+		
+		<link href="../../static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    	<!--[if lt IE 9]>
+      		<script src="../../static/bootstrap/js/html5shiv/dist/html5shiv.js"></script>
+    	<![endif]-->
+
+	</head>
+	<body>
+		
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					
+					
+					<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					
+					</a>
+					
+					<!-- keep the brand outside if want to be shown -->
+					<a class="brand" href="#">DNA Order Application</a>
+					
+					<!-- Everything you want hidden at 940px or less, place within here -->
+					<div class="nav-collapse collapse">
+						<ul class="nav pull-left">
+							<li><a href="index">Home</a></li>
+							<li><a href="about">About</a></li>
+							<li><a href="#contact">Contact</a></li>
+							<li class="active"><a href="project-list">Project List</a></li>
+							
+						</ul>
+						<ul class="nav pull-right">
+							<li class="dropdown">
+
+								<a href="#user-profile" class="dropdown-toggle" data-toggle="dropdown">
+									<i class="icon-user icon-white"></i> Profile 
+									<b class="caret"></b>
+								</a>
+								<ul class="dropdown-menu">
+									<li><a href="#edit-profile"><i class="icon-pencil"></i> Edit</a></li>
+									<li><a href="#logout"><i class="icon-off"></i> Log out</a></li>
+								</ul>
+							</li>
+						</ul>
+						
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<h1> Project List </h1>	
+			<table class="table table-hover">
+				<tr>
+					<th> Manifest Name </th>
+					<th> No. Plate </th>
+					<th> Study </th>
+					<th> Supplier </th>
+					<th> Created On </th>
+					<th> Created by </th>
+					<!-- Select Phenotypes, View Phenotypes -->
+					<th> Phenotype List </th>
+					<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
+					<th> Status Of Order </th> 
+				</tr>
+				<tr>
+					<td> Dummy Data - Manifest_1210 </td>
+					<td> 3 </td>
+					<td> UK10K_CILWGA </td>
+					<td> University College London Medical School </td>
+					<td> April 5, 2013 </td>
+					<td> aw18 </td>
+					<td> <a href="pheno_select"> Select Phenotypes </a></td>
+					<td> Incomplete Phenotype List </td>
+				</tr>
+			</table>
+
+			<!-- NEED TO IMPLEMENT LOGIC -->
+
+			<!-- Button to trigger modal -->
+			<a href="#upload_manifest" role="button"  class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
+			<a href="#delete_project" role="button" class="btn" data-toggle="modal"><i class="icon-minus"></i></a>
+
+			<!-- Upload Modal -->
+			<div id="upload_manifest" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h3 id="myModalLabel">Please Upload your Manifest</h3>
+				</div>
+				<div class="modal-body">
+					<p>Manifest Name, No. Plate, Study, Supplier, Created On, Created by, Phenotype List, Status of Order</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+					<button class="btn btn-primary">Save changes</button>
+				</div>
+			</div>
+
+			<!-- Delete Modal -->
+			<div id="delete_project" class="modal hide fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h3 id="myModalLabel">Deleting project</h3>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to delete this project?</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Delete project</button>
+				</div>
+			</div>
+
+			
+			<br>
+			<br>
+			<footer>
+				<p>&copy; Wellcome Trust Sanger Institute 2013, HGI Team</p>
+			</footer>
+		</div>
+	
+		<!-- Le javascript 
+		============================================================= -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<!-- local version of jquery -->
+		<script src="../../static/bootstrap/js/jquery-1.9.1.min.js"></script>
+		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+		<script src="../../static/bootstrap/js/bootstrap.min.js"></script>
+
+	</body>		
+</html>
