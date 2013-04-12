@@ -19,5 +19,11 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
     
     url(r'^order/', include('order.urls')),
-    url(r'^tutorial/', include('tutorial.urls'))
+)
+
+# From django-jquery-file-upload
+
+import os
+urlpatterns += patterns('',
+	url(r'^media/(.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.abspath(os.path.dirname(__file__)), 'media')}),
 )

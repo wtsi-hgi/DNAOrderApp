@@ -23,6 +23,10 @@
       		<script src="../../static/bootstrap/js/html5shiv/dist/html5shiv.js"></script>
     	<![endif]-->
 
+    	<script>
+    		
+    	</script>
+
 	</head>
 	<body>
 		
@@ -101,8 +105,11 @@
 			<!-- NEED TO IMPLEMENT LOGIC -->
 
 			<!-- Button to trigger modal -->
-			<a href="#upload_manifest" role="button"  class="btn" data-toggle="modal"><i class="icon-plus"></i></a>
-			<a href="#delete_project" role="button" class="btn" data-toggle="modal"><i class="icon-minus"></i></a>
+			<a href="#upload_manifest" role="button" class="btn" data-toggle="modal" data-keyboard=true>
+				<i class="icon-plus"></i>
+			</a>
+			<a href="#delete_project" role="button" class="btn" data-toggle="modal" data-keyboard=true>	<i class="icon-minus"></i>
+			</a>
 
 			<!-- Upload Modal -->
 			<div id="upload_manifest" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -112,6 +119,9 @@
 				</div>
 				<div class="modal-body">
 					<p>Manifest Name, No. Plate, Study, Supplier, Created On, Created by, Phenotype List, Status of Order</p>
+					<p> This should say what file's been uploaded - like Dropbox ...</p>
+					<!-- THIS IS A FORM -->
+
 				</div>
 				<div class="modal-footer">
 					<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -120,7 +130,7 @@
 			</div>
 
 			<!-- Delete Modal -->
-			<div id="delete_project" class="modal hide fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div id="delete_project" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
 					<h3 id="myModalLabel">Deleting project</h3>
