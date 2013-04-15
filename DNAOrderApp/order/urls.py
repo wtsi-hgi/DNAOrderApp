@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from order import views
+from DNAOrderApp.order import views
 
 urlpatterns = patterns('',
 
