@@ -1,91 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base_template.html" %}
 
-	<head>
-		<title> WTSI &middot; DNA Order Application &middot; About </title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="">
-		<meta name="author" content="">
-		
-		<!-- Bootstrap -->
-		<link href="../../static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
-		<style type="text/css">
-			body {
-				padding-top: 60px;
-				padding-bottom: 40px;
-			}
-		</style>
-		
-		<link href="../../static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+{% block title %}
+WTSI &middot; DNA Order Application &middot; About
+{% endblock title %}
 
-		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    	<!--[if lt IE 9]>
-      	<script src="../assets/js/html5shiv.js"></script>
-    	<![endif]-->
 
-	</head>
-	<body>
-		
-		<div class="navbar navbar-inverse navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-					
-					
-					<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					
-					</a>
-					
-					<!-- keep the brand outside if want to be shown -->
-					<a class="brand" href="#">DNA Order Application</a>
-					
-					<!-- Everything you want hidden at 940px or less, place within here -->
-					<div class="nav-collapse collapse">
-						<ul class="nav pull-left">
-							<li><a href="index">Home</a></li>
-							<li class="active"><a href="about">About</a></li>
-							<li><a href="#contact">Contact</a></li>
-							<li><a href="project-list">Project List</a></li>
-							
-						</ul>
-						<ul class="nav pull-right">
-							<li><a href="#user-profile">Profile</a></li>
-						</ul>
-						
-					</div>
-					
-				</div>
-			</div>
-		</div>
+{% block content %}
 
-		<div class="container">
-			<h1> About </h1>	
-			<p> 
-				The DNA Order Application aims to improve the interface for ordering DNA 
-				sequences from our collaborators. The current system generates an excel sheet 
-				(manifest) that is sent to our collaborators to be filled out as they fill the 
-				plates up with samples of the requested DNA sequences. The order that the DNA 
-				sequences are listed on the excel sheet is not very accommodating to the lab 
-				technician's workflow - we're hoping that the GUI that we provide could make 
-				it easier to fill out the order form and reduce the error rate of mislabelling 
-				the wells. 
-			</p>
+{% block section_title %} <h1> About </h1>{% endblock section_title %}
 
-			<footer>
-				<p>&copy; Wellcome Trust Sanger Institute 2013, HGI Team</p>
-			</footer>
-		</div>
-	
-		<!-- Le javascript 
-		============================================================= -->
-		<!-- Placed at the end of the document so the pages load faster -->
-		<!-- local version of jquery -->
-		<script src="../../static/bootstrap/js/jquery-1.9.1.min.js"></script>
-		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-		<script src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<div class="container">
+	<p> 
+		The DNA Order Application aims to improve the interface for ordering DNA 
+		sequences from our collaborators. The current system generates an excel sheet (manifest) that is sent to our collaborators to be filled out as they fill the plates up with samples of the requested DNA sequences. The order that the DNA sequences are listed on the excel sheet is not very accommodating to the lab technician's workflow - we're hoping that the GUI that we provide could make it easier to fill out the order form and reduce the error rate of mislabelling 
+		the wells. 
+	</p>
 
-	</body>		
-</html>
+{% endblock content %}

@@ -5,10 +5,12 @@ from order import views
 urlpatterns = patterns('',
 
     # Testing pages
-    url(r'^test$', views.test, name='base_test'),
+    url(r'^test$', views.test, name='base_template'),
     
-    # BOOTSTRAP TUTORIAL
     url(r'^index$', views.index, name='index'),
+
+    # BOOTSTRAP TUTORIAL
+    url(r'^base$', views.base, name='base'),
     
     # About Page
     url(r'^about$', views.about, name='about'),

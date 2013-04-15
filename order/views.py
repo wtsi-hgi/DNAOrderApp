@@ -2,15 +2,16 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 
-
-
 """ ACTUAL DNA ORDER APP """ 
 # Test
 def test(request):
-    return render(request, 'order/base_test.html', {})
+    return render(request, 'order/base_template.html', {})
+
+def index(request):
+    return render(request, 'order/index.html', {})
 
 # TRYING OUT BOOTSTRAP TUTORIAL
-def index(request):
+def base(request):
     return render(request, 'order/base.html', {})
 
 # About Page

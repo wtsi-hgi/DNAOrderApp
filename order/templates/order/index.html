@@ -1,0 +1,28 @@
+{% extends "base_template.html" %}
+
+{% block title %}WTSI &middot; DNA Order Application &middot; Home{% endblock title %}
+
+{% block signup %}
+<form class="navbar-form pull-right">
+	<input class="span2" type="text" placeholder="Email">
+	<input class="span2" type="password" placeholder="Password">
+	<button type="submit" class="btn">Sign in</button>
+	<a href="sign-up" class="btn">Sign up</a>
+</form>
+{% endblock signup %}
+
+{% block content %}
+		
+<!-- Main hero unit for a primary marketing message or call to action -->
+	<div class="hero-unit">
+		<h1> Need to order some DNA? </h1>
+		<p>  The DNA Order Application aims to make the entire DNA ordering process easy for both faculty members and collaborators.
+		</p>
+	</div>
+
+{% endblock content %}
+
+<!-- to add to parent block instea od completely overriding it, use {{ block.super }}-->
+				
+			
+
