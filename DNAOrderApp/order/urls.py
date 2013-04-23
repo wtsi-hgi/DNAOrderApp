@@ -18,9 +18,15 @@ urlpatterns = patterns('',
     # Project List Page
     url(r'^project-list$', views.project_list, name='project-list'),
 
+    # Manifest Upload Page
+    url(r'^manifest-upload$', views.manifest_upload, name='manifest-upload'),
+
     # Pheno Select Page
     url(r'^pheno-select$', views.pheno_select, name='pheno-select'),
     
+    # Contact Page
+    url(r'^contact$', views.contact, name='contact'),
+
     # Login / Sign Up Page
     url(r'^sign-up$', views.signup, name='sign-up'),
 

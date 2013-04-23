@@ -1,6 +1,20 @@
-{% extends "base_template.html" %}
+{% extends "base_template.html" %} 
 
-{% block title %}WTSI &middot; DNA Order Application &middot; Project List{% endblock title %}
+{% block title %}Project List{% endblock title %}
+
+
+{% block extra_css_js %}
+<link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="stylesheet" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="stylesheet" media="screen">
+{% endblock extra_css_js %}
+
+{% block active-navbar %} 
+<li><a href="index">Home</a></li>
+<li><a href="about">About</a></li>
+<li><a href="contact">Contact</a></li>
+<li class="active"><a href="project-list">Project List</a></li>
+{% endblock active-navbar %}
 
 {% block content %}
 
@@ -41,22 +55,51 @@
 </a>
 
 <!-- Upload Modal -->
-<div id="upload_manifest" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="upload_manifest" class="modal container hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
 		<h3 id="myModalLabel">Please Upload your Manifest</h3>
 	</div>
 	<div class="modal-body">
 		<p>Manifest Name, No. Plate, Study, Supplier, Created On, Created by, Phenotype List, Status of Order</p>
-		<p> This should say what file's been uploaded - like Dropbox ...</p>
-		<!-- THIS IS A FORM -->
+		<p> You've uploaded the following manifest(s): </p>
 
+		<!-- List of uploaded documents -->
+		{% if documents %}
+			<ul>
+			{% for document in documents %}
+				<li><a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+			<p>No documents.</p>
+		{% endif %}
+
+		<!-- Upload form. Note enctype attribute! -->
+		<form action="{% url manifest-upload %}" method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+			<p>{{ form.non_field_errors }}</p>
+
+			<!-- form.docfile.label_tag is the field's label wrapped in the appropriate <label> tag  i.e. <label for="id_email">E-mail address 
+		    </label> -->
+			<p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
+			<p>
+				{{ form.docfile.errors }}
+				{{ form.docfile }}
+			</p>
+			<p><input type="submit" value="Upload" /></p>
+		</form>
+
+		<!-- end of list-->
+
+		
 	</div>
 	<div class="modal-footer">
 		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-		<button class="btn btn-primary">Save changes</button>
+		<button class="btn btn-primary" data-loading-text="Extracting columns..." data-complete-text="finished!">Save changes</button>
 	</div>
 </div>
+
 
 <!-- Delete Modal -->
 <div id="delete_project" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -74,7 +117,17 @@
 </div>
 
 
+
+
 <br>
 <br>
 
 {% endblock content %}
+
+<!-- {% include "manifest_upload.html" %}
+
+{% block add_file %}
+{% endblock add_file %}
+
+{% block delete_file %}
+{% endblock delete_file %} -->

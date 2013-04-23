@@ -2,6 +2,11 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+# managing static files, css, images, https://docs.djangoproject.com/en/dev/howto/static-files/#django.conf.urls.static.static
+from django.conf.urls.static import static
+from django.views.generic.simple import redirect_to
+from django.conf import settings
+
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -19,7 +24,12 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
     
     url(r'^order/', include('DNAOrderApp.order.urls')),
-)
+    url(r'^$', redirect_to, {'url': '/order/manifest_upload/'}), # Just for ease of use.
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Django does not serve MEDIA_ROOT by default, that would be dangerous in production
+# environment. But in development stage, we could cut short. Pay attention to the 
+# last line. That line enables Django to serve files from MEDIA_URL. This works only in developement stage.
 
 # From django-jquery-file-upload
 

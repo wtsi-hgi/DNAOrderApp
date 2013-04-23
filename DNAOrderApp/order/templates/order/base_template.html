@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>{% block title %} WTSI &middot; DNA Order Application &middot;{% endblock title %} </title>
+		<title> WTSI &middot; DNA Order Application &middot;{% block title %}{% endblock title %} </title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="">
 		<meta name="author" content="">
@@ -11,9 +11,13 @@
 				padding-top: 60px;
 				padding-bottom: 40px;
 			}
+
+			{% block extrahead %}{% endblock extrahead %}
 		</style>
 
-		{% block extrahead %}{% endblock extrahead %}
+		{% block extra_css_js %}{% endblock extra_css_js %}
+
+		
 		
 		<!-- Bootstrap CSS Toolkit styles-->
 		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
@@ -55,11 +59,8 @@
 					<!-- Everything you want hidden at 940px or less, place within here -->
 					<div class="nav-collapse collapse">
 						<ul class="nav pull-left">
-							<li class="active"><a href="index">Home</a></li>
-							<li><a href="about">About</a></li>
-							<li><a href="#contact">Contact</a></li>
-							<li><a href="project-list">Project List</a></li>
-							
+							{% block active-navbar %}
+							{% endblock active-navbar %}
 						</ul>
 						<ul class="nav pull-right">
 							<li class="dropdown">

@@ -1,6 +1,64 @@
-
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+
+from DNAOrderApp.order.models import Document
+from DNAOrderApp.order.forms import DocumentForm
+
+import csv
+import ast
+
+"""tutorial"""
+def manifest_upload(request):
+    #Handle file upload
+    print "bye"
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            #newdoc = Document(docfile = request.FILES['docfile'])
+            #newdoc.save()
+            records = csv.reader(request.FILES['docfile'])
+            text_file = csv.writer(open("output.txt", 'w'))
+            count = 0
+            for line in records:
+                print count, " ", line
+                text_file.writerow(line)
+                count = count + 1
+
+
+
+            # Redirect to the document list after POST
+            return HttpResponseRedirect(reverse('project-list'))
+    else:
+        form = DocumentForm() #A empty, unbound form
+
+    print "hello"
+    # Load documents for the list page
+    documents = Document.objects.all()
+
+    # Render list page with the documents and the form
+    return render_to_response(
+        'order/project-list.html',
+        {'documents': documents, 'form': form},
+        context_instance=RequestContext(request)
+    )
+
+#TUTORIAL
+def contact(request):
+    if request.method == 'POST': # If the form has been submitted...
+        form = ContactForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            # Process the data in form.cleaned_data
+            # ...
+            return HttpResponseRedirect('/thanks/') # Redirect after POST
+    else:
+        form = ContactForm() # An unbound form
+
+    return render(request, 'contact.html', {
+        'form': form,
+    })
+
 
 """ ACTUAL DNA ORDER APP """ 
 # Test
@@ -8,7 +66,8 @@ def test(request):
     return render(request, 'order/base_template.html', {})
 
 def index(request):
-    return render(request, 'order/index.html', {})
+    title = 'Home'
+    return render(request, 'order/index.html', {'title' : title})
 
 # TRYING OUT BOOTSTRAP TUTORIAL
 def base(request):
@@ -20,7 +79,16 @@ def about(request):
 
 # Project List Page
 def project_list(request):
-    return render(request, 'order/project-list.html', {})
+    form = DocumentForm() #A empty, unbound form
+
+    # Load documents for the list page
+    documents = Document.objects.all()
+    return render(request, 'order/project-list.html', 
+        {'documents': documents, 'form': form})
+
+# Contact Page
+def contact(request):
+        return render(request, 'order/contact.html', {})
 
 # Login / Sign Up Page
 def signup(request):

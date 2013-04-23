@@ -1,6 +1,13 @@
 {% extends "base_template.html" %}
 
-{% block title %}WTSI &middot; DNA Order Application &middot; Home{% endblock title %}
+{% block title %}{{ title }}{% endblock title %}
+
+{% block active-navbar %} 
+<li class="active"><a href="index">Home</a></li>
+<li><a href="about">About</a></li>
+<li><a href="contact">Contact</a></li>
+<li><a href="project-list">Project List</a></li>
+{% endblock active-navbar %}
 
 {% block signup %}
 <form class="navbar-form pull-right">

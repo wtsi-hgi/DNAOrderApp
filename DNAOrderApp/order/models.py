@@ -259,4 +259,15 @@ class SampleQC(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     
 class BulkUpload(models.Model):
-    pass    
+    pass   
+
+""" MANIFEST UPLOAD """
+#Trying out the tutorial: https://docs.djangoproject.com/en/dev/topics/http/file-uploads/
+from django import forms
+
+# Stores the user uploaded files
+class Document(models.Model):
+    docfile = models.FileField(upload_to='manifests/%Y-%m-%d')
+
+
+

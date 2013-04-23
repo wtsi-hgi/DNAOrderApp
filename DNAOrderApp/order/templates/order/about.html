@@ -1,9 +1,15 @@
 {% extends "base_template.html" %}
 
 {% block title %}
-WTSI &middot; DNA Order Application &middot; About
+About
 {% endblock title %}
 
+{% block active-navbar %} 
+<li><a href="index">Home</a></li>
+<li class="active"><a href="about">About</a></li>
+<li><a href="contact">Contact</a></li>
+<li><a href="project-list">Project List</a></li>
+{% endblock active-navbar %}
 
 {% block content %}
 
