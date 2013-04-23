@@ -2,12 +2,12 @@ from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.core.files import File
 
 from DNAOrderApp.order.models import Document
 from DNAOrderApp.order.forms import DocumentForm
 
-import csv
-import ast
+import csv, string, re
 
 """tutorial"""
 def manifest_upload(request):
@@ -18,16 +18,8 @@ def manifest_upload(request):
         if form.is_valid():
             #newdoc = Document(docfile = request.FILES['docfile'])
             #newdoc.save()
-            records = csv.reader(request.FILES['docfile'])
-            text_file = csv.writer(open("output.txt", 'w'))
-            count = 0
-            for line in records:
-                print count, " ", line
-                text_file.writerow(line)
-                count = count + 1
-
-
-
+            handle_upload_file(request.FILES['docfile'])
+            
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('project-list'))
     else:
@@ -43,6 +35,54 @@ def manifest_upload(request):
         {'documents': documents, 'form': form},
         context_instance=RequestContext(request)
     )
+
+def handle_upload_file(f):
+    print "handle upload file"
+    #open the file
+    data = csv.reader(f)
+    #print f.name
+    ext_list = f.name.split('.') #GET FILE TYPE
+    list = data.next()
+    print list
+
+    while (list):
+        
+
+        if ( ext_list[-1] == 'xls' or ext_list[-1] == 'xlsx'):
+            print "THIS IS AN EXCEL FILE"
+
+
+        elif ( ext_list[-1] == 'csv'):
+            #print "THIS IS A CSV FILE"
+            if (data.line_num < 10):
+                print list
+
+            if any(x == ' Study:' for x in list ):
+                print "Study: ", list[list.index(' Study:')]
+                
+                
+            elif any( x == ' Supplier:' for x in list):
+                print "Supplier: ", list[list.index(' Supplier:')]
+            elif any( x == ' No. Plates Sent:' for x in list ):
+                print "No. Plates Sent: ", list[list.index(' No. Plates Sent:')]
+            elif any( x == 'SANGER PLATE ID' for x in list ):
+                print "HEADERS!!!"
+                print "SANGER PLATE ID: ", list[list.index('SANGER PLATE ID')]
+                print "SANGER SAMPLE ID: ", list[list.index('SANGER SAMPLE ID')]
+
+                # Collect the indices for SANGER PLATE ID,
+                # SANGER SAMPLE ID, SUPPLIER SAMPLE NAME
+
+
+        else:
+            print "UNKNOWN FILE TYPE"
+
+        try: 
+            list = data.next()
+        except StopIteration:
+            break
+
+    return 
 
 #TUTORIAL
 def contact(request):
