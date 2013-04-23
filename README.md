@@ -6,8 +6,8 @@ A web application that aims to improve the interface for ordering DNA sequences 
 Forked
 =======
 https://github.com/jschr/bootstrap-modal <br>
-https://github.com/sigurdga/django-jquery-file-upload 
-https://github.com/doph/minimal-django-file-upload-example 
+https://github.com/sigurdga/django-jquery-file-upload <br>
+https://github.com/doph/minimal-django-file-upload-example <br>
 
 
 License
