@@ -43,6 +43,17 @@
 		<td> <a href="pheno_select"> Select Phenotypes </a></td>
 		<td> Incomplete Phenotype List </td>
 	</tr>
+
+	<tr>
+		<td> Dummy Data 2 - Manifest_1369 </td>
+		<td> 1 </td>
+		<td> 2019STDY </td>
+		<td> Sanger Centre </td>
+		<td> May 9, 2013 </td>
+		<td> aw18 </td>
+		<td> <a href="pheno-list"> View Phenotype List </a></td>
+		<td> <a href="welcome-collaborator"> Start Well-filling </a></td>
+	</tr>
 </table>
 
 <!-- NEED TO IMPLEMENT LOGIC -->
@@ -58,10 +69,10 @@
 <div id="upload_manifest" class="modal container hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-		<h3 id="myModalLabel">Please Upload your Manifest</h3>
+		<h3 id="myModalLabel">Add A Project</h3>
 	</div>
 	<div class="modal-body">
-		<p>Manifest Name, No. Plate, Study, Supplier, Created On, Created by, Phenotype List, Status of Order</p>
+		<h4> 1. Upload the Manifest </h4>
 		<p> You've uploaded the following manifest(s): </p>
 
 		<!-- List of uploaded documents -->
@@ -91,6 +102,12 @@
 		</form>
 
 		<!-- end of list-->
+
+		<h4> 2. Please Fill in the Following fields </h4>
+		<p> For the StudyForm and SampleForm </p>
+
+		{{ studyform }}
+		{{ sampleform }}
 
 		
 	</div>
