@@ -8,6 +8,7 @@ Forked
 https://github.com/jschr/bootstrap-modal <br>
 https://github.com/sigurdga/django-jquery-file-upload <br>
 https://github.com/doph/minimal-django-file-upload-example <br>
+https://github.com/python-excel/xlrd <br>
 
 
 License
