@@ -1,0 +1,76 @@
+
+<!-- OUTDATED -->
+
+{% block add_file %}
+<!-- Upload Modal -->
+<div id="upload_manifest" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+		<h3 id="myModalLabel">Please Fill in the following form to submit a Project</h3>
+	</div>
+	<div class="modal-body">
+		<p> You may upload a manifest to automatically fill in some of the fields, while other fields you need input manually </p>
+		<p>Manifest Name, No. Plate, Study, Supplier, Created On, Created by, Phenotype List, Status of Order</p>
+		<p> This should say what file's been uploaded - like Dropbox ...</p>
+		<!-- THIS IS A FORM -->
+
+		<h6> Optional: Upload a manifest </h6>
+
+		<!-- List of uploaded documents -->
+		{% if documents %}
+			<ul>
+			{% for document in documents %}
+				<li><a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+			<p>No documents.</p>
+		{% endif %}
+
+		<!-- Upload form. Note enctype attribute! -->
+		<!-- Binding uploaded files to a form -->
+		<form action="{% url manifest-upload %}" method="post" enctype="multipart/form-data">
+			{% csrf_token %}
+			<p>{{ form.non_field_errors }}</p>
+			<p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
+			<p>
+				{{ form.docfile.errors }}
+				{{ form.docfile }}
+			</p>
+			<p><input type="submit" value="Upload" /></p>
+		</form>
+
+		<!-- end of list-->
+
+		<h6> Please fill in the following form </h6>
+		<p> StudyForm and SampleForm </p>
+
+
+	</div>
+	<div class="modal-footer">
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+		<button class="btn btn-primary">Save changes</button>
+	</div>
+</div>
+
+{% endblock add_file %}
+
+{% block delete_file %}
+
+<!-- Delete Modal -->
+<div id="delete_project" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+		<h3 id="myModalLabel">Deleting project</h3>
+	</div>
+	<div class="modal-body">
+		<p>Are you sure you want to delete this project?</p>
+	</div>
+	<div class="modal-footer">
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Delete project</button>
+	</div>
+</div>
+
+{% endblock delete_file %}
+
