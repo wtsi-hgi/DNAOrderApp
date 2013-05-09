@@ -154,7 +154,7 @@ class Study(models.Model):
     platform = models.ForeignKey(Platform)
     data_location = models.CharField(max_length=200)
     methodology_desc = models.TextField()
-    commment = models.TextField()
+    comment = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -262,12 +262,25 @@ class BulkUpload(models.Model):
     pass   
 
 """ MANIFEST UPLOAD """
-#Trying out the tutorial: https://docs.djangoproject.com/en/dev/topics/http/file-uploads/
-from django import forms
 
 # Stores the user uploaded files
 class Document(models.Model):
     docfile = models.FileField(upload_to='manifests/%Y-%m-%d')
+
+""" MODELFORMS """
+from django.forms import ModelForm 
+
+class StudyForm(ModelForm):
+    class Meta:
+        model = Study
+
+class SampleForm(ModelForm):
+    class Meta:
+        model = Sample
+
+
+
+
 
 
 
