@@ -4,10 +4,20 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.core.files import File
 
-from DNAOrderApp.order.models import Document
+from DNAOrderApp.order.models import Document, Sample, Study, SampleForm, StudyForm
 from DNAOrderApp.order.forms import DocumentForm
 
+
 import csv, string, re
+
+def model_form(request):
+    studyform = StudyForm()
+    sampleform = SampleForm()
+
+    return render_to_response(
+        'order/test_template.html',
+        {'studyform': studyform, 'sampleform': sampleform },
+    )
 
 """tutorial"""
 def manifest_upload(request):
@@ -15,10 +25,13 @@ def manifest_upload(request):
     print "bye"
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
+
         if form.is_valid():
+            print "yay"
             #newdoc = Document(docfile = request.FILES['docfile'])
             #newdoc.save()
-            handle_upload_file(request.FILES['docfile'])
+            results = handle_upload_file(request.FILES['docfile'])
+            print results
             
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('project-list'))
@@ -32,7 +45,7 @@ def manifest_upload(request):
     # Render list page with the documents and the form
     return render_to_response(
         'order/project-list.html',
-        {'documents': documents, 'form': form},
+        {'documents': documents, 'form': form },
         context_instance=RequestContext(request)
     )
 
@@ -42,8 +55,18 @@ def handle_upload_file(f):
     data = csv.reader(f)
     #print f.name
     ext_list = f.name.split('.') #GET FILE TYPE
+
     list = data.next()
     print list
+
+    study_name = 0
+    supplier_name = 0
+    num_plates = 0
+    sanger_plate_id = set()
+    spid_size = 0
+    sanger_sample_id = set()
+    headercount = 0
+
 
     while (list):
         
@@ -51,28 +74,48 @@ def handle_upload_file(f):
         if ( ext_list[-1] == 'xls' or ext_list[-1] == 'xlsx'):
             print "THIS IS AN EXCEL FILE"
 
-
         elif ( ext_list[-1] == 'csv'):
-            #print "THIS IS A CSV FILE"
-            if (data.line_num < 10):
-                print list
 
-            if any(x == ' Study:' for x in list ):
-                print "Study: ", list[list.index(' Study:')]
+            if headercount >= 6:    #SANGER PLATE ID, SANGER SAMPLE ID
                 
+                sanger_plate_id.add(list[spid])
+
+                #if (len(sanger_plate_id) != spid_size):
+                #    for sample in sanger_sample_id:
+                #        Sample(supplier_name=supplier_name, sanger_sample_id=sample, sanger_plate_id=list(sanger_plate_id)[spid_size-2])
+                #        Sample.save()
+
+                sanger_sample_id.add(list[ssid])
                 
-            elif any( x == ' Supplier:' for x in list):
-                print "Supplier: ", list[list.index(' Supplier:')]
-            elif any( x == ' No. Plates Sent:' for x in list ):
-                print "No. Plates Sent: ", list[list.index(' No. Plates Sent:')]
-            elif any( x == 'SANGER PLATE ID' for x in list ):
-                print "HEADERS!!!"
-                print "SANGER PLATE ID: ", list[list.index('SANGER PLATE ID')]
-                print "SANGER SAMPLE ID: ", list[list.index('SANGER SAMPLE ID')]
 
-                # Collect the indices for SANGER PLATE ID,
-                # SANGER SAMPLE ID, SUPPLIER SAMPLE NAME
+            else: #HEADER
+                if any(x == ' Study:' for x in list ):
+                    print "Study: ", list[list.index(' Study:') + 1]
+                    study_name = list[list.index(' Study:') + 1]
+                    headercount += 1
 
+                elif any( x == ' Supplier:' for x in list):
+                    print "Supplier: ", list[list.index(' Supplier:') + 1]
+                    supplier_name = list[list.index(' Supplier:') + 1]
+                    headercount += 1
+
+                elif any( x == ' No. Plates Sent:' for x in list ):
+                    print "No. Plates Sent: ", list[list.index(' No. Plates Sent:') + 1]
+                    num_plates = list[list.index(' No. Plates Sent:') + 1]
+                    headercount += 1
+                
+                elif any( x == 'SANGER PLATE ID' for x in list ):
+                    print "SANGER PLATE ID: ", list.index('SANGER PLATE ID')
+                    spid = list.index('SANGER PLATE ID')
+                    headercount += 1
+
+                    print "WELL #: ", list.index('WELL')
+                    wellid = list.index('WELL')
+                    headercount += 1
+
+                    print "SANGER SAMPLE ID: ", list.index('SANGER SAMPLE ID')
+                    ssid = list.index('SANGER SAMPLE ID')
+                    headercount += 1
 
         else:
             print "UNKNOWN FILE TYPE"
@@ -82,7 +125,17 @@ def handle_upload_file(f):
         except StopIteration:
             break
 
-    return 
+    return study_name, supplier_name, num_plates, headercount, sanger_plate_id, sanger_sample_id
+
+
+# CONSIDERING TRANSLATING AN EXISTING STUDY MODEL INTO A FORM TO FILL IN BY THE USER....
+# IF I THINK OF ERADICATING MANIFEST UPLOAD
+
+def pheno_list(request):
+    return render(request, 'order/pheno-list.html', {})
+
+def welcome_collab(request):
+    return render(request, 'order/welcome-collaborator.html', {})
 
 #TUTORIAL
 def contact(request):
@@ -120,11 +173,13 @@ def about(request):
 # Project List Page
 def project_list(request):
     form = DocumentForm() #A empty, unbound form
+    studyform = StudyForm()
+    sampleform = SampleForm()
 
     # Load documents for the list page
     documents = Document.objects.all()
     return render(request, 'order/project-list.html', 
-        {'documents': documents, 'form': form})
+        {'documents': documents, 'form': form, 'studyform': studyform, 'sampleform': sampleform})
 
 # Contact Page
 def contact(request):
