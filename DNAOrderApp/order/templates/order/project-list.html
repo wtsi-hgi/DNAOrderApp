@@ -5,8 +5,99 @@
 
 {% block extra_css_js %}
 <link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
-<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="stylesheet" media="screen">
-<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="stylesheet" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
+
+<script src="http://malsup.github.io/jquery.form.js"></script> 
+
+<script type="text/javascript">
+	$().ready(function() {
+		// alert("Testing");
+		// $('#hello').text("The DOM is now loaded and can be manipulated.");
+		// $('#upload_manifest form').each(function(i, j) { alert(j); });
+
+		// prepares a form to be submitted via AJAX 
+		// $('#upload_manifest form').ajaxForm({
+		// 	//target: '#recent_document',
+		// 	success: function(body) {
+		// 		alert("this is from ajaxForm: " + body);
+		// 		//$('#upload_manifest > .modal-body').
+		// 	}
+		// });
+
+		$('#save-button').click(function () {
+			$(this).ajaxSubmit({ 
+				resetForm: true,
+				success: function () {
+					alert("You have saved the project");
+					$('#myModalLabel_add_project').html("Thank you for your Submission!");
+
+					$('#upload_manifest_form').html("<p><b> You have uploaded and saved the following manifest into the database: </b></p><!-- List of uploaded documents --><div id='recent_document'>{% if recent_document %}<ul><li><a href='{{ recent_document.docfile.url }}''>{{ recent_document.docfile.name }}</a></li><br /><br />{{ display_dict }}</ul>{% else %}<p>No documents.</p>{% endif %}</div>");
+
+					$('#upload_manifest_modal_footer').html("<button id='upload_manifest_close_button' class='btn' data-dismiss='modal' aria-hidden='true'>Close</button>");
+
+				},
+				error: function () {
+					$('#myModalLabel_add_project').html("Sorry, There's been an error.");
+					$('#upload_manifest_form').html("<p><b> The following manifest failed to be submitted. Please Try Again. </b></p><!-- List of uploaded documents --><div id='recent_document'>{% if recent_document %}<ul><li><a href='{{ recent_document.docfile.url }}''>{{ recent_document.docfile.name }}</a></li><br /><br />{{ display_dict }}</ul>{% else %}<p>No documents.</p>{% endif %}</div>");
+
+					$('#upload_manifest_modal_footer').html("<button id='upload_manifest_close_button' class='btn' data-dismiss='modal' aria-hidden='true' href='project-list.html'>Close</button>");
+				}
+			});
+			return false;
+		});
+		
+		
+		$('#upload_manifest').on('hide', function(){
+			alert("closing modal");
+			window.location.href="project-list"
+
+		});
+   
+
+						// 	<!-- List of uploaded documents -->
+						// 	<div id="recent_document">
+						// 		{% if recent_document %}
+						// 		<ul>
+						// 			<li><a href="{{ recent_document.docfile.url }}">{{ recent_document.docfile.name }}</a></li>
+						// 			<br />
+						// 			<br />
+						// 		{{ display_dict }}
+						// 		</ul>
+						// 		{% else %}
+						// 		<p>No documents.</p>
+						// 		{% endif %}
+						// 	</div>
+
+		// submits the form immediately after 'submit' button is pressed
+		// attach handler to form's submit event
+		// $('#upload_manifest form').submit(function() {
+		// 	//submit the form
+		// 	$(this).ajaxSubmit({ 
+		// 		target: '#recent_document', 
+		// 		success: function() {
+		// 			alert("Thank you for uploading your manifest :)");
+
+		// 		} 
+		// 	});
+		// 	// file's been chosen
+		// 	// show the document as uploaded
+		// 	// then show what's been extracted
+
+		// 	// Then another function will need to be set for the "Save Changes" button
+
+		// 	// return false to prevent normal browser submit and page navigation
+		// 	return false;
+		// });
+		// $('#save-button').click(function () {
+		// 	$(this).ajaxSubmit({ success: function () {
+		// 		alert("You have saved the project");
+		// 	}});
+		// 	return false;
+  //   	});
+	});
+</script>
+
 {% endblock extra_css_js %}
 
 {% block active-navbar %} 
@@ -19,6 +110,8 @@
 {% block content %}
 
 {% block section_title %}<h1> Project List </h1>{% endblock section_title %}
+
+<p id="hello">Not loaded yet.</p>
 
 <table class="table table-hover">
 	<tr>
@@ -43,7 +136,6 @@
 		<td> <a href="pheno_select"> Select Phenotypes </a></td>
 		<td> Incomplete Phenotype List </td>
 	</tr>
-
 	<tr>
 		<td> Dummy Data 2 - Manifest_1369 </td>
 		<td> 1 </td>
@@ -56,8 +148,6 @@
 	</tr>
 </table>
 
-<!-- NEED TO IMPLEMENT LOGIC -->
-
 <!-- Button to trigger modal -->
 <a href="#upload_manifest" role="button" class="btn" data-toggle="modal" data-keyboard=true>
 	<i class="icon-plus"></i>
@@ -68,55 +158,37 @@
 <!-- Upload Modal -->
 <div id="upload_manifest" class="modal container hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-		<h3 id="myModalLabel">Add A Project</h3>
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+		<h3 id="myModalLabel_add_project">Add A Project</h3>
 	</div>
-	<div class="modal-body">
-		<h4> 1. Upload the Manifest </h4>
-		<p> You've uploaded the following manifest(s): </p>
 
-		<!-- List of uploaded documents -->
-		{% if documents %}
-			<ul>
-			{% for document in documents %}
-				<li><a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
-			{% endfor %}
-			</ul>
-		{% else %}
-			<p>No documents.</p>
-		{% endif %}
+	<div id="upload_manifest_form" class="modal-body">
+		<h4> Upload the Manifest </h4>
 
 		<!-- Upload form. Note enctype attribute! -->
-		<form action="{% url manifest-upload %}" method="post" enctype="multipart/form-data">
+		<form action="{% url project-list %}" method="post" enctype="multipart/form-data">
 			{% csrf_token %}
+
 			<p>{{ form.non_field_errors }}</p>
 
-			<!-- form.docfile.label_tag is the field's label wrapped in the appropriate <label> tag  i.e. <label for="id_email">E-mail address 
+			<!-- form.docfile.label_tag is the field's label wrapped in the appropriate "label" tag  i.e. <label for="id_email"> E-mail address 
 		    </label> -->
-			<p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
-			<p>
-				{{ form.docfile.errors }}
-				{{ form.docfile }}
-			</p>
-			<p><input type="submit" value="Upload" /></p>
+		    <p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
+		    <p>
+		    	{{ form.docfile.errors }}
+		    	{{ form.docfile }}
+		    </p>
 		</form>
 
-		<!-- end of list-->
+		<h4> The following is what's extracted from the manifest: </h4>
+		<p> Study Name, Supplier Name, Sanger Plate IDs, Sanger Sample IDs </p>
 
-		<h4> 2. Please Fill in the Following fields </h4>
-		<p> For the StudyForm and SampleForm </p>
-
-		{{ studyform }}
-		{{ sampleform }}
-
-		
 	</div>
-	<div class="modal-footer">
-		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-		<button class="btn btn-primary" data-loading-text="Extracting columns..." data-complete-text="finished!">Save changes</button>
+	<div id="upload_manifest_modal_footer" class="modal-footer">
+		<button id="upload_manifest_close_button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+		<button id="save-button" class="btn btn-primary" data-loading-text="Extracting columns..." data-complete-text="finished!" >Upload and Save File! </button>
 	</div>
 </div>
-
 
 <!-- Delete Modal -->
 <div id="delete_project" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -132,9 +204,6 @@
 		<button class="btn" data-dismiss="modal" aria-hidden="true">Delete project</button>
 	</div>
 </div>
-
-
-
 
 <br>
 <br>
