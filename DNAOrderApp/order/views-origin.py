@@ -13,49 +13,23 @@ import csv, string, re
 
 
 """tutorial"""
-
-# Project List Page
-def project_list(request):
-    print "INSIDE PROJECT_LIST"
-    # helper function to extract the info from excel
-    display_dict = {}
-    newdoc_flag = False
-
-    outcome = manifest_upload(request)
-
-    print "recent_document: ", outcome[0], outcome[1], outcome[2]
-    # Render list page with the documents and the form
-    return render_to_response(
-        'order/project-list.html',
-        {'recent_document': outcome[0],
-        'form': outcome[1],
-        'display_dict': outcome[2] 
-         },
-        context_instance=RequestContext(request)
-    )
-
 # Simply putting the manifest into the proper directory
 def manifest_upload(request):
-    print "INSIDE MANIFEST_UPLOAD"
     # helper function to extract the info from excel
     display_dict = {}
     newdoc_flag = False
     recent_document = []
     if request.method == 'POST':
-        print "IN THE POST"
         form = DocumentForm(request.POST, request.FILES)
 
         if form.is_valid():
-            print "INSIDE IS_VALID"
             # Will show the uploaded document
             newdoc = Document(docfile = request.FILES['docfile'])
             newdoc.save()
             newdoc_flag = True
 
-            print "BEFORE HANDLE UPLOAD FILE"
             # Helper function to show the extracted data to user
             results = handle_upload_file(request.FILES['docfile'])
-            print "AFTER HANDLE_UPLOAD_FILE INSIDE MANIFEST_UPLOAD"
 
             sanger_plate_id = 0
             ind = -1
@@ -67,36 +41,98 @@ def manifest_upload(request):
 
                 print j, results[1], sanger_plate_id, results[5][j]
 
-                # Store the data extracted from the excel form into the database
-                #study = Study(study_name=results[0])
-                #sample = Sample(supplier_name=results[1], sanger_plate_id=sanger_plate_id, sanger_sample_id=results[5][j])
-
-                #Display Top 5 and Bottom 5 rows to user to show what's been extracted to the user.
+                #Display what's been taken from the manifest to user
                 display_dict = {'study_name': results[0],
                             'supplier_name': results[1],
                             'sanger_plate_id': sanger_plate_id,
                             'sanger_sample_id': results[5][j]}
 
             # Redirect to the document list after POST
-            # return HttpResponseRedirect(reverse('project-list'))
+            return HttpResponseRedirect(reverse('project-list'))
     else:
-        print "IN THE ELSE"
         form = DocumentForm() #A empty, unbound form 
 
     # recent document uploaded
     if Document.objects.all().exists() and newdoc_flag:
         recent_document = Document.objects.order_by('-id')[0]
-        print "INSIDE DOCUMENT.OBJECTS.ALL().EXISTS AND NEWDOC_FLAG"
-        print "newdoc_flag is: ", newdoc_flag
     else:
         recent_document = []
 
-    print "RECENT DOCUMENT : ", recent_document
-    return recent_document, form, display_dict
+    print "recent_document: ", recent_document
+    # Render list page with the documents and the form
+    return render_to_response(
+        'order/project-list.html',
+        {'recent_document': recent_document,
+        'form': form,
+        'display_dict': display_dict, 
+         },
+        context_instance=RequestContext(request)
+    )
+
+# This is to commit all the fields into the database to create a project
+def save(request):
+    pass
+
+def manifest_upload_1(request):
+    #Handle file upload
+    print "bye"
+    display_dict = {}
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            print "yay"
+            # Will show the uploaded document
+            newdoc = Document(docfile = request.FILES['docfile'])
+            newdoc.save()
+
+            results = handle_upload_file(request.FILES['docfile'])
+            study = Study(study_name=results[0])
+
+            sanger_plate_id = 0
+            ind = -1
+            for j in range(0,len(results[5])):
+
+                if j%96 == 0:
+                    ind += 1
+                    sanger_plate_id = list(results[4])[ind]  
+
+                print j, results[1], sanger_plate_id, results[5][j]
+
+                sample = Sample(supplier_name=results[1], sanger_plate_id=sanger_plate_id, sanger_sample_id=results[5][j])
+                sanger_sample_id
+
+                #Display what's been taken from the manifest to user
+                display_dict = {'study_name': results[0],
+                            'supplier_name': results[1],
+                            'sanger_plate_id': sanger_plate_id,
+                            'sanger_sample_id': results[5][j]}
+
+            
+            # Redirect to the document list after POST
+            return HttpResponseRedirect(reverse('project-list'))
+    else:
+        form = DocumentForm() #A empty, unbound form
+
+    print "hello"
+    # Load documents for the list page
+    documents = Document.objects.all()
+    recent_document = Document.objects.order_by('-id')[0]
+
+    # Render list page with the documents and the form
+    return render_to_response(
+        'order/project-list.html',
+        {'documents': documents, 
+        'recent_document': recent_document,
+        'form': form, 
+        'display_dict': display_dict, 
+         },
+        context_instance=RequestContext(request)
+    )
 
 # Extracting out needed info from manifest
 def handle_upload_file(f):
-    print "INSIDE HANDLE UPLOAD FILE"
+    print "handle upload file"
     #open the file
     data = csv.reader(f)
     #print f.name
@@ -174,9 +210,6 @@ def handle_upload_file(f):
     return study_name, supplier_name, num_plates, headercount, sanger_plate_id, sanger_sample_id
 
 
-
-
-
 # CONSIDERING TRANSLATING AN EXISTING STUDY MODEL INTO A FORM TO FILL IN BY THE USER....
 # IF I THINK OF ERADICATING MANIFEST UPLOAD
 
@@ -221,6 +254,66 @@ def base(request):
 def about(request):
     return render(request, 'order/about.html', {})
 
+# Project List Page
+def project_list(request):
+    # helper function to extract the info from excel
+    display_dict = {}
+    newdoc_flag = False
+
+    manifest_upload(request)
+
+    if request.method == 'POST':
+        print "inside project_list POST"
+        form = DocumentForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            # Will show the uploaded document
+            newdoc = Document(docfile = request.FILES['docfile'])
+            newdoc.save()
+            newdoc_flag = True
+            print "project_list: saved the document"
+
+            # Helper function to show the extracted data to user
+            results = handle_upload_file(request.FILES['docfile'])
+            print "showing results"
+
+            sanger_plate_id = 0
+            ind = -1
+            for j in range(0,len(results[5])):
+
+                if j%96 == 0:
+                    ind += 1
+                    sanger_plate_id = list(results[4])[ind]  
+
+                print j, results[1], sanger_plate_id, results[5][j]
+
+                #Display what's been taken from the manifest to user
+                display_dict = {'study_name': results[0],
+                            'supplier_name': results[1],
+                            'sanger_plate_id': sanger_plate_id,
+                            'sanger_sample_id': results[5][j]}
+
+            # Redirect to the document list after POST
+            return HttpResponseRedirect(reverse('project-list'))
+    else:
+        form = DocumentForm() #A empty, unbound form 
+
+    # recent document uploaded
+    if Document.objects.all().exists() and newdoc_flag:
+        recent_document = Document.objects.order_by('-id')[0]
+    else:
+        recent_document = []
+
+    print "recent_document: ", recent_document, form, display_dict
+    # Render list page with the documents and the form
+    return render_to_response(
+        'order/project-list.html',
+        {'recent_document': recent_document,
+        'form': form,
+        'display_dict': display_dict, 
+         },
+        context_instance=RequestContext(request)
+    )
 
 # Contact Page
 def contact(request):
