@@ -15,7 +15,17 @@
 			{% block extrahead %}{% endblock extrahead %}
 		</style>
 
+		    			<!-- Le javascript 
+		============================================================= -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<!-- local version of jquery -->
+		<!--script src="../../static/bootstrap/js/jquery-1.9.1.min.js"></script-->
+		<script src="../../static/bootstrap/js/jquery-1.9.1.js"></script>
+		<script src="../../static/bootstrap/js/bootstrap.min.js"></script>
+		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
 		{% block extra_css_js %}{% endblock extra_css_js %}
+	
 
 		
 		
@@ -24,13 +34,13 @@
 		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
 		<!-- Generic page styles by TS -->
-		<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
+		<!--<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">-->
 
 		<!-- Bootstrap styles for responsive website layout, different screen sizes -->
 		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
 		<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-    	<link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap-image-gallery.min.css">
+    	<!--<link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap-image-gallery.min.css">-->
     	<link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/jquery.fileupload-ui.css">
 
 		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -96,15 +106,5 @@
 				<p>&copy; Wellcome Trust Sanger Institute 2013, HGI Team</p>
 			</footer>
 		</div>
-		
-		
-	
-		<!-- Le javascript 
-		============================================================= -->
-		<!-- Placed at the end of the document so the pages load faster -->
-		<!-- local version of jquery -->
-		<script src="../../static/bootstrap/js/jquery-1.9.1.min.js"></script>
-		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-		<script src="../../static/bootstrap/js/bootstrap.min.js"></script>
 	</body>
 </html>
