@@ -6,10 +6,10 @@ urlpatterns = patterns('',
 
     # Testing pages
     url(r'^test$', views.test, name='base_template'),
-    url(r'^testing-modelform$', views.model_form, name='modelform'),
     url(r'^pheno-list$', views.pheno_list, name='pheno-list' ),
     url(r'^welcome-collaborator$', views.welcome_collab, name='welcome-collab'),
-    
+    url(r'^96plate.html$', views._96plate, name='96plate'),
+
     url(r'^index$', views.index, name='index'),
 
     # BOOTSTRAP TUTORIAL
