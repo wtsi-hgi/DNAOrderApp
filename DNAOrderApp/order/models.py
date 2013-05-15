@@ -151,7 +151,7 @@ class Platform(models.Model):
 
 class Study(models.Model):
     study_name = models.CharField(max_length=100, unique=True)
-    platform = models.ForeignKey(Platform)
+    platform = models.ForeignKey(Platform, null=True, blank=True)
     data_location = models.CharField(max_length=200)
     methodology_desc = models.TextField()
     comment = models.TextField()
@@ -162,9 +162,9 @@ class Study(models.Model):
         return self.study_name
 
 class Sample(models.Model):
-    individual = models.ForeignKey(Individual)
+    individual = models.ForeignKey(Individual, null=True, blank=True)
     supplier_name = models.CharField(max_length=100)
-    sample_id = models.CharField(max_length=100)
+    #sample_id = models.CharField(max_length=100)
     sanger_plate_id = models.CharField(max_length=100)
     sanger_sample_id = models.CharField(max_length=100)
     supplier_sample_name = models.CharField(max_length=100)
@@ -267,16 +267,31 @@ class BulkUpload(models.Model):
 class Document(models.Model):
     docfile = models.FileField(upload_to='manifests/%Y-%m-%d')
 
+class Display(models.Model):
+    study_name = models.CharField(max_length=100, unique=True)
+    supplier_name = models.CharField(max_length=100)
+    sanger_plate_id = models.CharField(max_length=100)
+    sanger_sample_id = models.CharField(max_length=100)
+
+'''
 """ MODELFORMS """
 from django.forms import ModelForm 
 
 class StudyForm(ModelForm):
     class Meta:
         model = Study
+        exclude = ('platform', 'data_location', 'methodology_desc', 'comment')
 
 class SampleForm(ModelForm):
     class Meta:
         model = Sample
+        exclude = ('individual', 'sample_id', 'sanger_plate_id', 'sanger_sample_id',
+            'supplier_sample_name')
+'''
+
+
+
+        
 
 
 
