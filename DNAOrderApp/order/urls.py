@@ -20,9 +20,11 @@ urlpatterns = patterns('',
     
     # Project List Page
     url(r'^project-list$', views.project_list, name='project-list'),
+    url(r'^save-file$', views.save_files, name='save-file'),
+    url(r'^sample-submission$', views.sample_submission_list, name='sample-submission'),
 
     # Manifest Upload Page
-    url(r'^manifest-upload$', views.manifest_upload, name='manifest-upload'),
+    #url(r'^manifest-upload$', views.manifest_upload, name='manifest-upload'),
 
     # Pheno Select Page
     url(r'^pheno-select$', views.pheno_select, name='pheno-select'),
@@ -34,7 +36,7 @@ urlpatterns = patterns('',
     url(r'^sign-up$', views.signup, name='sign-up'),
 
 # User Profile Page
-    url(r'^user_profile$', views.user_profile, name='user_profile_page'),
+    url(r'^user_profile$', views.user_profile, name='user_profile'),
 
 
 # User Home Page, with the list of outgoing and incoming projects
