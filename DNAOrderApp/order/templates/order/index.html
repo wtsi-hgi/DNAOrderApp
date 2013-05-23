@@ -1,5 +1,31 @@
 {% extends "base_template.html" %}
 
+{% block extrahead %}
+#panel {
+	padding: 60px;
+	margin-bottom: 30px;
+	font-size: 18px;
+	font-weight: 200;
+	line-height: 30px;
+	color: inherit;
+	background-color: rgb(202, 243, 233);
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+}
+
+{% endblock extrahead %}
+
+{% block extra_css_js %}
+<script>
+$(document).ready( function() {
+	$("#flip").click( function(){
+		$("#panel").slideToggle("slow");
+	});
+});
+</script>
+{% endblock extra_css_js %}
+
+
 {% block title %}{{ title }}{% endblock title %}
 
 {% block active-navbar %} 
@@ -7,29 +33,51 @@
 <li><a href="about">About</a></li>
 <li><a href="contact">Contact</a></li>
 <li><a href="project-list">Project List</a></li>
+<li><a href="sample-submission">Sample Submission</a></li>
 {% endblock active-navbar %}
 
 {% block signup %}
-<form class="navbar-form pull-right">
+<!--form class="navbar-form pull-right">
 	<input class="span2" type="text" placeholder="Email">
 	<input class="span2" type="password" placeholder="Password">
 	<button type="submit" class="btn">Sign in</button>
 	<a href="sign-up" class="btn">Sign up</a>
-</form>
+</form-->
 {% endblock signup %}
 
 {% block content %}
-		
+
 <!-- Main hero unit for a primary marketing message or call to action -->
-	<div class="hero-unit">
-		<h1> Need to order some DNA? </h1>
-		<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
-		</p>
+<div class="hero-unit">
+	<h1> Need to order some DNA? </h1>
+	<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
+	</p>
+	<div>
+		<button id="flip" class="btn btn-large btn-primary pull-right" type="button"> Register Now! </button>
 	</div>
+	<br />
+	
+</div>
+<div id="panel" style="display:none"> 
+	<h1> Sign Up Now! </h1>
+	<br />
+		<form class="sign-up" method="post" action="{% url index %}">
+			{% csrf_token %}
+			<table>
+				{{ UserForm }}
+			</table>
+			<br />
+			<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign In</button>
+			<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign Up</button>
+		</form>
+	</div>
+
+
+
 
 {% endblock content %}
 
 <!-- to add to parent block instea od completely overriding it, use {{ block.super }}-->
-				
-			
+
+
 
