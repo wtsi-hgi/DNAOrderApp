@@ -212,10 +212,6 @@ $(document).mouseup( function(e){
 
     //same well
     if (pos1 == pos2){
-      // this adds a click handler to all the cells
-      //$('#wells td').click(){
-      // when any cell is clicked, we toggle it
-        //toggleWell(e.target.id);
         toggleWell(pos1, pos2, SAME);
         $('#line').html("same");
       //};
@@ -277,7 +273,6 @@ function toggleWell(pos1, pos2, line)
       break;
     }
 
-  // START HERE!!!!!!!
   for (var i = 0; i < list.length; i++){
     var ind = well_order.indexOf(list[i]);
 
@@ -290,17 +285,6 @@ function toggleWell(pos1, pos2, line)
       removeFromList(list[i]);
     }
   }
-
-  //var i = well_order.indexOf(pos1);
-
-  // if (i < 0) // not found
-  // {
-  //   addToList(name);
-  // }
-  // else
-  // {
-  //   removeFromList(name);
-  // }
 
   // debugging
   $('#demo').html(well_order);
