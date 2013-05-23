@@ -208,23 +208,41 @@ $(document).mouseup( function(e){
     var pos1 = $('#status1').html();
     var pos2 = e.target.id;
     $('#status2').html(pos2);
-    console.log(pos1);
-
+    console.log("pos1: "+pos1.substr(1));
+    console.log("pos2: "+pos2.substr(1));
+    console.log(pos2.substr(1)*1 > pos1.substr(1)*1);
+    
     //same well
     if (pos1 == pos2){
-        toggleWell(pos1, pos2, SAME);
+        toggleWell(pos1, pos2, SAME, "");
         $('#line').html("same");
       //};
     }
     //horizontal line
     else if (pos1.charAt(0) == pos2.charAt(0)){
-      toggleWell(pos1, pos2, HORIZONTAL);
       $('#line').html("horizontal");
+
+      if (pos2.substr(1)*1 > pos1.substr(1)*1){
+        $('#dir').html('right');
+        toggleWell(pos1, pos2, HORIZONTAL, "right");
+      }
+      else {
+        $('#dir').html('left');
+        toggleWell(pos1, pos2, HORIZONTAL, "left");
+      }
     }
     //vertical line
     else if (pos1.charAt(1) == pos2.charAt(1)){
-      toggleWell(pos1, pos2, VERTICAL);
       $('#line').html("vertical");
+
+      if (alphabet.indexOf(pos2.charAt(0)) < alphabet.indexOf(pos1.charAt(0))){
+        $('#dir').html('bottom-up');
+        toggleWell(pos1, pos2, VERTICAL, "bottom-up");
+      }
+      else{
+        $('#dir').html('top-down');
+        toggleWell(pos1, pos2, VERTICAL, "top-down");
+      }
     }
     //diagonal
     else {
@@ -234,7 +252,7 @@ $(document).mouseup( function(e){
 });
 
 
-function toggleWell(pos1, pos2, line)
+function toggleWell(pos1, pos2, line, direction)
 {
   // first, try to find if the well has been selected.  if it has, the index of it will be 0 or greater (search up Javascript array indexOf for a description)
   switch(line)
@@ -247,9 +265,21 @@ function toggleWell(pos1, pos2, line)
     case HORIZONTAL:
       var list = new Array();
       list[0] = pos1;
-      var len = (pos2.substr(1) - pos1.substr(1)) + 1; //multiplying by 1 converts the string to a number
+      var len = Math.abs(pos2.substr(1) - pos1.substr(1)) + 1; //multiplying by 1 converts the string to a number
+
+      console.log("this is the direction" + direction);
       for (var i=1; i<len; i++){
-        list[i] = pos1.charAt(0) + (pos1.substr(1)*1 + i); 
+        if (direction == "right"){
+          console.log("in the right");
+          list[i] = pos1.charAt(0) + (pos1.substr(1)*1 + i); 
+        }
+        else if (direction == "left"){ //left
+          console.log("in the left");
+          list[i] = pos1.charAt(0) + (pos1.substr(1)*1 - i); 
+        }
+        else{
+          alert("Error: No direction");
+        }
         console.log(pos1.substr(1)*1 + i);
       }
       console.log("IN HORIZONTAL");
@@ -257,10 +287,18 @@ function toggleWell(pos1, pos2, line)
       break;
     case VERTICAL:
       var list = new Array();
-      var len = alphabet.indexOf(pos2.charAt(0)) - alphabet.indexOf(pos1.charAt(0));
+      var len = Math.abs(alphabet.indexOf(pos2.charAt(0)) - alphabet.indexOf(pos1.charAt(0)));
       console.log(len);
       for (var i=0; i<=len; i++){
-        list[i] = alphabet.charAt(alphabet.indexOf(pos1.charAt(0))+i) + pos1.substr(1);
+        if (direction == 'top-down'){
+          list[i] = alphabet.charAt(alphabet.indexOf(pos1.charAt(0))+i) + pos1.substr(1);
+        }
+        else if ($('#dir').html() == 'bottom-up'){
+          list[i] = alphabet.charAt(alphabet.indexOf(pos1.charAt(0))-i) + pos1.substr(1);
+        }
+        else{
+          alert("Error: No direction");
+        }
       }
       console.log("IN VERTICAL");
       console.log(list);
