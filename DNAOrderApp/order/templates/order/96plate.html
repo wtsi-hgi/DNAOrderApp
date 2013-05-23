@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+
+  <style type="text/css">
+
+  /* CSS3 user-select styles set to none, so users can't select anything on the page. Necessary because when user is dragging his/her mouse, nothing gets selected. */
+  body{ 
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+
+  /* this block declares the size of each of the well cells in the table. We identify the wells table with the id 'wells' */
+  #wells td {
+    width: 60px;
+    height: 60px;
+  }
+  
+  /* this block sets the mouse cursor to be a hand (like a link) for all the well cells */
+  #wells td:hover {
+    cursor: pointer;
+  }
+  
+  /* this class will be applied to wells that have been selected. */
+  .cell_on:not(.rowname) {
+    background: url("../../../media/activewell.jpg") no-repeat;
+  }
+  
+  /* this class will be applied to wells that have not been selected. */
+  .cell_off:not(.rowname) {
+    background: url("../../../media/well.jpg") no-repeat;
+  }
+  </style>
+  <body>
+
+    <h1> Customize the order of the wells being filled</h1>
+
+    <p id="demo">Click the button to add a new element to the array.</p>
+
+    <table id="wells">
+      <tr>
+        <th>   </th>
+        <th> 1 </th>
+        <th> 2 </th>
+        <th> 3 </th>
+        <th> 4 </th>
+        <th> 5 </th>
+        <th> 6 </th>
+        <th> 7 </th>
+        <th> 8 </th>
+        <th> 9 </th>
+        <th> 10 </th>
+        <th> 11 </th>
+        <th> 12 </th>
+      </tr>
+      <tr>
+        <td class="rowname">A</td>
+        <td id="a1"></td>
+        <td id="a2"></td>
+        <td id="a3"></td>
+        <td id="a4"></td>
+        <td id="a5"></td>
+        <td id="a6"></td>
+        <td id="a7"></td>
+        <td id="a8"></td>
+        <td id="a9"></td>
+        <td id="a10"></td>
+        <td id="a11"></td>
+        <td id="a12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">B</td>
+        <td id="b1"></td>
+        <td id="b2"></td>
+        <td id="b3"></td>
+        <td id="b4"></td>
+        <td id="b5"></td>
+        <td id="b6"></td>
+        <td id="b7"></td>
+        <td id="b8"></td>
+        <td id="b9"></td>
+        <td id="b10"></td>
+        <td id="b11"></td>
+        <td id="b12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">C</td>
+        <td id="c1"></td>
+        <td id="c2"></td>
+        <td id="c3"></td>
+        <td id="c4"></td>
+        <td id="c5"></td>
+        <td id="c6"></td>
+        <td id="c7"></td>
+        <td id="c8"></td>
+        <td id="c9"></td>
+        <td id="c10"></td>
+        <td id="c11"></td>
+        <td id="c12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">D</td>
+        <td id="d1"></td>
+        <td id="d2"></td>
+        <td id="d3"></td>
+        <td id="d4"></td>
+        <td id="d5"></td>
+        <td id="d6"></td>
+        <td id="d7"></td>
+        <td id="d8"></td>
+        <td id="d9"></td>
+        <td id="d10"></td>
+        <td id="d11"></td>
+        <td id="d12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">E</td>
+        <td id="e1"></td>
+        <td id="e2"></td>
+        <td id="e3"></td>
+        <td id="e4"></td>
+        <td id="e5"></td>
+        <td id="e6"></td>
+        <td id="e7"></td>
+        <td id="e8"></td>
+        <td id="e9"></td>
+        <td id="e10"></td>
+        <td id="e11"></td>
+        <td id="e12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">F</td>
+        <td id="f1"></td>
+        <td id="f2"></td>
+        <td id="f3"></td>
+        <td id="f4"></td>
+        <td id="f5"></td>
+        <td id="f6"></td>
+        <td id="f7"></td>
+        <td id="f8"></td>
+        <td id="f9"></td>
+        <td id="f10"></td>
+        <td id="f11"></td>
+        <td id="f12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">G</td>
+        <td id="g1"></td>
+        <td id="g2"></td>
+        <td id="g3"></td>
+        <td id="g4"></td>
+        <td id="g5"></td>
+        <td id="g6"></td>
+        <td id="g7"></td>
+        <td id="g8"></td>
+        <td id="g9"></td>
+        <td id="g10"></td>
+        <td id="g11"></td>
+        <td id="g12"></td>
+      </tr>
+      <tr>
+        <td class="rowname">H</td>
+        <td id="h1"></td>
+        <td id="h2"></td>
+        <td id="h3"></td>
+        <td id="h4"></td>
+        <td id="h5"></td>
+        <td id="h6"></td>
+        <td id="h7"></td>
+        <td id="h8"></td>
+        <td id="h9"></td>
+        <td id="h10"></td>
+        <td id="h11"></td>
+        <td id="h12"></td>
+      </tr>
+    </table>
+
+    Status 1: <div id="status1"></div>
+    Status 2: <div id="status2">Status 2</div>
+    Line: <div id="line"></div>
+    Direction: <div id="dir"></div>
+
+    <script>
+
+    var SAME = 0;
+    var HORIZONTAL = 1;
+    var VERTICAL = 2;
+    var DIAGONAL = 3;
+
+    var alphabet = "abcdefgh";
+
+$('#wells td').addClass('cell_off'); // initialize cells with cell_off
+
+//SWIPE GESTURES FOR MULTI-WELL SELECT
+
+// store position 1 in html
+$(document).mousedown( function(e){
+  var pos1 = e.target.id;
+  $('#status1').html(pos1);
+});
+
+// store position 2 in html
+$(document).mouseup( function(e){
+    var pos1 = $('#status1').html();
+    var pos2 = e.target.id;
+    $('#status2').html(pos2);
+    console.log(pos1);
+
+    //same well
+    if (pos1 == pos2){
+      // this adds a click handler to all the cells
+      //$('#wells td').click(){
+      // when any cell is clicked, we toggle it
+        //toggleWell(e.target.id);
+        toggleWell(pos1, pos2, SAME);
+        $('#line').html("same");
+      //};
+    }
+    //horizontal line
+    else if (pos1.charAt(0) == pos2.charAt(0)){
+      toggleWell(pos1, pos2, HORIZONTAL);
+      $('#line').html("horizontal");
+    }
+    //vertical line
+    else if (pos1.charAt(1) == pos2.charAt(1)){
+      toggleWell(pos1, pos2, VERTICAL);
+      $('#line').html("vertical");
+    }
+    //diagonal
+    else {
+      toggleWell(pos1, pos2, DIAGONAL);
+      $('#line').html("diagonal");
+    }
+});
+
+
+function toggleWell(pos1, pos2, line)
+{
+  // first, try to find if the well has been selected.  if it has, the index of it will be 0 or greater (search up Javascript array indexOf for a description)
+  switch(line)
+  {
+    case SAME:
+      var list = new Array(pos1);
+      console.log("IN SAME");
+      console.log(list);
+      break;
+    case HORIZONTAL:
+      var list = new Array();
+      list[0] = pos1;
+      var len = (pos2.substr(1) - pos1.substr(1)) + 1; //multiplying by 1 converts the string to a number
+      for (var i=1; i<len; i++){
+        list[i] = pos1.charAt(0) + (pos1.substr(1)*1 + i); 
+        console.log(pos1.substr(1)*1 + i);
+      }
+      console.log("IN HORIZONTAL");
+      console.log(list);
+      break;
+    case VERTICAL:
+      var list = new Array();
+      var len = alphabet.indexOf(pos2.charAt(0)) - alphabet.indexOf(pos1.charAt(0));
+      console.log(len);
+      for (var i=0; i<=len; i++){
+        list[i] = alphabet.charAt(alphabet.indexOf(pos1.charAt(0))+i) + pos1.substr(1);
+      }
+      console.log("IN VERTICAL");
+      console.log(list);
+      break;
+    case DIAGONAL: // MIGHT NOT IMPLEMENT. Restricted diagonal or loosely diagonal?
+      var list = new Array();
+      // not yet - STILL NEED TO IMPLEMENT
+      console.log("IN DIAGONAL");
+      console.log(list);
+      break;
+    }
+
+  // START HERE!!!!!!!
+  for (var i = 0; i < list.length; i++){
+    var ind = well_order.indexOf(list[i]);
+
+    if (ind < 0) // not found
+    {
+      addToList(list[i]);
+    }
+    else
+    {
+      removeFromList(list[i]);
+    }
+  }
+
+  //var i = well_order.indexOf(pos1);
+
+  // if (i < 0) // not found
+  // {
+  //   addToList(name);
+  // }
+  // else
+  // {
+  //   removeFromList(name);
+  // }
+
+  // debugging
+  $('#demo').html(well_order);
+}
+
+var well_order = []; // stores the order of the well selection
+
+function addToList(name)
+{
+  well_order.push(name); // add to the end of the list
+  updateCell(name); // update what the cell looks like
+}
+
+function removeFromList(name)
+{
+  var index = well_order.indexOf(name); // we have to get the index of the well in the list
+  well_order.splice(index, 1); // we use that index to remove it (search up Javascript array functions for a description of what splice does)
+
+  // we have to update this cell, and all cells that were selected after it
+  updateCell(name);
+  for (i = index; i < well_order.length; i++)
+  {
+    updateCell(well_order[i]);
+  }
+}
+
+
+
+function updateCell(name)
+{
+  // use jQuery to get the cell by its id
+  var cell = $("#"+name);
+  
+  // reset cell CSS classes
+  cell.removeClass('cell_off');
+  cell.removeClass('cell_on');
+
+  // again we figure out whether the well is selected
+  var i = well_order.indexOf(name);
+  if (i < 0) // not found
+  {
+    cell.html(''); // We clear out the ordering shown in the cell
+    cell.addClass('cell_off'); // set it to show an off icon
+  }
+  else
+  {
+    cell.html(i+1); // since array indices start at 0, we add 1 to the index because only computer people start counting at zero :)
+    cell.addClass('cell_on'); // set it to show an on icon
+  }
+}
+
+
+</script>
+
+
+</body>
+</html>
