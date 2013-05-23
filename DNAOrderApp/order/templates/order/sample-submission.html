@@ -1,7 +1,7 @@
 {% extends "base_template.html" %} 
 {% load render_table from django_tables2 %}
 
-{% block title %}Project List{% endblock title %}
+{% block title %}Sample Submission{% endblock title %}
 
 
 {% block extra_css_js %}
@@ -13,6 +13,7 @@
 <script type="text/javascript">
 	$().ready(function() {
 		// alert("Testing");
+		// $('#hello').text("The DOM is now loaded and can be manipulated.");
 		// $('#upload_manifest form').each(function(i, j) { alert(j); });
 
 		// prepares a form to be submitted via AJAX 
@@ -213,36 +214,48 @@
 <li><a href="index">Home</a></li>
 <li><a href="about">About</a></li>
 <li><a href="contact">Contact</a></li>
-<li class="active"><a href="project-list">Project List</a></li>
-<li><a href="sample-submission">Sample Submission</a></li>
+<li><a href="project-list">Project List</a></li>
+<li class="active"><a href="sample-submission">Sample Submission</a></li>
 {% endblock active-navbar %}
 
 {% block content %}
 
-{% block section_title %}<h1> Project List </h1>{% endblock section_title %}
+{% block section_title %}<h1> Sample Submission </h1>{% endblock section_title %}
+
+<p id="hello">Not loaded yet.</p>
 
 <table class="table table-hover">
 	<tr>
-		<th> Project Name </th>
-		<th> Sample Submission </th>
+		<th> Manifest Name </th>
+		<th> No. Plate </th>
+		<th> Project </th>
+		<th> Supplier </th>
 		<th> Created On </th>
 		<th> Created by </th>
+		<!-- Select Phenotypes, View Phenotypes -->
+		<th> Phenotype List </th>
 		<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
-		<th> Project Status </th> 
+		<th> Status Of Order </th> 
 	</tr>
 	<tr>
+		<td> Dummy Data - Manifest_1210 </td>
+		<td> 3 </td>
 		<td> UK10K_CILWGA </td>
-		<td><a href="sample-submission">See Samples</a></td>
+		<td> University College London Medical School </td>
 		<td> April 5, 2013 </td>
 		<td> aw18 </td>
-		<td> In Progress </td>
+		<td> <a href="pheno_select"> Select Phenotypes </a></td>
+		<td> Incomplete Phenotype List </td>
 	</tr>
 	<tr>
+		<td> Dummy Data 2 - Manifest_1369 </td>
+		<td> 1 </td>
 		<td> 2019STDY </td>
-		<td><a href="sample-submission">See Samples</a></td>
+		<td> Sanger Centre </td>
 		<td> May 9, 2013 </td>
 		<td> aw18 </td>
-		<td> Complete </td>
+		<td> <a href="pheno-list"> View Phenotype List </a></td>
+		<td> <a href="welcome-collaborator"> Start Well-filling </a></td>
 	</tr>
 </table>
 
@@ -266,7 +279,7 @@
 
 		<!-- Upload form. Note enctype attribute! -->
 		<!--form action="{% url project-list %}" method="post" enctype="multipart/form-data" id="project-list-form"-->
-		<form id="project-list-form" action="{% url project-list %}" method="post" enctype="multipart/form-data" >
+		<form id="project-list-form" action="{% url sample-submission %}" method="post" enctype="multipart/form-data" >
 			{% csrf_token %}
 
 			<p>{{ form.non_field_errors }}</p>
