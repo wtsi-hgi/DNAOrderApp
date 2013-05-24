@@ -7,10 +7,10 @@
 		<meta name="author" content="">
 		
 		<style type="text/css">
-			body {
-				padding-top: 60px;
-				padding-bottom: 40px;
-			}
+		body {
+			padding-top: 60px;
+			padding-bottom: 40px;
+		}
 
 			{% block extrahead %}{% endblock extrahead %}
 		</style>
@@ -22,6 +22,8 @@
 		<!--script src="../../static/bootstrap/js/jquery-1.9.1.min.js"></script-->
 		<script src="../../static/bootstrap/js/jquery-1.9.1.js"></script>
 		<script src="../../static/bootstrap/js/bootstrap.min.js"></script>
+		<script src="../../static/bootstrap/js/jquery.form.js"></script> 
+		<!--script src="http://malsup.github.io/jquery.form.js"></script--> 
 		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 
 		{% block extra_css_js %}{% endblock extra_css_js %}
@@ -73,6 +75,9 @@
 							{% endblock active-navbar %}
 						</ul>
 						<ul class="nav pull-right">
+							{% block active-navbar-pull-right %}
+							{% endblock active-navbar-pull-right %}
+
 							<li class="dropdown">
 
 								<a href="#user-profile" class="dropdown-toggle" data-toggle="dropdown">
@@ -80,6 +85,7 @@
 									<b class="caret"></b>
 								</a>
 								<ul class="dropdown-menu">
+									<li><a href="user_profile"><i class="icon-user"></i> Conan O'Brien</a></li>
 									<li><a href="#edit-profile"><i class="icon-pencil"></i> Edit</a></li>
 									<li><a href="#logout"><i class="icon-off"></i> Log out</a></li>
 								</ul>
@@ -97,6 +103,15 @@
 		<div class="container">
 		
 			{% block content %}
+			{% if messages %}
+			<ul class="messages">
+				{% for message in messages %}
+				<li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+
+
 			{% block section_title %}{% endblock %}
 
 
