@@ -1,6 +1,21 @@
 {% extends "base_template.html" %}
 
 {% block extrahead %}
+body{
+	background: url('../../../media/sanger.jpeg');
+	background-repeat: no-repeat;
+	display: compact;
+	background-size: cover;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+}
+
+.front-container{
+	position: fixed;
+	top: 20%;
+}
+
 #panel {
 	padding: 60px;
 	margin-bottom: 30px;
@@ -32,9 +47,12 @@ $(document).ready( function() {
 <li class="active"><a href="index">Home</a></li>
 <li><a href="about">About</a></li>
 <li><a href="contact">Contact</a></li>
-<li><a href="project-list">Project List</a></li>
-<li><a href="sample-submission">Sample Submission</a></li>
 {% endblock active-navbar %}
+
+{% block active-navbar-pull-right %}
+<li><a href="#sign-in">Sign In</a></li>
+<li><a href="#sign-up">Sign Up</a></li>
+{% endblock active-navbar-pull-right %}
 
 {% block signup %}
 <!--form class="navbar-form pull-right">
@@ -48,29 +66,57 @@ $(document).ready( function() {
 {% block content %}
 
 <!-- Main hero unit for a primary marketing message or call to action -->
-<div class="hero-unit">
-	<h1> Need to order some DNA? </h1>
-	<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
-	</p>
-	<div>
-		<button id="flip" class="btn btn-large btn-primary pull-right" type="button"> Register Now! </button>
+<div class="front-container">
+	<div class="row fluid">
+		<div class="span7" id="slogan">
+			<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+				<h1> Need to order some DNA? </h1>
+				<br />
+				<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
+				</p>
+
+				<div>
+					<button id="flip" class="btn btn-large btn-primary pull-right" type="button"> Register Now! 
+					</button>
+				</div>
+				<br />
+				<br />
+				<br />
+			</div>
+		</div>
+		<div class="span5" id="sign-in-sign-up">
+			<div class="row-fluid">
+				<div class="span12">
+					<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+						<h3> New to DNA Order App? </h3>
+						<h3> Sign Up Now! </h3>
+					</div>
+				</div>
+			</div>
+			<div class="row-fluid">
+				<div class="span12">
+					<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+						<h3> Sign In </h3>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<br />
-	
 </div>
+
 <div id="panel" style="display:none"> 
 	<h1> Sign Up Now! </h1>
 	<br />
-		<form class="sign-up" method="post" action="{% url index %}">
-			{% csrf_token %}
-			<table>
-				{{ UserForm }}
-			</table>
-			<br />
-			<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign In</button>
-			<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign Up</button>
-		</form>
-	</div>
+	<form class="sign-up" method="post" action="{% url index %}">
+		{% csrf_token %}
+		<table>
+			{{ UserForm }}
+		</table>
+		<br />
+		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign In</button>
+		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign Up</button>
+	</form>
+</div>
 
 
 
