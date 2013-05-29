@@ -1,87 +1,199 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.core.files import File
+from django.contrib.auth import authenticate, login
 
-from DNAOrderApp.order.models import Document, Sample, Study, Display
+from DNAOrderApp.order.models import Document, Sample, Study, Display, User, UserRole, UserForm
 #from DNAOrderApp.order.models import SampleForm, StudyForm
 from DNAOrderApp.order.forms import DocumentForm
+from DNAOrderApp.order.authentication_backend import AuthenticationBackend
+
+from django.contrib import messages
+from django.db import IntegrityError, DatabaseError
+import base64
 
 
 import csv, string, re
 
+formfile = ""
+
 
 """tutorial"""
 
-# Project List Page
+def clear_form_file(request):
+    global formfile 
+    formfile = ""
+
+    if not formfile:  #formfile is empty
+        return True
+    else:
+        return False
+
+# Binding a File to the Form
+def bind_file_to_form(request):
+
+    if request.method == 'POST':
+        print "INSIDE BIND_FILE_TO_FORM, POST"
+        form = DocumentForm(request.POST, request.FILES)
+    else:
+        print "IN THE ELSE, BIND_FILE_TO_FORM, POST"
+        form = DocumentForm()
+
+    return form
+
 def project_list(request):
+    return render(request, 'order/project-list.html', {})
+
+# Sample Submission List Page
+# Display top and bottom 5 rows 
+def sample_submission_list(request):
     print "INSIDE PROJECT_LIST"
-    # helper function to extract the info from excel
-    display_dict = {}
-    newdoc_flag = False
+    global formfile
+    print "this is formfile: ", formfile
 
-    outcome = manifest_upload(request)
+    # Requires rendering of the top and bottom 5 of the rows from excel
+    study_name = ""
+    supplier_name = ""
+    num_of_plates = 0
+    headings = [" Sanger Plate ID ", " Sanger Sample ID "]
+    rows = []
 
-    print "recent_document: ", outcome[0], outcome[1], outcome[2]
+    if not formfile: # if form is an empty string
+        formfile = bind_file_to_form(request)
+        form = bind_file_to_form(request)
+        print "INSIDE PROJECT LIST, SETTING FORMFILE AND FORM TO A FILE"
+    else:
+        form = formfile
+        print "INSIDE PROJECT LIST, FORMFILE BEEN SET ALREADY, SETTING FORM TO BE FORMFILE"
+
+    # if request.method == 'POST':
+    #     form = DocumentForm(request.POST, request.FILES)
+
+    if form.is_valid():
+
+        # Helper function to show the extracted data to user
+        results = handle_upload_file(request.FILES['docfile'])
+
+        study_name = results[0]
+        supplier_name = results[1]
+        num_of_plates = results[2]
+
+        sanger_plate_id = 0
+        ind = -1
+        for j in range(0,len(results[4])):
+
+            if j%96 == 0:
+                ind += 1
+                sanger_plate_id = list(results[3])[ind]  
+
+            print j, results[1], sanger_plate_id, results[4][j]
+
+                
+            row = [sanger_plate_id, results[4][j]]
+            rows.append(row)
+
+            # Redirect to the document list after POST
+            # return HttpResponseRedirect(reverse('project-list'))
+    # else:
+    #     print "IN THE ELSE"
+    #     form = DocumentForm() #A empty, unbound form 
+
+    # Top 5
+    top5 = rows[0:5]
+    print "top 5: ", top5
+
+    # Bottom 5
+    bottom5 = rows[-5:]
+    print "bottom 5: ", bottom5
+
     # Render list page with the documents and the form
     return render_to_response(
-        'order/project-list.html',
-        {'recent_document': outcome[0],
-        'form': outcome[1],
-        'display_dict': outcome[2] 
+        'order/sample-submission.html',
+        {'form': form,
+        'study_name': study_name,
+        'supplier_name': supplier_name,
+        'num_of_plates': num_of_plates,
+        'headings': headings,
+        'top5': top5,
+        'bottom5': bottom5
          },
         context_instance=RequestContext(request)
     )
 
-# Simply putting the manifest into the proper directory
-def manifest_upload(request):
-    print "INSIDE MANIFEST_UPLOAD"
+# Save and upload the manifest file into database
+def save_files(request):
     # helper function to extract the info from excel
+    print "INSIDE SAVE_FILE!"
+    global formfile
     display_dict = {}
     newdoc_flag = False
     recent_document = []
-    if request.method == 'POST':
-        print "IN THE POST"
-        form = DocumentForm(request.POST, request.FILES)
 
-        if form.is_valid():
-            print "INSIDE IS_VALID"
-            # Will show the uploaded document
-            newdoc = Document(docfile = request.FILES['docfile'])
-            newdoc.save()
-            newdoc_flag = True
+    if not formfile: # if form is an empty string
+        formfile = bind_file_to_form(request)
+        form = bind_file_to_form(request)
+        print "INSIDE SAVE_FILE, SETTING FORMFILE AND FORM TO BE THE RECENT_DOC"
+    else:
+        form = formfile
+        print "INSIDE SAVE_FILE, FORMFILE BEEN SET ALREADY, SETTING FORM TO BE FORMFILE"
 
-            print "BEFORE HANDLE UPLOAD FILE"
+    form = bind_file_to_form(request)
+
+    # if request.method == 'POST':
+    #     print "SAVE_FILE INSIDE POST"
+    #     form = DocumentForm(request.POST, request.FILES)
+    #     return "form.is_valid():", form.is_valid()
+
+    if form.is_valid():
+        print "INSIDE IS VALID"
+        # Will show the uploaded document
+        newdoc = Document(docfile = request.FILES['docfile'])
+        newdoc.save()
+        newdoc_flag = True
+
             # Helper function to show the extracted data to user
-            results = handle_upload_file(request.FILES['docfile'])
-            print "AFTER HANDLE_UPLOAD_FILE INSIDE MANIFEST_UPLOAD"
+        results = handle_upload_file(request.FILES['docfile'])
+
+        print "BEFORE STUDY"
+        print type(results[0])
+        print results[0]
+        #Store the study name
+        try: 
+            study = Study(study_name=results[0])
+            study.save()
+            print "AFTER STUDY: study saved"
+        except IntegrityError:
+            print "Study already exists"
+            messages.info(request, u"Study already exists")
 
             sanger_plate_id = 0
             ind = -1
-            for j in range(0,len(results[5])):
+            for j in range(0,len(results[4])):
 
                 if j%96 == 0:
                     ind += 1
-                    sanger_plate_id = list(results[4])[ind]  
+                    sanger_plate_id = list(results[3])[ind]  
 
-                print j, results[1], sanger_plate_id, results[5][j]
+                print j, results[1], sanger_plate_id, results[4][j]
+                print "type: " , j, type(results[1]), type(sanger_plate_id), type(results[4][j])
 
-                # Store the data extracted from the excel form into the database
-                #study = Study(study_name=results[0])
-                #sample = Sample(supplier_name=results[1], sanger_plate_id=sanger_plate_id, sanger_sample_id=results[5][j])
+                # Store the sample data extracted from the excel form into the database
+                sample = Sample(supplier_name=results[1], sanger_plate_id=sanger_plate_id, sanger_sample_id=results[4][j])
+                print "after sample's been made"
+                try:
+                    sample.save()
+                    print "sample save"
+                except IntegrityError:
+                    print "Integrity Error"
 
-                #Display Top 5 and Bottom 5 rows to user to show what's been extracted to the user.
-                display_dict = {'study_name': results[0],
-                            'supplier_name': results[1],
-                            'sanger_plate_id': sanger_plate_id,
-                            'sanger_sample_id': results[5][j]}
-
+                
             # Redirect to the document list after POST
             # return HttpResponseRedirect(reverse('project-list'))
-    else:
-        print "IN THE ELSE"
-        form = DocumentForm() #A empty, unbound form 
+    # else:
+    #     print "IN THE ELSE"
+    #     form = DocumentForm() #A empty, unbound form 
 
     # recent document uploaded
     if Document.objects.all().exists() and newdoc_flag:
@@ -91,8 +203,80 @@ def manifest_upload(request):
     else:
         recent_document = []
 
-    print "RECENT DOCUMENT : ", recent_document
-    return recent_document, form, display_dict
+    print "save-file: ", recent_document, form
+    # Render list page with the documents and the form
+    return render_to_response(
+        'order/sample-submission.html',
+        {'recent_document': recent_document,
+        'form': form,
+         },
+        context_instance=RequestContext(request)
+    )
+
+# # Simply putting the manifest into the proper directory
+# def manifest_upload(request):
+#     print "INSIDE MANIFEST_UPLOAD"
+#     # helper function to extract the info from excel
+#     display_dict = {}
+#     newdoc_flag = False
+#     recent_document = []
+#     if request.method == 'POST':
+#         print "IN THE POST"
+#         form = DocumentForm(request.POST, request.FILES)
+
+#         if form.is_valid():
+#             print "INSIDE IS_VALID"
+#             # Will show the uploaded document
+#             newdoc = Document(docfile = request.FILES['docfile'])
+#             newdoc.save()
+#             newdoc_flag = True
+
+#             print "BEFORE HANDLE UPLOAD FILE"
+#             # Helper function to show the extracted data to user
+#             results = handle_upload_file(request.FILES['docfile'])
+#             print "AFTER HANDLE_UPLOAD_FILE INSIDE MANIFEST_UPLOAD"
+
+#             sanger_plate_id = 0
+#             ind = -1
+#             for j in range(0,len(results[5])):
+
+#                 if j%96 == 0:
+#                     ind += 1
+#                     sanger_plate_id = list(results[4])[ind]  
+
+#                 print j, results[1], sanger_plate_id, results[5][j]
+
+#                 # Store the data extracted from the excel form into the database
+#                 #study = Study(study_name=results[0])
+#                 #sample = Sample(supplier_name=results[1], sanger_plate_id=sanger_plate_id, sanger_sample_id=results[5][j])
+
+#                 #Display Top 5 and Bottom 5 rows to user to show what's been extracted to the user.
+#                 display_dict = {'study_name': results[0],
+#                             'supplier_name': results[1],
+#                             'sanger_plate_id': sanger_plate_id,
+#                             'sanger_sample_id': results[5][j]}
+
+#             # Redirect to the document list after POST
+#             # return HttpResponseRedirect(reverse('project-list'))
+#     else:
+#         print "IN THE ELSE"
+#         form = DocumentForm() #A empty, unbound form 
+
+#     # recent document uploaded
+#     if Document.objects.all().exists() and newdoc_flag:
+#         recent_document = Document.objects.order_by('-id')[0]
+#         print "INSIDE DOCUMENT.OBJECTS.ALL().EXISTS AND NEWDOC_FLAG"
+#         print "newdoc_flag is: ", newdoc_flag
+#     else:
+#         recent_document = []
+
+#     print "RECENT DOCUMENT : ", recent_document
+#     return recent_document, form, display_dict
+
+
+ 
+
+
 
 # Extracting out needed info from manifest
 def handle_upload_file(f):
@@ -111,7 +295,7 @@ def handle_upload_file(f):
     sanger_plate_id = set()
     spid_size = 0
     sanger_sample_id = []
-    headercount = 0
+    headercount = 0 #did not return this, no use outside
 
 
     while (list):
@@ -171,7 +355,7 @@ def handle_upload_file(f):
         except StopIteration:
             break
 
-    return study_name, supplier_name, num_plates, headercount, sanger_plate_id, sanger_sample_id
+    return study_name, supplier_name, num_plates, sanger_plate_id, sanger_sample_id
 
 
 
@@ -209,9 +393,31 @@ def _96plate(request):
 def test(request):
     return render(request, 'order/base_template.html', {})
 
+def basic_http_auth(f):
+    def wrap(request, *args, **kwargs):
+        if request.META.get('HTTP_AUTHORIZATION', False):
+            authtype, auth = request.META['HTTP_AUTHORIZATION'].split(' ')
+            auth = base64.b64decode(auth)
+            username, password = auth.split(':')
+            if authenticate(username=username, password=password):
+                return f(request, *args, **kwargs)
+            else:
+                print "hello"
+                r = HttpResponse("Auth Required", status = 401)
+                r['WWW-Authenticate'] = 'Basic realm="bat"'
+                return r
+        print "hello hey"
+        r = HttpResponse("Auth Required", status = 401)
+        r['WWW-Authenticate'] = 'Basic realm="bat"'
+        return r
+        
+    return wrap
+
+@basic_http_auth
 def index(request):
     title = 'Home'
-    return render(request, 'order/index.html', {'title' : title})
+    userform = UserForm()
+    return render(request, 'order/index.html', {'title' : title, 'UserForm': userform})
 
 # TRYING OUT BOOTSTRAP TUTORIAL
 def base(request):
@@ -228,12 +434,22 @@ def contact(request):
 
 # Login / Sign Up Page
 def signup(request):
+    # Check to see if you already exist in the database
+    print "INSIDE SIGNUP!"
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+    else:
+        print "IN THE ELSE, BIND_FILE_TO_FORM, POST"
+        form = DocumentForm()
+
+    return form
+
+
     return render(request, 'order/sign-up.html', {})
 
 # User Profile Page
 def user_profile(request):
-    pass
-    # return render(request, 'order/user_profile.html', {})
+    return render(request, 'order/profile.html', {})
 
 # User Home Page, with the list of outgoing and incoming projects
 def user_home(request):
