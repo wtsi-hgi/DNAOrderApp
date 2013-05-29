@@ -272,7 +272,38 @@ class Display(models.Model):
     supplier_name = models.CharField(max_length=100)
     sanger_plate_id = models.CharField(max_length=100)
     sanger_sample_id = models.CharField(max_length=100)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
+""" TEMPORARY MODELS TO SIMULATE DIFFERENT ROLES FOR DIFFERENT VIEWS """
+
+class UserRole(models.Model):
+    user_role = models.CharField(max_length=100, unique=True)
+    
+    def __unicode__(self):
+        return self.user_role
+
+class User(models.Model):
+    email = models.EmailField(max_length=254, unique=True)
+    role = models.ForeignKey(UserRole)
+    password = models.CharField(max_length=100)
+    address = models.TextField()
+    fax_num = models.CharField(max_length=100) #To store the number as entered by the user, because different phone formats exists across the globe
+    phone_num = models.CharField(max_length=100)
+    affiliation = models.CharField(max_length=100)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+'''
+There is user authentication in Django: https://docs.djangoproject.com/en/dev/topics/auth/
+At the moment that is not the main focus. This is already being done by another project.
+'''
+
+from django.forms import ModelForm
+
+class UserForm(ModelForm):
+    class Meta:
+        model = User
 '''
 """ MODELFORMS """
 from django.forms import ModelForm 
@@ -288,7 +319,6 @@ class SampleForm(ModelForm):
         exclude = ('individual', 'sample_id', 'sanger_plate_id', 'sanger_sample_id',
             'supplier_sample_name')
 '''
-
 
 
         
