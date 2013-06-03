@@ -1,7 +1,7 @@
 ''' CUSTOMIZED AUTHENTICATION BACKEND '''
 import hmac
 import base64
-import time
+from time import time
 from django.contrib.auth.models import User
 
 class AuthenticationBackend(object):
@@ -18,27 +18,51 @@ class AuthenticationBackend(object):
 		digest = hmaccer.digest()
 		return digest
 
+
+	def add_padding_to_password(self, password):
+		modulo = len(password) % 4
+		print "modulo: " , modulo
+
+		dict = { 
+					2: "==",
+					3: "="
+				}
+
+		new_pw = password + dict[modulo]
+		return new_pw
+
 	def authenticate(self, username = None, password = None):
 		print "Username = " + username
-		print "Passwrod = " + password
+		print "Passwrod = " + str(type(password))
 		parts = base64.b64decode(username)
 		print "parts: " + parts
 		expiry = parts.split(':')[1]
 		print "expiry: " + expiry
 		realuser = parts.split(':')[0]
 		print "realuser: " + realuser
-		now = time.time()
-		if now:
-			print "now exists!" + str(now)
+
+		import sys
+		print "sys.version: " + sys.version
+
+		currentTime = time()
+		print "Time: " + str(currentTime)
+		if currentTime < float(expiry):
+			print "Token has " , str(float(expiry) - currentTime) , " seconds remaining."
 		else:
-			print "now does not exist"
+			print "Token expired"
 
 		print "before if"
-		print "nowtype",type(now),type(expiry)
+		print "currentTimetype",type(currentTime),type(expiry)
 
-		print "self.hmac(parts) : " + self.hmac(parts)
+		print "self.hmac(parts) : " + base64.b64encode(self.hmac(parts))
 		print "password: " + password
-		if self.hmac(parts) == base64.b64decode(password) and now < float(expiry):
+		print "len(password): " , len(password)
+
+		padded_pw = self.add_padding_to_password(password)
+
+		print "padded_pw: " + padded_pw
+
+		if self.hmac(parts) == base64.b64decode(padded_pw) and currentTime < float(expiry):
 			print "in here!"
 			try:
 				print "before user"
@@ -55,10 +79,6 @@ class AuthenticationBackend(object):
 			return user
 		print "no user"
 		return None
-
-	# # Check token and return a User
-	# def authenticate(self, token=None):
-	# 	pass
 
 
 	# user_id can be a username, database ID, must be primary key of the User object
