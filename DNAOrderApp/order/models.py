@@ -85,6 +85,7 @@ class Phenotype(models.Model):
     def __unicode__(self):
         return self.phenotype_name
 
+# THE UNITS MIGHT BE BEST IF PROVIDED BY THE COLLABORATORS INSTEAD OF FACULTY MEMBER
 class AffectionStatusPhenotypeValue(models.Model):
     phenotype = models.ForeignKey(Phenotype)
     individual = models.ForeignKey(Individual)
@@ -149,6 +150,9 @@ class Platform(models.Model):
     def __unicode__(self):
         return self.platform_name
 
+
+# This study model will be modified, since studies are known already, 
+# and are associated with the individuals
 class Study(models.Model):
     study_name = models.CharField(max_length=100, unique=True)
     platform = models.ForeignKey(Platform, null=True, blank=True)
@@ -261,27 +265,23 @@ class SampleQC(models.Model):
 class BulkUpload(models.Model):
     pass   
 
-""" MANIFEST UPLOAD """
-
-# Stores the user uploaded files
-class Document(models.Model):
-    docfile = models.FileField(upload_to='manifests/%Y-%m-%d')
-
-class Display(models.Model):
-    study_name = models.CharField(max_length=100, unique=True)
-    supplier_name = models.CharField(max_length=100)
-    sanger_plate_id = models.CharField(max_length=100)
-    sanger_sample_id = models.CharField(max_length=100)
-    date_created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-
 """ TEMPORARY MODELS TO SIMULATE DIFFERENT ROLES FOR DIFFERENT VIEWS """
+'''
+There is user authentication in Django: https://docs.djangoproject.com/en/dev/topics/auth/
+At the moment that is not the main focus. This is already being done by another project.
+'''
 
 class UserRole(models.Model):
     user_role = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
         return self.user_role
+
+TITLE_CHOICES = (
+    ('MR', 'Mr.'),
+    ('MRS', 'Mrs.'),
+    ('MS', 'Ms.'),
+)
 
 class User(models.Model):
     email = models.EmailField(max_length=254, unique=True)
@@ -293,17 +293,38 @@ class User(models.Model):
     affiliation = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=3, choices=TITLE_CHOICES)
 
-'''
-There is user authentication in Django: https://docs.djangoproject.com/en/dev/topics/auth/
-At the moment that is not the main focus. This is already being done by another project.
-'''
+""" MANIFEST UPLOAD """
+
+# Stores the user uploaded files
+class Document(models.Model):
+    docfile = models.FileField(upload_to='manifests/%Y-%m-%d')
+
+class Display(models.Model):
+    study_name = models.CharField(max_length=100, unique=True)
+    supplier_name = models.CharField(max_length=100)
+    sanger_plate_id = models.CharField(max_length=100)
+    sanger_sample_id = models.CharField(max_length=100)
+    user = models.ForeignKey(User)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+class Unit(models.Model):
+    unit_name = models.CharField(max_length=100, unique=True)
 
 from django.forms import ModelForm
 
 class UserForm(ModelForm):
     class Meta:
         model = User
+
+class PhenotypeForm(ModelForm):
+    class Meta:
+        model = Phenotype
+
+
+
 '''
 """ MODELFORMS """
 from django.forms import ModelForm 
