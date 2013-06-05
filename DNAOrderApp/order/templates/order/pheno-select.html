@@ -65,11 +65,31 @@ color: red;
 // 	});
 // });
 
-//Generate unique IDs for each table row
+
 $(document).ready( function(){
+	
+	//Generate unique IDs for each table row
 	var ind = 0;
 	$("tr").each(function( index ){
 		$(this).attr('id', index);
+	});
+	
+});
+
+//Activates ajax function call to delete phenotype
+function deletePheno(){
+	alert("delete");
+	var phenotype_name = $(this).closest("tr").children("td").text();
+	console.log(this);
+}
+
+$(document).ready( function() {
+	$(".delete-pheno").click(function (event){
+		//event.preventDefault();
+		var id = $(this).closest("tr")
+						.children("td:first-child")
+						.text();
+		alert(id);
 	});
 });
 
@@ -128,7 +148,7 @@ $(document).ready( function(){
 		<td>{{ p.phenotype_type_id }}</td>
 		<td>{{ p.phenotype_description }}</td>
 		<td>{{ p.phenotype_definition }}</td>
-		<td> <button id="delete-pheno" class="btn" type="button"><i class="icon-remove"></i></button></td>
+		<td> <button id="delete-pheno{{p.pk}}" class="btn delete-pheno" type="button"><i class="icon-remove"></i></button></td>
 	</tr>
 	{% endfor %}
 </table>
