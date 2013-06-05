@@ -1,145 +1,172 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base_template.html" %} 
+{% load render_table from django_tables2 %}
 
-	<head>
-		<title> WTSI &middot; DNA Order App &middot; Project List &middot; Phenotype Selection </title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="">
-		<meta name="author" content="">
-		
-		<!-- Bootstrap -->
-		<link href="../../static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
-		<style type="text/css">
-			body {
-				padding-top: 60px;
-				padding-bottom: 40px;
-				background-color: #f5f5f5;
-			}
-			.form-signin {
-				max-width: 3500px;
-				padding: 19px 29px 29px;
-				margin: 0 auto 10px;
-				background-color: #fff;
-				border: 1px solid #e5e5e5;
-				-webkit-border-radius: 5px;
-				   -mox-border-radius: 5px;
-				        border-radius: 5px;
-				 -webkit-box-shadow: 0 1px 2px rgb(0, 0, 0, .05);
-				    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-				         box-shadow: 0 1px 2px rgba(0,0,0,.05);
-			}
-			.form-signin .form-signin-heading,
-			.form-signin .checkbox {
-				margin-bottom: 20px;
-			}
-			.form-signin input[type="text"],
-			.form-signin input[type="password"] {
-				font-size: 16px;
-				height: auto;
-				margin-bottom: 15px;
-				padding: 7px 9px;
-			}
-			button[name="add"]{
-				height: 35.7px;
-			}
-			.btn .lower-right-button{
-				color: red;
-			}
+{% block title %}Phenotype Selection{% endblock title %}
 
+{% block extrahead %}
 
-		</style>
-		
-		<link href="../../static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+body {
+padding-top: 60px;
+padding-bottom: 40px;
+background-color: #f5f5f5;
+}
+.form-signin {
+max-width: 3500px;
+padding: 19px 29px 29px;
+margin: 0 auto 10px;
+background-color: #fff;
+border: 1px solid #e5e5e5;
+-webkit-border-radius: 5px;
+-mox-border-radius: 5px;
+border-radius: 5px;
+-webkit-box-shadow: 0 1px 2px rgb(0, 0, 0, .05);
+-moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+margin-bottom: 20px;
+}
+.form-signin input[type="text"],
+.form-signin input[type="password"] {
+font-size: 16px;
+height: auto;
+margin-bottom: 15px;
+padding: 7px 9px;
+}
+button[name="add"]{
+height: 35.7px;
+}
+.btn .lower-right-button{
+color: red;
+}
 
-		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    	<!--[if lt IE 9]>
-      		<script src="../../static/bootstrap/js/html5shiv/dist/html5shiv.js"></script>
-    	<![endif]-->
-	</head>
-	<body>
-		
-		<div class="navbar navbar-inverse navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-					
-					
-					<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					
-					</a>
-					
-					<!-- keep the brand outside if want to be shown -->
-					<a class="brand" href="#">DNA Order Application</a>
-					
-					<!-- Everything you want hidden at 940px or less, place within here -->
-					<div class="nav-collapse collapse">
-						<ul class="nav pull-left">
-							<li><a href="index">Home</a></li>
-							<li><a href="about">About</a></li>
-							<li><a href="#contact">Contact</a></li>
-							<li class="active"><a href="project-list">Project List</a></li>
-							
-						</ul>
-						<ul class="nav pull-right">
-							<li class="dropdown">
-
-								<a href="#user-profile" class="dropdown-toggle" data-toggle="dropdown">
-									<i class="icon-user icon-white"></i> Profile 
-									<b class="caret"></b>
-								</a>
-								<ul class="dropdown-menu">
-									<li><a href="#edit-profile"><i class="icon-pencil"></i> Edit</a></li>
-									<li><a href="#logout"><i class="icon-off"></i> Log out</a></li>
-								</ul>
-							</li>
-						</ul>
-						
-					</div>
-					
-				</div>
-			</div>
-		</div>
-
-		<div class="container">
-
-			<!-- Exhibit A: Type in phenotypes -->
-			<h1> Type in the Phenotypes that you want recorded: </h1>
-			<h5> phenotype, units, expected range </h5>
-			
-			<div class="form-signin">
-			
-				<div class="form-actions">
-					<div class="input-append container-fluid">
-						<input class="span10" id="appendedInputButton" type="text" data-provide="typeahead">
-						<button class="btn" type="button" name="add">Add!</button>
-					</div>
-
-					<button type="submit" class="btn btn-primary lower-right-button" name="commit-btns"> Save changes </button>
-					<button type="button" class="btn lower-right-button">Cancel</button>
-
-				</div>
-
-				<!-- Exhibit B: Select phenotypes plus a customized version -->
-
-			</div>
-
-		
-			<footer>
-				<p>&copy; Wellcome Trust Sanger Institute 2013, HGI Team</p>
-			</footer>
-		</div>
-		
+.alert{
 	
-		<!-- Le javascript 
-		============================================================= -->
-		<!-- Placed at the end of the document so the pages load faster -->
-		<!-- local version of jquery -->
-		<script src="../../static/bootstrap/js/jquery-1.9.1.min.js"></script>
-		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-		<script src="../../static/bootstrap/js/bootstrap.min.js"></script>
+}
 
-	</body>		
-</html>
+{% endblock extrahead %}
+
+
+{% block extra_css_js %}
+
+<!-- JAVASCRIPT HERE -->
+<script>
+
+// $(document).ready( function() {
+// 	$('#delete-pheno').click( function() {
+// 		alert("delete phenotype!");
+
+// 		$.ajax({
+// 			type: "POST",
+// 			url: "pheno-select"
+// 		});
+// 		return false;
+// 	});
+// });
+
+//Generate unique IDs for each table row
+$(document).ready( function(){
+	var ind = 0;
+	$("tr").each(function( index ){
+		$(this).attr('id', index);
+	});
+});
+
+// $(function() {
+		// 	//twitter bootstrap script
+		// 	$("button#submit").click(function(){
+		// 		$.ajax({
+		// 			type: "POST",
+		// 			url: "process.php",
+		// 			data: $('form.contact').serialize(),
+		// 			success: function(msg){
+		// 				$("#thanks").html(msg)
+		// 				$("#form-content").modal('hide');    
+		// 			},
+		// 			error: function(){
+		// 				alert("failure");
+		// 			}
+		// 		});
+		// 	});
+		// });
+
+</script>
+{% endblock extra_css_js %}
+
+{% block active-navbar %} 
+<li><a href="index">Home</a></li>
+<li><a href="about">About</a></li>
+<li><a href="contact">Contact</a></li>
+<li><a href="project-list">Project List</a></li>
+<li class="active"><a href="sample-submission">Sample Submission</a></li>
+{% endblock active-navbar %}
+
+{% block content %}
+
+{% block section_title %}<h1> Type in the Phenotypes that you want recorded: </h1>{% endblock section_title %}
+<h5> phenotype, units, expected range </h5>
+
+<div id="alert-signs">
+	{{ success_alert|safe }}
+	{{ try_again_alert|safe }}
+	{{ fill_in_alert|safe }}
+</div>
+
+<h3> Existing Phenotypes </h3>
+<table class="table table-striped table-bordered table-hover">
+	<tr>
+		<th> Phenotype Name </th>
+		<th> Phenotype Type </th>
+		<th> Phenotype Description </th>
+		<th> Phenotype Definition </th>
+		<th> Delete? </th>
+	</tr>
+	{% for p in phenotypelist %}
+	<tr>
+		<td>{{ p.phenotype_name }}</td>
+		<td>{{ p.phenotype_type_id }}</td>
+		<td>{{ p.phenotype_description }}</td>
+		<td>{{ p.phenotype_definition }}</td>
+		<td> <button id="delete-pheno" class="btn" type="button"><i class="icon-remove"></i></button></td>
+	</tr>
+	{% endfor %}
+</table>
+
+</table>
+
+<div id="add_a_phenotype_panel"> 
+	<h3> Add A Phenotype </h3>
+	<br />
+	<form class="add_a_phenotype" method="post" action="{% url pheno-select %}">
+		{% csrf_token %}
+		<table>
+			{{ phenotypeForm }}
+		</table>
+		<br />
+		<button id="add-pheno" class="btn btn-primary" type="submit" action="{% url pheno-select %}">Create a Phenotype</button>
+	</form>
+</div>
+
+
+
+<!-- A PHENOTYPE TABLE WHERE THEY CAN INPUT THE VALUES IN -->
+
+
+<!-- THERE SHOULD BE AN UPLOAD BUTTON WHERE PEOPLE CAN UPLOAD PHENOTYPE LIST ONTO THE WEB APPLICATION AND AUTOMATICALLY
+	STORES IT INTO THE DATABASE, AFTER SHOWING THEM A TABLE OF THE EXTRACTED INFORMATION ASKING IF THE INFORMATION IS 
+	CORRECT -->
+
+
+{% endblock content %}
+
+
+<!-- ONE WITH THE BAR AND AN ADD BUTTON -->
+<!-- <div class="well well-large input-append">
+	<form id="phenotype-form" action="" method="post", enctype="multipart/form-data">
+		{% csrf_token %}
+	<input type="text" class="span11" placeholder="Type phenotype here" name="phenotype-item" id="phenotype-item" />
+	<button class="btn" id="add-phenotype"> Add </button>
+</form>
+</div> -->
+
