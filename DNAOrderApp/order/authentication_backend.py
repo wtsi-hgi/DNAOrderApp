@@ -80,10 +80,28 @@ class AuthenticationBackend(object):
 		print "no user"
 		return None
 
-
 	# user_id can be a username, database ID, must be primary key of the User object
 	def get_user(self, user_id):
 		try:
 			return User.objects.get(pk=user_id)
 		except User.DoesNotExist:
 			return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
