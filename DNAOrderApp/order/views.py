@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.contrib.auth import authenticate, login
 
-from DNAOrderApp.order.models import Document, Sample, Study, Display, User, UserRole, UserForm
+from DNAOrderApp.order.models import Document, Sample, Study, Display, User, UserRole, UserForm, PhenotypeForm, Phenotype
 #from DNAOrderApp.order.models import SampleForm, StudyForm
 from DNAOrderApp.order.forms import DocumentForm
 from DNAOrderApp.order.authentication_backend import AuthenticationBackend
@@ -46,9 +46,13 @@ def bind_file_to_form(request):
 def project_list(request):
     return render(request, 'order/project-list.html', {})
 
-# Sample Submission List Page
-# Display top and bottom 5 rows 
+# Shows when first loading the submissions page
 def sample_submission_list(request):
+    return render(request, 'order/sample-submission.html', {})
+
+# preview page
+# Display top and bottom 5 rows 
+def preview(request):
     print "INSIDE PROJECT_LIST"
     global formfile
     print "this is formfile: ", formfile
@@ -110,7 +114,7 @@ def sample_submission_list(request):
 
     # Render list page with the documents and the form
     return render_to_response(
-        'order/sample-submission.html',
+        'order/preview.html',
         {'form': form,
         'study_name': study_name,
         'supplier_name': supplier_name,
@@ -419,6 +423,61 @@ def index(request):
     userform = UserForm()
     return render(request, 'order/index.html', {'title' : title, 'UserForm': userform})
 
+
+# Phenotype Selection Page
+def pheno_select(request):
+    print "in pheno_select"
+
+    # RETURNING TO THE PAGE AFTER SUBMIT HAS BEEN PRESSED
+    if request.method == 'POST':
+        phenotypeForm = PhenotypeForm(request.POST) # bound form has submitted data; an invalid bound form
+                                                    # is rendered, it can include inline error messages telling
+                                                    # telling the user what data to correct. !!!
+
+        print "this is phenotypeForm ", phenotypeForm
+
+        if phenotypeForm.is_valid():
+            phenotype_name = phenotypeForm.cleaned_data['phenotype_name']
+            phenotype_type = phenotypeForm.cleaned_data['phenotype_type']
+            phenotype_description = phenotypeForm.cleaned_data['phenotype_description']
+            phenotype_definition = phenotypeForm.cleaned_data['phenotype_definition']
+
+            print phenotype_name, phenotype_type, phenotype_description, phenotype_definition
+
+            phenotypeForm.save()
+            print "Check phenotype table to see if it has been saved properly."
+
+            phenotypelist = Phenotype.objects.all().order_by('phenotype_name')
+
+            return render(request, 'order/pheno-select.html', {
+                'phenotypeForm': phenotypeForm,
+                'success_alert' : '<div class="alert alert-success"> You have successfully added a phenotype! </div>',
+                'phenotypelist' : phenotypelist,
+            })
+
+        # ERROR ALERT FOR INVALID BOUND FORM
+        print "phenotypeForm is bound but invalid"
+        phenotypelist = Phenotype.objects.all().order_by('phenotype_name')
+        return render(request, 'order/pheno-select.html', {
+                'phenotypeForm': phenotypeForm,
+                'try_again_alert' : '<div class="alert alert-block"> Oops! Try again - phenotype was not added. </div>',
+                'phenotypelist' : phenotypelist,
+            })
+    else:
+        # FIRST COMING TO THE PHENO_SELECT PAGE
+        phenotypeForm = PhenotypeForm() #unbound form, no associated data, empty form
+        print "exiting", phenotypeForm
+        print "phenotypelist ", Phenotype.objects.all()
+        phenotypelist = Phenotype.objects.all().order_by('phenotype_name')
+
+
+    return render(request, 'order/pheno-select.html', {
+            'phenotypeForm': phenotypeForm,
+            'fill_in_alert': '<div class="alert alert-info"> Fill in the following form to add a phenotype. </div>',
+            'phenotypelist' : phenotypelist,
+
+        })
+
 # TRYING OUT BOOTSTRAP TUTORIAL
 def base(request):
     return render(request, 'order/base.html', {})
@@ -454,10 +513,6 @@ def user_profile(request):
 # User Home Page, with the list of outgoing and incoming projects
 def user_home(request):
     pass
-
-# POP-UP: Phenotype Selection Page
-def pheno_select(request):
-    return render(request, 'order/pheno-select.html', {})
 
 # POP-UP: Choose the method that the wells will be filled: Manual or Robot?
 
