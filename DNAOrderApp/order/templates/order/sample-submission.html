@@ -10,82 +10,33 @@
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
 <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
 
+
 <script type="text/javascript">
-	$().ready(function() {
-		// alert("Testing");
-		// $('#hello').text("The DOM is now loaded and can be manipulated.");
-		// $('#upload_manifest form').each(function(i, j) { alert(j); });
 
-		// prepares a form to be submitted via AJAX 
-		// $('#upload_manifest form').ajaxForm({
-		// 	//target: '#recent_document',
-		// 	success: function(body) {
-		// 		alert("this is from ajaxForm: " + body);
-		// 		//$('#upload_manifest > .modal-body').
-		// 	}
-		// });
+$(document).ready(function() {
+	alert("hi");
+	// For Testing purposes - to check if ready function is working
+	$('#hello').text("The DOM is now loaded and can be manipulated.");
+	
 
-//---------------------TRYING OUT A NEW WAY TO SUBMIT FORM FROM A REMOTE BUTTON---------------------
+	// Changing the <input type="file".../> so that once file is chosen
+	// the file details are immediately shown 
+	this.getElementById("id_docfile").addEventListener("change", function(){
+		alert('test');
+		$('#test').text(":O");
 
-		// <div id="thanks">
-		// 	<p>
-		// 		<a data-toggle="modal" href="#form-content" class="btn btn-primary">Contact us</a>
-		// 	</p>
-		// </div>
-		// <!-- model content -->    
-		// <div id="form-content" class="modal hide fade in" style="display: none; ">
-		// 	<div class="modal-header">
-		// 		<a class="close" data-dismiss="modal">×</a>
-		// 		<h3>Contact us</h3>
-		// 	</div>
-		// 	<div>
-		// 		<form class="contact">
-		// 			<fieldset>
-		// 				<div class="modal-body">
-		// 					<ul class="nav nav-list">
-		// 						<li class="nav-header">Name</li>
-		// 						<li><input class="input-xlarge" value=" krizna" type="text" name="name"></li>
-		// 						<li class="nav-header">Email</li>
-		// 						<li><input class="input-xlarge" value=" user@krizna.com" type="text" name="Email"></li>
-		// 						<li class="nav-header">Message</li>
-		// 						<li>
-		// 							<textarea class="input-xlarge" name="sug" rows="3"> 
-		// 								Thanks for the article and demo
-		// 							</textarea>
-		// 						</li>
-		// 					</ul> 
-		// 				</div>
-		// 			</fieldset>
-		// 		</form>
-		// </div>
-		// <div class="modal-footer">
-		// 	<button class="btn btn-success" id="submit">submit</button>
-		// 	<a href="#" class="btn" data-dismiss="modal">Close</a>
-		// </div>
-		
+		//Extract file details here without Extract button
+		// Using the multi-submit method
 
+		$("#resultcontainer").slideToggle("slow");
+		this.getElementById('project-list-form').target='frame_result';
+		alert("after frame result");
+		this.forms['project-list-form'].submit();
+		alert('done test');
+		});
 
-		// $(function() {
-		// 	//twitter bootstrap script
-		// 	$("button#submit").click(function(){
-		// 		$.ajax({
-		// 			type: "POST",
-		// 			url: "process.php",
-		// 			data: $('form.contact').serialize(),
-		// 			success: function(msg){
-		// 				$("#thanks").html(msg)
-		// 				$("#form-content").modal('hide');    
-		// 			},
-		// 			error: function(){
-		// 				alert("failure");
-		// 			}
-		// 		});
-		// 	});
-		// });
-//-------------------------- END -----------------------------------------
-
-
-		$('#save-button').click(function () {
+	// Saving the form information into the database officially after pressing the save button
+	$('#save-button').click(function () {
 			alert("trying to save!");
 			$.ajax({
 				type: "POST",
@@ -102,95 +53,13 @@
 					alert("failure");
 				}
 			});
-		});
+		});	
+});
 
-
-		// 	$(this).ajaxSubmit({ 
-		// 		url: 'save-file',
-		// 		type: 'POST',
-		// 		success: function () {
-					
-		// 			$('#myModalLabel_add_project').html("Thank you for your Submission!");
-
-		// 			$('#upload_manifest_form').html("<p><b> You have uploaded and saved the following manifest into the database: </b></p><!-- List of uploaded documents --><div id='recent_document'>{% if recent_document %}<ul><li><a href='{{ recent_document.docfile.url }}''>{{ recent_document.docfile.name }}</a></li><br /><br />{{ display_dict }}</ul>{% else %}<p>No documents.</p>{% endif %}</div>");
-
-		// 			$('#upload_manifest_modal_footer').html("<button id='upload_manifest_close_button' class='btn' data-dismiss='modal' aria-hidden='true'>Close</button>");
-
-		// 		}
-		// 		// error: function () {
-		// 		// 	$('#myModalLabel_add_project').html("Sorry, There's been an error.");
-		// 		// 	$('#upload_manifest_form').html("<p><b> The following manifest failed to be submitted. Please Try Again. </b></p><!-- List of uploaded documents --><div id='recent_document'>{% if recent_document %}<ul><li><a href='{{ recent_document.docfile.url }}''>{{ recent_document.docfile.name }}</a></li><br /><br />{{ display_dict }}</ul>{% else %}<p>No documents.</p>{% endif %}</div>");
-
-		// 		// 	$('#upload_manifest_modal_footer').html("<button id='upload_manifest_close_button' class='btn' data-dismiss='modal' aria-hidden='true' href='project-list.html'>Close</button>");
-		// 		// }
-		// 	});
-		// 	return false;
-		// });
-		
-		
-		$('#upload_manifest').on('hide', function(){
-			alert("closing modal");
-			window.location.href="project-list"
-
-		});
-
-		$('#extract-now').click( function(){
-			$('#project-list-form').ajaxSubmit({
-				target: '#extract-panel',
-				type: 'post',
-				success: function(a) {
-					//console.log(a);
-					var html = a;
-					table = $(html).find("#extract-panel").html();
-					$('#extract-panel').replaceWith(table);
-					$('#extract-panel').slideToggle("slow");
-				}
-			});
-			return false;
-		});
-   
-
-						// 	<!-- List of uploaded documents -->
-						// 	<div id="recent_document">
-						// 		{% if recent_document %}
-						// 		<ul>
-						// 			<li><a href="{{ recent_document.docfile.url }}">{{ recent_document.docfile.name }}</a></li>
-						// 			<br />
-						// 			<br />
-						// 		{{ display_dict }}
-						// 		</ul>
-						// 		{% else %}
-						// 		<p>No documents.</p>
-						// 		{% endif %}
-						// 	</div>
-
-		// submits the form immediately after 'submit' button is pressed
-		// attach handler to form's submit event
-		// $('#upload_manifest form').submit(function() {
-		// 	//submit the form
-		// 	$(this).ajaxSubmit({ 
-		// 		target: '#recent_document', 
-		// 		success: function() {
-		// 			alert("Thank you for uploading your manifest :)");
-
-		// 		} 
-		// 	});
-		// 	// file's been chosen
-		// 	// show the document as uploaded
-		// 	// then show what's been extracted
-
-		// 	// Then another function will need to be set for the "Save Changes" button
-
-		// 	// return false to prevent normal browser submit and page navigation
-		// 	return false;
-		// });
-		// $('#save-button').click(function () {
-		// 	$(this).ajaxSubmit({ success: function () {
-		// 		alert("You have saved the project");
-		// 	}});
-		// 	return false;
-  //   	});
-	});
+// function showResultDiv(){
+// 	var result_div = document.getElementById('resultcontainer');
+// 	result_div.style.display="";
+// }
 </script>
 
 {% endblock extra_css_js %}
@@ -224,36 +93,81 @@
 
 <p id="hello">Not loaded yet.</p>
 
+<h3> Here are all the specific Sample Submissions for the Selected Project </h3>
 <table class="table table-hover">
 	<tr>
-		<th> Manifest Name </th>
-		<th> No. Plate </th>
-		<th> Project </th>
-		<th> Supplier </th>
+		<th> Project Name </th>
+		<th> Sample Submission Name </th>
+		<th> External Collaborator (Source) </th>
+		<th> Number of Samples </th>
 		<th> Created On </th>
-		<th> Created by </th>
+		<th> Last Updated </th>
+		<!-- Select Phenotypes, View Phenotypes -->
+		<th> Phenotype List </th>
+		<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
+		<th> Status Of Order </th> 
+		<th> Delete? </th>
+	</tr>
+	{% for s in sample_submission_list %}
+	<tr id="{{s.pk}}">
+		<td>{{ s.project_name }}</td>
+		<td>{{ s.sample_submission_name }}</td>
+		<td>{{ s.source }}</td>
+		<td>{{ s.sample_num }}</td>
+		<td>{{ s.date_created }}</td>
+		<td>{{ s.last_updated }}</td>
+		<td>THIS SHOULD BE THE sample_submission ASSOCIATED PHENOTYPE LIST</td>
+		<td>{{ s.order_status }}</td>
+		<td> <button id="delete-sample-submission{{s.pk}}" class="btn delete-pheno" type="button"><i class="icon-remove"></i></button></td>
+	</tr>
+	{% endfor %}
+</table>
+
+<h3> Below are all the Sample Submissions in the database </h3>
+You shouldn't be able to delete any of these. They are the accumulation of everyone's sample submissions.
+
+<table class="table table-hover">
+	<tr>
+		<th> Project Name </th>
+		<th> Sample Submission Name </th>
+		<th> External Collaborator (Source) </th>
+		<th> Number of Samples </th>
+		<th> Created On </th>
+		<th> Last Updated </th>
 		<!-- Select Phenotypes, View Phenotypes -->
 		<th> Phenotype List </th>
 		<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
 		<th> Status Of Order </th> 
 	</tr>
+	{% for s in sample_submission_list %}
+	<tr id="{{s.pk}}">
+		<td>{{ s.project_name }}</td>
+		<td>{{ s.sample_submission_name }}</td>
+		<td>{{ s.source }}</td>
+		<td>{{ s.sample_num }}</td>
+		<td>{{ s.date_created }}</td>
+		<td>{{ s.last_updated }}</td>
+		<td>THIS SHOULD BE THE sample_submission ASSOCIATED PHENOTYPE LIST</td>
+		<td>{{ s.order_status }}</td>
+	</tr>
+	{% endfor %}
 	<tr>
 		<td> Dummy Data - Manifest_1210 </td>
-		<td> 3 </td>
 		<td> UK10K_CILWGA </td>
 		<td> University College London Medical School </td>
+		<td> 288 </td>
 		<td> April 5, 2013 </td>
-		<td> aw18 </td>
+		<td> April 28, 2013</td>
 		<td> <a href="pheno_select"> Select Phenotypes </a></td>
 		<td> Incomplete Phenotype List </td>
 	</tr>
 	<tr>
 		<td> Dummy Data 2 - Manifest_1369 </td>
-		<td> 1 </td>
 		<td> 2019STDY </td>
 		<td> Sanger Centre </td>
+		<td> 96 </td>
 		<td> May 9, 2013 </td>
-		<td> aw18 </td>
+		<td> May 15, 2013 </td>
 		<td> <a href="pheno-list"> View Phenotype List </a></td>
 		<td> <a href="welcome-collaborator"> Start Well-filling </a></td>
 	</tr>
@@ -265,6 +179,29 @@
 </a>
 <a href="#delete_project" role="button" class="btn" data-toggle="modal" data-keyboard=true>	<i class="icon-minus"></i>
 </a>
+
+<!-- ADD A SAMPLE SUBMISSION FORM -->
+
+<div id="add_a_sample_submission_panel"> 
+	<h3> Add A Sample Submission </h3>
+	<br />
+	<form class="add_a_sample_submission" method="post" action="{% url sample-submission %}">
+		{% csrf_token %}
+		<table>
+			{{ sform }}
+		</table>
+		<br />
+		<button id="add-sample-submit" class="btn btn-primary" type="submit" action="{% url sample-submission %}">Create a Sample Submission</button>
+	</form>
+</div>
+
+
+
+
+
+
+
+
 
 <!-- Upload Modal -->
 	
@@ -279,7 +216,7 @@
 
 		<!-- Upload form. Note enctype attribute! -->
 		<!--form action="{% url project-list %}" method="post" enctype="multipart/form-data" id="project-list-form"-->
-		<form id="project-list-form" action="{% url sample-submission %}" method="post" enctype="multipart/form-data" >
+		<form id="project-list-form" action="{% url sample-submission %}" method="post" enctype="multipart/form-data">
 			{% csrf_token %}
 
 			<p>{{ form.non_field_errors }}</p>
@@ -291,46 +228,19 @@
 		    	{{ form.docfile.errors }}
 		    	{{ form.docfile }}
 		    </p>
-		    <p>
-		    	<input type="submit" value="Extract Now" id="extract-now"/>
-		    </p>
 		</form>
-		<div id="extract-panel">
-			<h4> The following is what's extracted from the manifest: </h4>
-			<p>Study Name: {{ study_name }} </p>
-			<p>Supplier Name: {{ supplier_name }} </p>
-			<p>Number of Plates: {{ num_of_plates }}</p>
 
-			<h3> Top 5 Rows </h3>
-			<table border="1" id="top5">
-				<tr>
-					{% for heading in headings %}
-					<th>{{ heading }}</th>
-					{% endfor %}
-				</tr>
-				{% for x, y in top5 %}
-				<tr>
-					<td> {{ x }} </td>
-					<td> {{ y }} </td>
-				</tr>
-				{% endfor %}
-			</table>
+		<p id="test">:)</p>
 
-			<h3> Bottom 5 Rows </h3>
-			<table border="1" id="bottom5">
-				<tr>
-					{% for heading in headings %}
-					<th>{{ heading }}</th>
-					{% endfor %}
-				</tr>
-				{% for x, y in bottom5 %}
-				<tr>
-					<td> {{ x }} </td>
-					<td> {{ y }} </td>
-				</tr>
-				{% endfor %}
-			</table>
+		<div id="resultcontainer" style="display:none">
+			<div class='iframe_container'>
+				<iframe name='frame_result' width='350px' height='100px' frameborder='0'>
+					
+				</iframe>
+			</div>
 		</div>
+
+		
 	</div>
 
 	<div id="upload_manifest_modal_footer" class="modal-footer">
@@ -368,3 +278,18 @@
 
 {% block delete_file %}
 {% endblock delete_file %} -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

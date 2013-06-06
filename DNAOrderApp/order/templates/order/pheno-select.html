@@ -65,23 +65,44 @@ color: red;
 // 	});
 // });
 
-
-$(document).ready( function(){
-	
-	//Generate unique IDs for each table row
-	var ind = 0;
-	$("tr").each(function( index ){
-		$(this).attr('id', index);
-	});
-	
-});
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
 
 $(document).ready( function() {
 	$(".delete-pheno").click(function (event){
 		//event.preventDefault();
-		var id = $(this).closest("tr")
-						.children("td:first-child")
-						.text();
+		// var id = $(this).closest("tr")
+		// 				.children("td:first-child")
+		// 				.text();
+
+		var id = $(this).closest("tr").attr("id");
+
+		$.ajax({url: "pheno-select/"+id+"/",
+				type : "DELETE",
+				headers : {"X-CSRFToken" : csrftoken}})
+				.done(function( data ){
+					$(data).filter("#alert-signs").html('<div class="alert alert-success"><b>Good Job!</b> You have successfully deleted the phenotype!</div>');
+					// $("#alert-signs").html('<div class="alert alert-success"><b>Good Job!</b> You have successfully deleted the phenotype!</div>');
+					console.log(data);
+				})
+				.fail(function(){
+					alert("WHY HERE?!");
+					$("#alert-signs").html('<div class="alert alert-error"><b>Uh Oh!</b> The phenotype failed to delete.</div>');
+				});
 		alert(id);
 	});
 });
@@ -117,16 +138,25 @@ $(document).ready( function() {
 
 {% block content %}
 
-{% block section_title %}<h1> Type in the Phenotypes that you want recorded: </h1>{% endblock section_title %}
-<h5> phenotype, units, expected range </h5>
+{% block section_title %}<h1> Phenotype Lists: </h1>{% endblock section_title %}
+
+<h3> Phenotypes that you want associated with your samples </h3>
+A SAMPLESUBMISSIONPHENOTYPE TABLE WILL GO HERE!!!
+
+
+
+
+
 
 <div id="alert-signs">
 	{{ success_alert|safe }}
 	{{ try_again_alert|safe }}
 	{{ fill_in_alert|safe }}
+
 </div>
 
-<h3> Existing Phenotypes </h3>
+<h3> Existing Phenotypes in the Database </h3>
+<h5> phenotype, units, expected range?????????? </h5>
 <table class="table table-striped table-bordered table-hover">
 	<tr>
 		<th> Phenotype Name </th>
@@ -136,7 +166,7 @@ $(document).ready( function() {
 		<th> Delete? </th>
 	</tr>
 	{% for p in phenotypelist %}
-	<tr>
+	<tr id="{{p.pk}}">
 		<td>{{ p.phenotype_name }}</td>
 		<td>{{ p.phenotype_type_id }}</td>
 		<td>{{ p.phenotype_description }}</td>
@@ -146,7 +176,6 @@ $(document).ready( function() {
 	{% endfor %}
 </table>
 
-</table>
 
 <div id="add_a_phenotype_panel"> 
 	<h3> Add A Phenotype </h3>

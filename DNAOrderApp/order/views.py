@@ -5,7 +5,10 @@ from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.contrib.auth import authenticate, login
 
-from DNAOrderApp.order.models import Document, Sample, Study, Display, User, UserRole, UserForm, PhenotypeForm, Phenotype
+from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
+from DNAOrderApp.order.models import OrderStatus, UserProject, Source, SampleSubmissionPhenotype
+
+from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm
 #from DNAOrderApp.order.models import SampleForm, StudyForm
 from DNAOrderApp.order.forms import DocumentForm
 from DNAOrderApp.order.authentication_backend import AuthenticationBackend
@@ -42,13 +45,6 @@ def bind_file_to_form(request):
         form = DocumentForm()
 
     return form
-
-def project_list(request):
-    return render(request, 'order/project-list.html', {})
-
-# Shows when first loading the submissions page
-def sample_submission_list(request):
-    return render(request, 'order/sample-submission.html', {})
 
 # preview page
 # Display top and bottom 5 rows 
@@ -420,16 +416,85 @@ def basic_http_auth(f):
 @basic_http_auth
 def index(request):
     title = 'Home'
-    userform = UserForm()
-    return render(request, 'order/index.html', {'title' : title, 'UserForm': userform})
+    return render(request, 'order/index.html', {'title' : title})
+
+def project_list(request):
+    print "inside project list"
+
+    if request.method == 'DELETE':
+        print "deleting a project"
+
+    elif request.method == 'POST':
+        userprojectform = UserProjectForm(request.POST)
+        print "this is userprojectform", userprojectform
+
+        if userprojectform.is_valid():
+            userprojectform.save()
+            print "Check userproject table to see if it has been saved properly."
+
+            userprojectlist_all = UserProject.objects.all().order_by('project_name')
+
+            #ASSUMING SOMEHOW I KNOW WHO I AM - faculty member
+            userprojectlist_user = UserProject.objects.filter(username_id=2)
+
+
+            return render(request, 'order/project-list.html', {
+                'userprojectform': userprojectform,
+                'userprojectlist_all': userprojectlist_all,
+                'userprojectlist_user' : userprojectlist_user
+            })
+
+    else:
+        # FIRST COMING TO THE PROJECT PAGE
+        # CREATE DUMMY USERS HERE
+        from django.contrib.auth.models import User
+        if User.objects.filter(username='facultymember').count() == 0:
+            user = User.objects.create_user(username='facultymember', email='facultymember@sanger.ac.uk', password='fmpassword')
+            user.save()
+
+        # DUMMY PROJECT STATUS
+        from DNAOrderApp.order.models import ProjectStatus
+        if ProjectStatus.objects.all().count() == 0:
+            project_status = ProjectStatus(project_status='In Progress')
+            project_status.save()
+            project_status = ProjectStatus(project_status = 'Complete')
+            project_status.save()
+
+    userprojectform = UserProjectForm() #unbound form, no associated data, empty form
+    userprojectlist_all = UserProject.objects.all().order_by('project_name')
+    print "projectlistall: ", userprojectlist_all
+
+    #ASSUMING SOMEHOW I KNOW WHO I AM - faculty member
+    userprojectlist_user = UserProject.objects.filter(username_id=2)
+
+    userproject = UserProject()
+    print userproject
+    return render(request, 'order/project-list.html', {
+            'userprojectform' : userprojectform,
+            'userprojectlist_all' : userprojectlist_all,
+            'userprojectlist_user' : userprojectlist_user
+        })
 
 
 # Phenotype Selection Page
-def pheno_select(request):
+def pheno_select(request, id=-1):
     print "in pheno_select"
 
     # RETURNING TO THE PAGE AFTER SUBMIT HAS BEEN PRESSED
-    if request.method == 'POST':
+    if request.method == 'DELETE' and id != -1:
+
+        print "deleting a phenotype"
+        del_pheno = Phenotype.objects.get(pk=id)
+        print "del_pheno: ", del_pheno
+        del_pheno.delete()
+        phenotypelist = Phenotype.objects.all().order_by('phenotype_name')
+        print "phenotypelist: ", phenotypelist
+        phenotypeForm = PhenotypeForm() #unbound form, no associated data, empty form
+        print "phenotypeForm: ", phenotypeForm
+
+
+    elif request.method == 'POST':
+
         phenotypeForm = PhenotypeForm(request.POST) # bound form has submitted data; an invalid bound form
                                                     # is rendered, it can include inline error messages telling
                                                     # telling the user what data to correct. !!!
@@ -471,11 +536,57 @@ def pheno_select(request):
         phenotypelist = Phenotype.objects.all().order_by('phenotype_name')
 
 
+    print "RENDERING OUTSIDE"
     return render(request, 'order/pheno-select.html', {
             'phenotypeForm': phenotypeForm,
             'fill_in_alert': '<div class="alert alert-info"> Fill in the following form to add a phenotype. </div>',
             'phenotypelist' : phenotypelist,
 
+        })
+
+    def __unicode__(self):
+        return self.sample_submission_name
+
+# Sample Submission Page
+def sample_submission_list(request):
+    print "in sample_submission_list"
+
+    if request.method == 'DELETE':
+        print "deleting a sample_submission"
+
+    elif request.method == 'POST':
+        sform = SampleSubmissionForm(request.POST)
+        print "this is sform", sform
+
+        if sform.is_valid():
+            sform.save()
+            print "Check Sample Submission table to see if it's been saved"
+
+            sample_submission_list = SampleSubmission.objects.all().order_by('project_name')
+
+            return render(request, 'order/sample-submission.html', {
+                'sform': sform,
+                'sample_submission_list' : sample_submission_list,
+            })
+
+    else:
+        # DUMMY SOURCE
+        from DNAOrderApp.order.models import Source
+        if Source.objects.all().count() == 0:
+            source = Source(source_name="Sanger Center", contact_name="Dr.Who", 
+                source_description="Office located somewhere in the land far far away")
+            source.save()
+            source = Source(source_name="Addenbrookes Hospital", contact_name="Dr.How", 
+                source_description="Office located somewhere in the land very closeby")
+            source.save()
+
+        sample_submission_list = SampleSubmission.objects.all().order_by('project_name')
+        sform = SampleSubmissionForm()
+        print "this is sform", sform
+
+    return render(request, 'order/sample-submission.html', {
+            'sform' : sform,
+            'sample_submission_list' : sample_submission_list
         })
 
 # TRYING OUT BOOTSTRAP TUTORIAL

@@ -221,28 +221,82 @@
 
 {% block section_title %}<h1> Project List </h1>{% endblock section_title %}
 
+<h4> 
+	Hi, I assume I know who the user is. I also assume I will get a list of projects that is associated
+	to this user.
+	<br />
+	I AM THE FACULTY MEMBER.
+</h4>
+
+<br />
+<br />
+<h3> Welcome Faculty Member. Here are your projects. </h3>
+
 <table class="table table-hover">
 	<tr>
+		<th> Username </th>
 		<th> Project Name </th>
-		<th> Sample Submission </th>
+		<th> Sample Submission(s) </th>
 		<th> Created On </th>
-		<th> Created by </th>
+		<th> Last updated </th>
 		<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
 		<th> Project Status </th> 
+		<th> Delete? </th>
 	</tr>
+	{% for up in userprojectlist_user %}
+	<tr id="{{up.pk}}">
+		<td>{{ up.username }}</td>
+		<td>{{ up.project_name }}</td>
+		<td><a href="sample-submission">See Samples</a></td>
+		<td>{{ up.date_created }}</td>
+		<td>{{ up.last_updated }}</td>
+		<td>{{ up.project_status }}</td>
+		<td> <button id="delete-pheno{{p.pk}}" class="btn delete-pheno" type="button"><i class="icon-remove"></i></button></td>
+	</tr>
+	{% endfor %}
+</table>
+
+<h3> Below are all the projects in the database </h3>
+
+<table class="table table-hover">
 	<tr>
+		<th> Username </th>
+		<th> Project Name </th>
+		<th> Sample Submission(s) </th>
+		<th> Created On </th>
+		<th> Last updated </th>
+		<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
+		<th> Project Status </th> 
+		<th> Delete? </th>
+	</tr>
+	{% for up in userprojectlist_all %}
+	<tr id="{{up.pk}}">
+		<td>{{ up.username }}</td>
+		<td>{{ up.project_name }}</td>
+		<td><a href="sample-submission">See Samples</a></td>
+		<td>{{ up.date_created }}</td>
+		<td>{{ up.last_updated }}</td>
+		<td>{{ up.project_status }}</td>
+		<td> <button id="delete-pheno{{p.pk}}" class="btn delete-pheno" type="button"><i class="icon-remove"></i></button></td>
+	</tr>
+	{% endfor %}
+	<tr>
+		<td> facultymember </td>
 		<td> UK10K_CILWGA </td>
 		<td><a href="sample-submission">See Samples</a></td>
 		<td> April 5, 2013 </td>
-		<td> aw18 </td>
+		<td> April 15, 2013 </td>
 		<td> In Progress </td>
+		<td> HARDCODED </td>
 	</tr>
 	<tr>
+		<td> facultymember </td>
 		<td> 2019STDY </td>
 		<td><a href="sample-submission">See Samples</a></td>
 		<td> May 9, 2013 </td>
-		<td> aw18 </td>
+		<td> May 19, 2013 </td>
 		<td> Complete </td>
+		<td> HARDCODED </td>
 	</tr>
 </table>
 
@@ -252,6 +306,39 @@
 </a>
 <a href="#delete_project" role="button" class="btn" data-toggle="modal" data-keyboard=true>	<i class="icon-minus"></i>
 </a>
+
+<br />
+<br />
+<br />
+
+
+<!-- ADD A PROJECT FORM -->
+
+<div id="add_a_project_panel"> 
+	<h3> Add A Project </h3>
+
+	<b>Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
+	associated with the specific user.</b>
+	<br />
+	<br />
+	<form class="add_a_project" method="post" action="{% url project-list %}">
+		{% csrf_token %}
+		<table>
+			{{ userprojectform }}
+		</table>
+		<br />
+		<button id="add-a-project" class="btn btn-primary" type="submit" action="{% url project-list %}">Create a Project</button>
+	</form>
+</div>
+
+
+
+
+
+
+
+
+
 
 <!-- Upload Modal -->
 	

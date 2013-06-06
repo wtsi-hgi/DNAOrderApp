@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 """
 MODELS.PY
@@ -20,6 +21,38 @@ Modified by Albertina Wong, March 22, 2013 to address the following issues:
     - removed flagged field from all the DataType Models
 """
 
+""" TEMPORARY MODELS TO SIMULATE DIFFERENT ROLES FOR DIFFERENT VIEWS """
+'''
+There is user authentication in Django: https://docs.djangoproject.com/en/dev/topics/auth/
+At the moment that is not the main focus. This is already being done by another project.
+'''
+
+# class UserRole(models.Model):
+#     user_role = models.CharField(max_length=100, unique=True)
+    
+#     def __unicode__(self):
+#         return self.user_role
+
+# TITLE_CHOICES = (
+#     ('MR', 'Mr.'),
+#     ('MRS', 'Mrs.'),
+#     ('MS', 'Ms.'),
+# )
+
+# # DUMMY USER
+# class User(models.Model):
+#     email = models.EmailField(max_length=254, unique=True)
+#     role = models.ForeignKey(UserRole)
+#     password = models.CharField(max_length=100)
+#     address = models.TextField()
+#     fax_num = models.CharField(max_length=100) #To store the number as entered by the user, because different phone formats exists across the globe
+#     phone_num = models.CharField(max_length=100)
+#     affiliation = models.CharField(max_length=100)
+#     date_created = models.DateTimeField(auto_now_add=True)
+#     last_updated = models.DateTimeField(auto_now=True)
+#     title = models.CharField(max_length=3, choices=TITLE_CHOICES)
+
+
 """ ACTUAL DNA ORDER APP """
 
 class Individual(models.Model):
@@ -27,6 +60,7 @@ class Individual(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
+# EXTERNAL COLLABORATORS
 class Source(models.Model):
     source_name = models.CharField(max_length=100, unique=True)
     contact_name = models.CharField(max_length=100)
@@ -76,6 +110,54 @@ class PhenotypeType(models.Model):
     def __unicode__(self):
         return self.phenotype_type
 
+#DUMMY PROJECT LIST
+class ProjectStatus(models.Model):
+    # NOTE: these aren't actually choices...but these are the statuses
+    STATUS = (
+        ('in_progress', 'In Progress'),
+        ('complete', 'Complete'),
+    )
+
+    project_status = models.CharField(max_length=100, default='in_progress')
+
+    def __unicode__(self):
+        return self.project_status
+
+class UserProject(models.Model):
+    username = models.ForeignKey(User)
+    project_name = models.CharField(max_length=100, unique=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    project_status = models.ForeignKey(ProjectStatus)
+
+    def __unicode__(self):
+        return self.project_name
+
+class OrderStatus(models.Model):
+    # NOTE: these aren't actually choices...but these are the statuses
+    STATUS = (
+        ('incomplete_phenotype_list', 'Incomplete Phenotype List'),
+        ('start_well_filling', 'Start Well-filling'),
+        ('sample_submission_complete', 'Sample Submission Complete')
+    )
+
+    order_status = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.order_status
+
+class SampleSubmission(models.Model):
+    sample_submission_name = models.CharField(max_length=100, unique=True)
+    project_name = models.ForeignKey(UserProject)
+    source = models.ForeignKey(Source)
+    sample_num = models.IntegerField() #two end users don't need to worry about manifest, we can generate the sample id 
+    order_status = models.ForeignKey(OrderStatus)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return self.sample_submission_name
+
 class Phenotype(models.Model):
     phenotype_name = models.CharField(max_length=100, unique=True)
     phenotype_type = models.ForeignKey(PhenotypeType)
@@ -84,6 +166,14 @@ class Phenotype(models.Model):
 
     def __unicode__(self):
         return self.phenotype_name
+
+class SampleSubmissionPhenotype(models.Model):
+    phenotype = models.ForeignKey(Phenotype)
+    sample_submission = models.ForeignKey(SampleSubmission)
+
+    def __unicode__(self):
+        return self.sample_submission_phenotype_name
+
 
 # THE UNITS MIGHT BE BEST IF PROVIDED BY THE COLLABORATORS INSTEAD OF FACULTY MEMBER
 class AffectionStatusPhenotypeValue(models.Model):
@@ -265,35 +355,6 @@ class SampleQC(models.Model):
 class BulkUpload(models.Model):
     pass   
 
-""" TEMPORARY MODELS TO SIMULATE DIFFERENT ROLES FOR DIFFERENT VIEWS """
-'''
-There is user authentication in Django: https://docs.djangoproject.com/en/dev/topics/auth/
-At the moment that is not the main focus. This is already being done by another project.
-'''
-
-class UserRole(models.Model):
-    user_role = models.CharField(max_length=100, unique=True)
-    
-    def __unicode__(self):
-        return self.user_role
-
-TITLE_CHOICES = (
-    ('MR', 'Mr.'),
-    ('MRS', 'Mrs.'),
-    ('MS', 'Ms.'),
-)
-
-class User(models.Model):
-    email = models.EmailField(max_length=254, unique=True)
-    role = models.ForeignKey(UserRole)
-    password = models.CharField(max_length=100)
-    address = models.TextField()
-    fax_num = models.CharField(max_length=100) #To store the number as entered by the user, because different phone formats exists across the globe
-    phone_num = models.CharField(max_length=100)
-    affiliation = models.CharField(max_length=100)
-    date_created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-    title = models.CharField(max_length=3, choices=TITLE_CHOICES)
 
 """ MANIFEST UPLOAD """
 
@@ -323,6 +384,13 @@ class PhenotypeForm(ModelForm):
     class Meta:
         model = Phenotype
 
+class SampleSubmissionForm(ModelForm):
+    class Meta:
+        model = SampleSubmission
+
+class UserProjectForm(ModelForm):
+    class Meta:
+        model = UserProject
 
 
 '''

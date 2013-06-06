@@ -5,6 +5,8 @@ from DNAOrderApp.order import views
 urlpatterns = patterns('',
 
     # Testing pages
+
+    url(r'^preview$', views.preview, name='preview'),
     url(r'^test$', views.test, name='base_template'),
     url(r'^pheno-list$', views.pheno_list, name='pheno-list' ),
     url(r'^welcome-collaborator$', views.welcome_collab, name='welcome-collab'),
@@ -28,6 +30,7 @@ urlpatterns = patterns('',
 
     # Pheno Select Page
     url(r'^pheno-select$', views.pheno_select, name='pheno-select'),
+    url(r'^pheno-select/(?P<id>\d+)/$', views.pheno_select, name='pheno-select-id'),
     
     # Contact Page
     url(r'^contact$', views.contact, name='contact'),
