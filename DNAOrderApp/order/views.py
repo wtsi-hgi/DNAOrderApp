@@ -3,15 +3,15 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.core.files import File
-from django.contrib.auth import authenticate, login
+
+from django.contrib.auth import login, authenticate, get_user
 
 from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
-from DNAOrderApp.order.models import OrderStatus, UserProject, Source, SampleSubmissionPhenotype
+from DNAOrderApp.order.models import UserProject, Source
 
 from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm
 #from DNAOrderApp.order.models import SampleForm, StudyForm
 from DNAOrderApp.order.forms import DocumentForm
-from DNAOrderApp.order.authentication_backend import AuthenticationBackend
 
 from django.contrib import messages
 from django.db import IntegrityError, DatabaseError
@@ -399,14 +399,27 @@ def basic_http_auth(f):
             authtype, auth = request.META['HTTP_AUTHORIZATION'].split(' ')
             auth = base64.b64decode(auth)
             username, password = auth.split(':')
-            if authenticate(username=username, password=password):
-                return f(request, *args, **kwargs)
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                print "user.is_active", user.is_active
+                if user.is_active:
+                    #attaches the authenticated user to current session, saves userid in session.
+                    login(request,user)
+                    print "get_user:", get_user(request)
+                    
+                    #Successful login
+                    return f(request, *args, **kwargs)
+                else:
+                    #Return a 'disabled account' error message
+                    print "disabled account error message"
+
             else:
-                print "hello"
+                # Return an 'invalid login' error message
+                print "User does not exist"
                 r = HttpResponse("Auth Required", status = 401)
                 r['WWW-Authenticate'] = 'Basic realm="bat"'
                 return r
-        print "hello hey"
+        print "HTTP_AUTHORIZATION CANNOT BE FOUND IN request.META"
         r = HttpResponse("Auth Required", status = 401)
         r['WWW-Authenticate'] = 'Basic realm="bat"'
         return r
@@ -414,9 +427,36 @@ def basic_http_auth(f):
     return wrap
 
 @basic_http_auth
+def signin(request):
+    title = 'Sign In'
+    print "inside login page"
+    for key, value in request.session.items():
+        print "request.session: ", key, value
+
+    print "request.user.is_authenticated():", request.user.is_authenticated()
+    print "request.user, ", request.user
+
+    if not request.user.is_authenticated():
+        print request.user, "is not authenticated."
+        return HttpResponseRedirect(reverse('failed_signin'))
+
+    # SUCCESSFULLY AUTHENTICATED USER
+    return render(request, 'order/signin.html', {
+        'title' : title,
+        'realuser' : request.user
+        })
+
+def failed_signin(request):
+    return render(request, 'order/failed_signin.html', {})
+
+# ENTRY PAGE TO DIRECT USERS TO LOGIN
 def index(request):
     title = 'Home'
-    return render(request, 'order/index.html', {'title' : title})
+    for key, value in request.session.items():
+        print key, "corresponds to", value
+    return render(request, 'order/index.html', {
+        'title' : title,
+        })
 
 def project_list(request):
     print "inside project list"
@@ -453,19 +493,19 @@ def project_list(request):
             user.save()
 
         # DUMMY PROJECT STATUS
-        from DNAOrderApp.order.models import ProjectStatus
-        if ProjectStatus.objects.all().count() == 0:
-            project_status = ProjectStatus(project_status='In Progress')
-            project_status.save()
-            project_status = ProjectStatus(project_status = 'Complete')
-            project_status.save()
+        # from DNAOrderApp.order.models import ProjectStatus
+        # if ProjectStatus.objects.all().count() == 0:
+        #     project_status = ProjectStatus(project_status='In Progress')
+        #     project_status.save()
+        #     project_status = ProjectStatus(project_status = 'Complete')
+        #     project_status.save()
 
     userprojectform = UserProjectForm() #unbound form, no associated data, empty form
     userprojectlist_all = UserProject.objects.all().order_by('project_name')
     print "projectlistall: ", userprojectlist_all
 
-    #ASSUMING SOMEHOW I KNOW WHO I AM - faculty member
-    userprojectlist_user = UserProject.objects.filter(username_id=2)
+    #ASSUMING SOMEHOW I KNOW WHO I AM 
+    userprojectlist_user = UserProject.objects.filter(username_id=3)
 
     userproject = UserProject()
     print userproject
@@ -536,6 +576,17 @@ def pheno_select(request, id=-1):
         phenotypelist = Phenotype.objects.all().order_by('phenotype_name')
 
 
+        # INITIALIZING ADDING PHENOTYPE TYPE IN THERE FIRST TIME AROUND
+        from DNAOrderApp.order.models import PhenotypeType
+        if PhenotypeType.objects.all().count() == 0:
+            pt1 = PhenotypeType(phenotype_type="Affection Status")
+            pt2 = PhenotypeType(phenotype_type="Qualitative")
+            pt3 = PhenotypeType(phenotype_type="Quantitative")
+            pt1.save()
+            pt2.save()
+            pt3.save()
+
+
     print "RENDERING OUTSIDE"
     return render(request, 'order/pheno-select.html', {
             'phenotypeForm': phenotypeForm,
@@ -561,12 +612,15 @@ def sample_submission_list(request):
         if sform.is_valid():
             sform.save()
             print "Check Sample Submission table to see if it's been saved"
+            sform_project_name = sform.cleaned_data['project_name']
 
+            sample_submission_list_user = SampleSubmission.objects.filter(project_name=sform_project_name)
             sample_submission_list = SampleSubmission.objects.all().order_by('project_name')
 
             return render(request, 'order/sample-submission.html', {
                 'sform': sform,
                 'sample_submission_list' : sample_submission_list,
+                'sample_submission_list_user' : sample_submission_list_user,
             })
 
     else:
@@ -580,9 +634,35 @@ def sample_submission_list(request):
                 source_description="Office located somewhere in the land very closeby")
             source.save()
 
+        # INITIALIZING ADDING PHENOTYPE TYPE IN THERE FIRST TIME AROUND
+        from DNAOrderApp.order.models import PhenotypeType
+        if PhenotypeType.objects.all().count() == 0:
+            pt1 = PhenotypeType(phenotype_type="Affection Status")
+            pt2 = PhenotypeType(phenotype_type="Qualitative")
+            pt3 = PhenotypeType(phenotype_type="Quantitative")
+            pt1.save()
+            pt2.save()
+            pt3.save()
+
+        # DUMMY PHENOTYPES
+        from DNAOrderApp.order.models import Phenotype, PhenotypeType
+        if Phenotype.objects.all().count() == 0:
+            pt1=PhenotypeType.objects.get(pk=1)
+            p1 = Phenotype(phenotype_name="Sex", phenotype_type=pt1, phenotype_description="Sex", phenotype_definition="M/F")
+            p1.save()
+
+            pt2 = PhenotypeType.objects.get(pk=1)
+            p2 = Phenotype(phenotype_name="Year of birth", phenotype_type=pt2, phenotype_description="Year of birth", phenotype_definition="YYYY")
+            p2.save()
+
+            pt3 = PhenotypeType.objects.get(pk=3)
+            p3 = Phenotype(phenotype_name="Smoking status", phenotype_type=pt3, phenotype_description="Smoking status", phenotype_definition="Smoker/Non-smoker")
+            p3.save()
+
         sample_submission_list = SampleSubmission.objects.all().order_by('project_name')
         sform = SampleSubmissionForm()
         print "this is sform", sform
+
 
     return render(request, 'order/sample-submission.html', {
             'sform' : sform,
@@ -606,15 +686,6 @@ def contact(request):
 def signup(request):
     # Check to see if you already exist in the database
     print "INSIDE SIGNUP!"
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-    else:
-        print "IN THE ELSE, BIND_FILE_TO_FORM, POST"
-        form = DocumentForm()
-
-    return form
-
-
     return render(request, 'order/sign-up.html', {})
 
 # User Profile Page
