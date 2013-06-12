@@ -1,0 +1,148 @@
+{% extends "base_template.html" %}
+
+{% block extrahead %}
+body{
+	background: url('../../../media/sanger.jpeg');
+	background-attachment: fixed;
+	background-repeat: no-repeat;
+	display: compact;
+	background-size: cover;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+}
+
+.front-container{
+	position: fixed;
+	top: 20%;
+}
+
+#panel {
+	padding: 60px;
+	margin-bottom: 30px;
+	font-size: 18px;
+	font-weight: 200;
+	line-height: 30px;
+	color: inherit;
+	background-color: rgb(202, 243, 233);
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+}
+
+{% endblock extrahead %}
+
+{% block extra_css_js %}
+
+{% endblock extra_css_js %}
+
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block active-navbar %} 
+<li class="active"><a href="index">Home</a></li>
+<li><a href="about">About</a></li>
+<li><a href="contact">Contact</a></li>
+{% endblock active-navbar %}
+
+{% block active-navbar-pull-right %}
+<li class="dropdown">
+
+	<a href="#user-profile" class="dropdown-toggle" data-toggle="dropdown">
+		<i class="icon-user icon-white"></i> Profile 
+		<b class="caret"></b>
+	</a>
+	<ul class="dropdown-menu">
+		<li><a href="user_profile"><i class="icon-user"></i> {{ realuser }}</a></li>
+		<li><a href="#edit-profile"><i class="icon-pencil"></i> Edit</a></li>
+		<li><a href="#logout"><i class="icon-off"></i> Log out</a></li>
+	</ul>
+</li>
+{% endblock active-navbar-pull-right %}
+
+
+
+{% block signup %}
+<!--form class="navbar-form pull-right">
+	<input class="span2" type="text" placeholder="Email">
+	<input class="span2" type="password" placeholder="Password">
+	<button type="submit" class="btn">Sign in</button>
+	<a href="sign-up" class="btn">Sign up</a>
+</form-->
+{% endblock signup %}
+
+{% block content %}
+
+<!-- Main hero unit for a primary marketing message or call to action -->
+<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+	<h2> Welcome {{ realuser.username }}! 
+		<small> You have successfully logged in. </small>
+	</h2>
+	<p>
+		<a id="go-to-project-list" class="btn btn-primary btn-large pull-right" href="project-list"> Start DNA Order </a>
+	</p>
+</div>
+
+{% endblock content %}
+
+<!-- to add to parent block instea od completely overriding it, use {{ block.super }}-->
+
+<!-- <div class="span5" id="sign-in-sign-up">
+			<div class="row-fluid">
+				<div class="span12">
+					<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+						<h3> New to DNA Order App? </h3>
+						<h3> Sign Up Now! </h3>
+					</div>
+				</div>
+			</div>
+			<div class="row-fluid">
+				<div class="span12">
+					<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+						<h3> Sign In </h3>
+					</div>
+				</div>
+			</div>
+		</div> -->
+
+<!--
+<script>
+$(document).ready( function() {
+	$("#flip").click( function(){
+		$("#panel").slideToggle("slow");
+	});
+});
+</script>
+
+<div>
+	<button id="flip" class="btn btn-large btn-primary pull-right" type="button"> Register Now! 
+	</button>
+</div>
+-->
+
+
+<!-- <div id="panel" style="display:none"> 
+	<h1> Sign Up Now! </h1>
+	<br />
+	<form class="sign-up" method="post" action="{% url index %}">
+		{% csrf_token %}
+		<table>
+			{{ UserForm }}
+		</table>
+		<br />
+		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign In</button>
+		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign Up</button>
+	</form>
+</div> -->
+
+
+
+<!-- <div class="front-container">
+	<div class="row fluid">
+			<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+				<h1> Welcome {{ realuser.username }} ! Need to order some DNA? </h1>
+				<br />
+				<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
+				</p>
+			</div>
+	</div>
+</div> -->
