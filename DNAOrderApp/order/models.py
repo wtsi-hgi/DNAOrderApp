@@ -103,60 +103,30 @@ class PhenodbIdentifier(models.Model):
     
     def __unicode__(self):
         return self.individual_string
-    
+
+
+# THIS PARTICULAR DESIGN WOULD ALLOW USER TO ADD ADDITIONAL PHENOTYPETYPES IF ANYMORE APPEARS   
 class PhenotypeType(models.Model):
     phenotype_type = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
         return self.phenotype_type
 
-#DUMMY PROJECT LIST
-class ProjectStatus(models.Model):
-    # NOTE: these aren't actually choices...but these are the statuses
+class UserProject(models.Model):
+
     STATUS = (
-        ('in_progress', 'In Progress'),
-        ('complete', 'Complete'),
+        ('In Progress', 'In Progress'),
+        ('Complete', 'Complete'),
     )
 
-    project_status = models.CharField(max_length=100, default='in_progress')
-
-    def __unicode__(self):
-        return self.project_status
-
-class UserProject(models.Model):
     username = models.ForeignKey(User)
     project_name = models.CharField(max_length=100, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
-    project_status = models.ForeignKey(ProjectStatus)
+    project_status = models.CharField(max_length=100, choices=STATUS, default='In Progress')
 
     def __unicode__(self):
         return self.project_name
-
-class OrderStatus(models.Model):
-    # NOTE: these aren't actually choices...but these are the statuses
-    STATUS = (
-        ('incomplete_phenotype_list', 'Incomplete Phenotype List'),
-        ('start_well_filling', 'Start Well-filling'),
-        ('sample_submission_complete', 'Sample Submission Complete')
-    )
-
-    order_status = models.CharField(max_length=100)
-
-    def __unicode__(self):
-        return self.order_status
-
-class SampleSubmission(models.Model):
-    sample_submission_name = models.CharField(max_length=100, unique=True)
-    project_name = models.ForeignKey(UserProject)
-    source = models.ForeignKey(Source)
-    sample_num = models.IntegerField() #two end users don't need to worry about manifest, we can generate the sample id 
-    order_status = models.ForeignKey(OrderStatus)
-    date_created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-
-    def __unicode__(self):
-        return self.sample_submission_name
 
 class Phenotype(models.Model):
     phenotype_name = models.CharField(max_length=100, unique=True)
@@ -167,13 +137,25 @@ class Phenotype(models.Model):
     def __unicode__(self):
         return self.phenotype_name
 
-class SampleSubmissionPhenotype(models.Model):
-    phenotype = models.ForeignKey(Phenotype)
-    sample_submission = models.ForeignKey(SampleSubmission)
+class SampleSubmission(models.Model):
+
+    STATUS = (
+        ('Incomplete Phenotype List', 'Incomplete Phenotype List'),
+        ('Start Well-filling', 'Start Well-filling'),
+        ('Sample Submission Complete', 'Sample Submission Complete')
+    )
+
+    sample_submission_name = models.CharField(max_length=100, unique=True)
+    project_name = models.ForeignKey(UserProject)
+    source = models.ForeignKey(Source)
+    sample_num = models.IntegerField() #two end users don't need to worry about manifest, we can generate the sample id 
+    phenotype_list = models.ManyToManyField(Phenotype) #Associated phenotype list, will generate m2m table
+    order_status = models.CharField(max_length=100, choices=STATUS, default='Incomplete Phenotype List')
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.sample_submission_phenotype_name
-
+        return self.sample_submission_name
 
 # THE UNITS MIGHT BE BEST IF PROVIDED BY THE COLLABORATORS INSTEAD OF FACULTY MEMBER
 class AffectionStatusPhenotypeValue(models.Model):
@@ -387,6 +369,7 @@ class PhenotypeForm(ModelForm):
 class SampleSubmissionForm(ModelForm):
     class Meta:
         model = SampleSubmission
+        # exclude = ['phenotype_list']
 
 class UserProjectForm(ModelForm):
     class Meta:
@@ -409,12 +392,44 @@ class SampleForm(ModelForm):
             'supplier_sample_name')
 '''
 
+'''
+# NOTE: I'M TRYING OUT THE DEFAULT M2M RELATIONSHIPS IN DJANGO
+# class SampleSubmissionPhenotype(models.Model):
+#     phenotype = models.ForeignKey(Phenotype)
+#     sample_submission = models.ForeignKey(SampleSubmission)
+
+#     def __unicode__(self):
+#         return self.sample_submission_phenotype_name
 
         
+# class OrderStatus(models.Model):
+#     # NOTE: these aren't actually choices...but these are the statuses
+#     STATUS = (
+#         ('A', 'Incomplete Phenotype List'),
+#         ('b', 'Start Well-filling'),
+#         ('c', 'Sample Submission Complete')
+#     )
+
+#     order_status = models.CharField(max_length=100, choices=STATUS, default='A')
+
+#     def __unicode__(self):
+#         return self.order_status
 
 
+#DUMMY PROJECT LIST
+# class ProjectStatus(models.Model):
+#     # NOTE: these aren't actually choices...but these are the statuses
+#     STATUS = (
+#         ('in_progress', 'In Progress'),
+#         ('complete', 'Complete'),
+#     )
 
+#     project_status = models.CharField(max_length=100, default='in_progress')
 
+#     def __unicode__(self):
+#         return self.project_status
+
+'''
 
 
 
