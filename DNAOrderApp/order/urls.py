@@ -5,7 +5,8 @@ from DNAOrderApp.order import views
 urlpatterns = patterns('',
 
     # Testing pages
-
+    url(r'^failed_signin$', views.failed_signin, name='failed_signin'),
+    url(r'^signin$', views.signin, name='signin'),
     url(r'^preview$', views.preview, name='preview'),
     url(r'^test$', views.test, name='base_template'),
     url(r'^pheno-list$', views.pheno_list, name='pheno-list' ),

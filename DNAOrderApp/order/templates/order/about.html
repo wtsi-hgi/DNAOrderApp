@@ -27,13 +27,18 @@ About
 
 {% block content %}
 
-{% block section_title %} <h1> About </h1>{% endblock section_title %}
-
-<div class="container">
+<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+	{% block section_title %} <h1> About <small>Need to order some DNA?</small></h1>{% endblock section_title %}
+	<br />
+	<p>
+		<b>TL;DR - The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.</b>
+	</p>
 	<p> 
 		The DNA Order Application aims to improve the interface for ordering DNA 
 		sequences from our collaborators. The current system generates an excel sheet (manifest) that is sent to our collaborators to be filled out as they fill the plates up with samples of the requested DNA sequences. The order that the DNA sequences are listed on the excel sheet is not very accommodating to the lab technician's workflow - we're hoping that the GUI that we provide could make it easier to fill out the order form and reduce the error rate of mislabelling 
 		the wells. 
 	</p>
+</div>
+
 
 {% endblock content %}

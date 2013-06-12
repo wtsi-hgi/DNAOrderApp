@@ -144,10 +144,6 @@ $(document).ready( function() {
 A SAMPLESUBMISSIONPHENOTYPE TABLE WILL GO HERE!!!
 
 
-
-
-
-
 <div id="alert-signs">
 	{{ success_alert|safe }}
 	{{ try_again_alert|safe }}
@@ -179,6 +175,7 @@ A SAMPLESUBMISSIONPHENOTYPE TABLE WILL GO HERE!!!
 
 <div id="add_a_phenotype_panel"> 
 	<h3> Add A Phenotype </h3>
+	<b>NOTE: PHENOTYPE DEFINITION CAN USE THE TAG-IT FEATURE http://aehlke.github.io/tag-it/ </b>
 	<br />
 	<form class="add_a_phenotype" method="post" action="{% url pheno-select %}">
 		{% csrf_token %}
@@ -189,6 +186,7 @@ A SAMPLESUBMISSIONPHENOTYPE TABLE WILL GO HERE!!!
 		<button id="add-pheno" class="btn btn-primary" type="submit" action="{% url pheno-select %}">Create a Phenotype</button>
 	</form>
 </div>
+
 
 
 

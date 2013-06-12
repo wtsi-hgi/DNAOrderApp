@@ -14,7 +14,6 @@
 <script type="text/javascript">
 
 $(document).ready(function() {
-	alert("hi");
 	// For Testing purposes - to check if ready function is working
 	$('#hello').text("The DOM is now loaded and can be manipulated.");
 	
@@ -92,6 +91,8 @@ $(document).ready(function() {
 {% block section_title %}<h1> Sample Submission </h1>{% endblock section_title %}
 
 <p id="hello">Not loaded yet.</p>
+<h3> THIS IS THE SAMPLE SUBMISSION ASSOCIATED WITH THE PROJECT THAT I'VE CLICKED INTO </h3>
+How do I know which project I'm associated with? I'm thinking keyword in url.
 
 <h3> Here are all the specific Sample Submissions for the Selected Project </h3>
 <table class="table table-hover">
@@ -108,7 +109,7 @@ $(document).ready(function() {
 		<th> Status Of Order </th> 
 		<th> Delete? </th>
 	</tr>
-	{% for s in sample_submission_list %}
+	{% for s in sample_submission_list_user %}
 	<tr id="{{s.pk}}">
 		<td>{{ s.project_name }}</td>
 		<td>{{ s.sample_submission_name }}</td>

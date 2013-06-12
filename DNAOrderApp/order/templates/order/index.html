@@ -32,13 +32,7 @@ body{
 {% endblock extrahead %}
 
 {% block extra_css_js %}
-<script>
-$(document).ready( function() {
-	$("#flip").click( function(){
-		$("#panel").slideToggle("slow");
-	});
-});
-</script>
+
 {% endblock extra_css_js %}
 
 
@@ -50,42 +44,22 @@ $(document).ready( function() {
 <li><a href="contact">Contact</a></li>
 {% endblock active-navbar %}
 
-{% block active-navbar-pull-right %}
-<li><a href="#sign-in">Sign In</a></li>
-<li><a href="#sign-up">Sign Up</a></li>
-{% endblock active-navbar-pull-right %}
-
-{% block signup %}
-<!--form class="navbar-form pull-right">
-	<input class="span2" type="text" placeholder="Email">
-	<input class="span2" type="password" placeholder="Password">
-	<button type="submit" class="btn">Sign in</button>
-	<a href="sign-up" class="btn">Sign up</a>
-</form-->
-{% endblock signup %}
-
 {% block content %}
 
 <!-- Main hero unit for a primary marketing message or call to action -->
-<div class="front-container">
-	<div class="row fluid">
-		<div class="span7" id="slogan">
-			<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
-				<h1> Need to order some DNA? </h1>
-				<br />
-				<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
-				</p>
+<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+	<h1> Need to order some DNA?</h1>
+	<p> The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators. </p>
+	<p>
+		<a id="go-to-project-list" class="btn btn-primary btn-large pull-right" href="signin"> Start Now! </a>
+	</p>
+</div>
 
-				<div>
-					<button id="flip" class="btn btn-large btn-primary pull-right" type="button"> Register Now! 
-					</button>
-				</div>
-				<br />
-				<br />
-				<br />
-			</div>
-		</div>
-		<div class="span5" id="sign-in-sign-up">
+{% endblock content %}
+
+<!-- to add to parent block instea od completely overriding it, use {{ block.super }}-->
+
+<!-- <div class="span5" id="sign-in-sign-up">
 			<div class="row-fluid">
 				<div class="span12">
 					<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
@@ -101,11 +75,25 @@ $(document).ready( function() {
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
-</div>
+		</div> -->
 
-<div id="panel" style="display:none"> 
+<!--
+<script>
+$(document).ready( function() {
+	$("#flip").click( function(){
+		$("#panel").slideToggle("slow");
+	});
+});
+</script>
+
+<div>
+	<button id="flip" class="btn btn-large btn-primary pull-right" type="button"> Register Now! 
+	</button>
+</div>
+-->
+
+
+<!-- <div id="panel" style="display:none"> 
 	<h1> Sign Up Now! </h1>
 	<br />
 	<form class="sign-up" method="post" action="{% url index %}">
@@ -117,14 +105,17 @@ $(document).ready( function() {
 		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign In</button>
 		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign Up</button>
 	</form>
-</div>
+</div> -->
 
 
 
-
-{% endblock content %}
-
-<!-- to add to parent block instea od completely overriding it, use {{ block.super }}-->
-
-
-
+<!-- <div class="front-container">
+	<div class="row fluid">
+			<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
+				<h1> Welcome {{ realuser.username }} ! Need to order some DNA? </h1>
+				<br />
+				<p>  The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators.
+				</p>
+			</div>
+	</div>
+</div> -->
