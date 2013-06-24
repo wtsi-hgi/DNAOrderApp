@@ -1,0 +1,179 @@
+{% extends "base_template.html" %}
+
+{% block title %}Admin Page{% endblock title %}
+
+{% block extra_css_js %}
+<style>
+div h3{
+	color:#f8a10d;
+}
+
+</style>
+<script type="text/javascript">
+
+function getCookie(name) {
+	var cookieValue = null;
+	if (document.cookie && document.cookie != '') {
+		var cookies = document.cookie.split(';');
+		for (var i = 0; i < cookies.length; i++) {
+			var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+            	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            	break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+$().ready(function() {
+	alert("Dom is now ready - this is admin-page-2");
+
+
+	// To Delete Projects
+	// $("a[class='btn delete']").click(function(){
+	// 	alert("delete has been clicked! - this is admin-page-2");
+	// 	alert($(this).attr("value"));
+	// 	var value = $(this).attr("value");
+
+	// 	alert($(this).attr("name"));
+	// 	var name = $(this).attr("name");
+
+	// 	$.ajax({
+	// 		url: '/order/api/handle_project/DELETE/'+value,
+	// 		type: "DELETE",
+	// 		headers : {"X-CSRFToken" : csrftoken},
+	// 	}).done( function(data) {
+	// 		console.log(data);
+	// 		$('table#project-table').replaceWith(data);
+	// 		$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully deleted a project!</div>");
+	// 	}).fail( function(){
+	// 		$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+	// 	});
+	// });
+
+	// To Add Projects
+	$("#add_a_project_form").ajaxForm({
+		url: '/order/api/handle_project/ADD/',
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log(data);
+			$('table#project-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+
+
+});
+
+function deleteProject(elt) {
+	var value = $(elt).attr("value");
+
+	alert($(elt).attr("name"));
+	var name = $(elt).attr("name");
+
+	$.ajax({
+		url: '/order/api/handle_project/DELETE/'+value,
+		type: "DELETE",
+		headers : {"X-CSRFToken" : csrftoken},
+	}).done( function(data) {
+		console.log(data);
+		$('table#project-table').replaceWith(data);
+		$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully deleted a project!</div>");
+	}).fail( function(){
+		$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+	});
+
+	return false;
+}
+
+
+</script>
+
+{% endblock extra_css_js %}
+
+{% block extrahead %}
+{% endblock extrahead %}
+
+{% block active-navbar %}
+{% endblock active-navbar %}
+
+{% block content %}
+
+<div class="container">
+	{% block section_title %}<h1> Admin Page </h1>{% endblock section_title %}
+	<br />
+
+	<!--****************** PROJECT TABLE ***********************-->
+	<div id="alert-signs">
+		{{ alert_msg|safe }}
+	</div>
+	<br />
+	<h3> All Projects </h3>
+
+	<table class="table table-hover" id="project-table">
+		<tr>
+			<th> Username </th>
+			<th> Project Name </th>
+			<th> Sample Submission(s) </th>
+			<th> Created On </th>
+			<th> Last updated </th>
+			<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
+			<th> Project Status </th> 
+			<th> Delete? </th>
+		</tr>
+		{% for up in userprojectlist_all %}
+		<tr id="{{up.pk}}">
+			<td>{{ up.username }}</td>
+			<td>{{ up.project_name }}</td>
+			<td><a href="sample-submission">See Samples</a></td>
+			<td>{{ up.date_created }}</td>
+			<td>{{ up.last_updated }}</td>
+			<td>{{ up.project_status }}</td>
+			<td> <a id="delete-project{{up.pk}}" name="DEL_PROJ" class="btn delete" value="{{up.pk}}" onclick="deleteProject(this)"><i class="icon-remove"></i></a></td>
+		</tr>
+
+
+		<!-- <form id ="pkid-form" method="">
+			{% csrf_token %}
+			<input type="hidden" id="pkid" value="{{p.pk}}" name="pkid">
+		</form> -->
+		{% endfor %}
+	</table>
+
+	<!--****************** ADD A PROJECT FORM ***********************-->
+
+	<div id="add_a_project_panel"> 
+		<h3> Add A Project </h3>
+
+		<b>Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
+			associated with the specific user.</b>
+			<br />
+			<br />
+			<form class="add_a_project" method="post" id="add_a_project_form">
+				{% csrf_token %}
+				<table>
+					{{ userprojectform }}
+				</table>
+				<br />
+				<button id="add-a-project-button" class="btn btn-primary" type="submit" name="ADD_PROJ">Create a Project</button>
+			</form>
+		</div>
+		<br />
+		<hr />
+		<br />
+		<br />
+
+		
+	</div>
+</div>
+
+
+{% endblock content %}
