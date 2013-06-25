@@ -237,85 +237,85 @@ def handle_phenotype(request, action=None, id=None):
         return HttpResponse("Everything failed! - phenotype")
 
 
-## USERS ARE INTERESTING AND HARD AND MIGHT NOT BE HIGH PRIORITY - DO THIS AFTER PHENOTYPES??????
+# USERS ARE INTERESTING AND HARD AND MIGHT NOT BE HIGH PRIORITY - DO THIS AFTER PHENOTYPES??????
 
-# def delete_user(id):
-#     print "deleting a user"
-#     alert_msg = ""
-#     try:
-#         print "pkid ", id
-#         u = User.objects.get(pk=id)
-#         u.delete()
-#         print "Check user table to see if it is deleted."
+def delete_user(id):
+    print "deleting a user"
+    alert_msg = ""
+    try:
+        print "pkid ", id
+        u = User.objects.get(pk=id)
+        u.delete()
+        print "Check user table to see if it is deleted."
 
-#     except User.DoesNotExist, e:
-#         alert_msg = '<div class="alert alert-error"><b>Uh Oh! </b>',e.message,"</div>"
-#     except AssertionError, e:
-#         alert_msg = '<div class="alert alert-error"><b>Uh Oh! </b>',e.message," </div>"
-#     except KeyError, e:
-#         alert_msg = '<div class="alert alert-error"><b>Uh Oh! </b>',e.message," </div>"
+    except User.DoesNotExist, e:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh! </b>',e.message,"</div>"
+    except AssertionError, e:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh! </b>',e.message," </div>"
+    except KeyError, e:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh! </b>',e.message," </div>"
 
-#     userlist_all = User.objects.all().order_by('project_name')
-#     userform = UserForm() #unbound form, no associated data, empty form
+    userlist_all = User.objects.all().order_by('project_name')
+    userform = UserForm() #unbound form, no associated data, empty form
 
-#     # it should return just the updated table
-#     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/user-table.html')
-#     t = Template(fp.read())
-#     fp.close()
-#     c = Context({
-#             'userform': userform,
-#             'userlist_all': userlist_all,
-#             'alert_msg': alert_msg,
-#         })
-#     return HttpResponse(t.render(c))
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/user-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'userform': userform,
+            'userlist_all': userlist_all,
+            'alert_msg': alert_msg,
+        })
+    return HttpResponse(t.render(c))
 
-# from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 
-# def add_user(request):
-#     print "adding a user"
-#     alert_msg = ""
-#     print "this is request.POST in user", request.POST
-#     userform = UserForm(request.POST)
-#     userform2 = UserCreationForm(request.POST)
+def add_user(request):
+    print "adding a user"
+    alert_msg = ""
+    print "this is request.POST in user", request.POST
+    userform = UserForm(request.POST)
+    userform2 = UserCreationForm(request.POST)
 
-#     if userform.is_valid():
-#         userform.save()
-#         alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a User!</div>"
-#     else:
-#         alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No User was added. Invalid Form. </div>'
+    if userform.is_valid():
+        userform.save()
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a User!</div>"
+    else:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No User was added. Invalid Form. </div>'
 
 
-#     if userform2.is_valid():
-#         userform2.save()
-#         alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a User!</div>"
-#     else:
-#         alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No User was added. Invalid Form. </div>'
+    if userform2.is_valid():
+        userform2.save()
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a User!</div>"
+    else:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No User was added. Invalid Form. </div>'
 
-#     userlist_all = User.objects.all().order_by('date_created')
-#     userform = UserForm() #unbound form, no associated data, empty form
-#     userform2 = UserCreationForm()
+    userlist_all = User.objects.all().order_by('date_created')
+    userform = UserForm() #unbound form, no associated data, empty form
+    userform2 = UserCreationForm()
 
-#     # it should return just the updated table
-#     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/user-table.html')
-#     t = Template(fp.read())
-#     fp.close()
-#     c = Context({
-#             'userform2': userform2,
-#             'userlist_all':userlist_all,
-#             'alert_msg': alert_msg,
-#         })
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/user-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'userform2': userform2,
+            'userlist_all':userlist_all,
+            'alert_msg': alert_msg,
+        })
 
-#     return HttpResponse(t.render(c))
+    return HttpResponse(t.render(c))
 
-# def handle_user(request, action=None, id=None):
-#     print "in handle_user"
-#     if action == "DELETE":
-#         if id != None:
-#             return delete_user(id)
-#     elif action == "ADD":
-#         return add_user(request)
-#     else:
-#         return HttpResponse("Everything failed! - user")
+def handle_user(request, action=None, id=None):
+    print "in handle_user"
+    if action == "DELETE":
+        if id != None:
+            return delete_user(id)
+    elif action == "ADD":
+        return add_user(request)
+    else:
+        return HttpResponse("Everything failed! - user")
 
 
 # RENDER THE ADMIN PAGE
@@ -479,58 +479,6 @@ def collab_page(request):
 def lab_tech_page(request):
     return render(request, 'order/lab-tech-page.html', {
         })
-
-
-#This is used for ease of demoing...
-# def admin_page(request, table=None, pkid=None):
-#     print "in admin page"
-
-#     if table and pkid:
-#         request.session[table] = pkid
-#         for key, value in request.session.items():
-#             print "request.session: ", key, value
-
-#     #Can Create/Delete Projects
-#     userprojectform, userprojectlist_all = project_list(request)
-
-#     #Can Create/Delete Sample Submissions
-#     print "here is sample_submission"
-#     sform, sample_submission_list_all = sample_submission_list(request)
-
-#     #Can Create/Delete Users
-#     if request.method == 'DELETE':
-#         print "deleting user"
-
-#     elif request.method == 'POST':
-#         print "creating user"
-#         userform = UserForm(request.POST)
-
-#         if userform.is_valid():
-#             userform.save()
-#             print "Check user table to see if it has been saved."
-        
-#         user_all = User.objects.all()
-#     else:
-#         userform = UserForm()
-#         user_all = User.objects.all()
-
-#     #Can create/delete phenotypes
-#     phenotypeForm, alert_msg, phenotypelist = pheno_select(request)
-
-#     return render(request, 'order/admin-page.html', {
-#             'userprojectform': userprojectform,
-#             'userprojectlist_all': userprojectlist_all,
-#             'sform': sform,
-#             'sample_submission_list_all': sample_submission_list_all,
-#             'userform': userform,
-#             'user_all': user_all,
-#             'phenotypeForm': phenotypeForm,
-#             'alert_msg': alert_msg,
-#             'phenotypelist': phenotypelist
-#         })
-
-
-
 
 
 # OLD STUFF
