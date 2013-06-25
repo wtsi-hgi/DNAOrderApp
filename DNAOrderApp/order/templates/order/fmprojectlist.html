@@ -1,0 +1,242 @@
+{% extends "base_template.html" %} 
+{% load render_table from django_tables2 %}
+
+{% block title %}Project List{% endblock title %}
+
+
+{% block extra_css_js %}
+<link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
+<link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".collapse").collapse();
+});
+</script>
+
+{% endblock extra_css_js %}
+
+{% block extrahead %}
+#extract-now, #extract-panel{
+padding:5px;
+text-align:center;
+background-color:#e5eecc;
+border:solid 1px #c3c3c3;
+}
+
+#extract-panel
+{
+	padding:50px;
+	display:none;
+}
+{% endblock extrahead %}
+
+{% block active-navbar %} 
+<!-- NAVBAR IF WANTED -->
+{% endblock active-navbar %}
+
+{% block content %}
+<div class="container">
+
+	{% block section_title %}<h1> Welcome {{ username }} ! Status: Faculty Member </h1>{% endblock section_title %}
+
+	<div class="container" id="project-section">
+		<!--****************** PROJECT TABLE ***********************-->
+		<div id="alert-signs">
+			{{ alert_msg|safe }}
+		</div>
+		<br />
+		<h3> All Projects </h3>
+
+		<!-- <table class="table table-hover" id="project-table">
+			<tr>
+				<th> Project Name </th>
+				<th> Created On </th>
+				<th> Last updated </th>
+				<th> Delete? </th>
+			</tr>
+			{% for up in userprojectlist_all %}
+			<tr id="{{up.pk}}">
+				<td>{{ up.project_name }}</td>
+				<td>{{ up.date_created }}</td>
+				<td>{{ up.last_updated }}</td>
+				<td> <a id="delete-project{{up.pk}}" name="DEL_PROJ" class="btn delete" value="{{up.pk}}" onclick="deleteProject(this)"><i class="icon-remove"></i></a></td>
+			</tr>
+
+			{% endfor %}
+		</table> -->
+
+		<div id="PARENT" class="accordion"></div>
+		<table class="table table-striped" border="0" cellspacing="0">
+			<thead>
+				<tr>
+					<th></th>
+					<th>Project Name</th>
+					<th>Created On</th>
+					<th>Last Updated</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for mp in myprojectlist %}
+				<tr id="{mp.pk}}">
+					<td></td>
+					<td>{{ mp.project_name }}</td>
+					<td>{{ mp.date_created }}</td>
+					<td>{{ mp.last_updated }}</td>
+				</tr>
+				{% endfor %}
+
+				{% for ss in sslist %}
+				<tr>
+					{{ ss }}
+				</tr>
+				{% endfor %}
+
+			</tbody>
+		</table>
+
+		<!--****************** ADD A PROJECT FORM ***********************-->
+
+		<div id="add_a_project_panel"> 
+			<h3> Add A Project </h3>
+
+			<b>Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
+				associated with the specific user.</b>
+				<br />
+				<br />
+				<form class="add_a_project" method="post" id="add_a_project_form">
+					{% csrf_token %}
+					<table>
+						{{ userprojectform }}
+					</table>
+					<br />
+					<button id="add-a-project-button" class="btn btn-primary" type="submit" name="ADD_PROJ">Create a Project</button>
+				</form>
+			</div>
+			<br />
+			<hr />
+			<br />
+			<br />
+
+
+		</div>
+	</div>
+
+</div>
+{% endblock content %}
+
+
+<!-- <tr class="GroupA">
+					<td>
+						<div class="accordion-group">
+							<div class="accordion-heading">
+								<a href="#DESC" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+									<i id="toggle" class="icon-plus"></i>
+								</a>
+							</div>
+						</div>
+					</td>
+					<td>
+						ProjectNameTest
+					</td>
+					<td>
+						January 3, 2013
+					</td>
+					<td>
+						January 4, 2013
+					</td>
+				</tr>
+				<tr>
+					<td class="more"></td>
+					<td colspan="3" class="more">
+						<div class="accordion-body in collapse" id="DESC">
+							<div class="accordion-inner" style="border:none">
+								<table class="table table-bordered" style="border:solid 1px">
+									<tr>
+										<th>Sample Submission</th>
+										<th>Phenotype List</th>
+										<th> Source </th>
+										<th> # of Samples </th>
+										<th> Date Created </th>
+										<th> Last Updated </th>
+									</tr>
+									<tr>
+										<td>Sample Submission Test</td>
+										<td>PhenotypeListTest </td>
+										<td> Addenbrokes Hospital </td>
+										<td> 110 </td>
+										<td> January 4, 2013 </td>
+										<td> January 4, 2013 </td>
+									</tr>
+									<tr>
+										<td>Sample Submission Test 2</td>
+										<td>PhenotypeListTest 2</td>
+										<td> Addenbrokes Hospital </td>
+										<td> 3000 </td>
+										<td> January 4, 2013 </td>
+										<td> January 4, 2013 </td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr class="GroupB">
+					<td width="20">
+						<div class="accordion-group">
+							<div class="accordion-heading">
+								<a href="#DESC1" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+									<i id="toggle" class="icon-plus"></i>
+								</a>
+							</div>
+						</div>
+					</td>
+					<td>
+						ProjectNameTest
+					</td>
+					<td>
+						January 3, 2013
+					</td>
+					<td>
+						January 4, 2013
+					</td>
+				</tr>
+				<tr>
+					<td class="more"></td>
+					<td colspan="3" class="more">
+						<div class="accordion-body in" id="DESC">
+							<div class="accordion-inner" style="border:none">
+								<table class="table table-bordered" style="border:solid 1px">
+									<tr>
+										<th>Sample Submission</th>
+										<th>Phenotype List</th>
+										<th> Source </th>
+										<th> # of Samples </th>
+										<th> Date Created </th>
+										<th> Last Updated </th>
+									</tr>
+									<tr>
+										<td>Sample Submission Test</td>
+										<td>PhenotypeListTest </td>
+										<td> Addenbrokes Hospital </td>
+										<td> 110 </td>
+										<td> January 4, 2013 </td>
+										<td> January 4, 2013 </td>
+									</tr>
+									<tr>
+										<td>Sample Submission Test 2</td>
+										<td>PhenotypeListTest 2</td>
+										<td> Addenbrokes Hospital </td>
+										<td> 3000 </td>
+										<td> January 4, 2013 </td>
+										<td> January 4, 2013 </td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</td>
+				</tr> -->
+
+
