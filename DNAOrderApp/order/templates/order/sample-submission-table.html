@@ -1,0 +1,55 @@
+<!--****************** INSERTED TABLE ***********************-->
+<!--****************** SAMPLE SUBMISSION TABLE ***********************-->
+
+<table class="table table-hover" id="sample-submission-table">
+		<tr>
+			<th> Project Name </th>
+			<th> Sample Submission Name </th>
+			<th> External Collaborator (Source) </th>
+			<th> Number of Samples </th>
+			<th> Created On </th>
+			<th> Last Updated </th>
+			<!-- Select Phenotypes, View Phenotypes -->
+			<th> Phenotype List </th>
+			<!--Incomplete Manifest, Failed Upload, Pending for Collaborators, Complete, Incomplete Phenotype list -->
+			<th> Status Of Order </th> 
+			<th> Delete? </th>
+		</tr>
+		{% for s in samplesubmissionlist_all %}
+		<tr id="{{s.pk}}">
+			<td>{{ s.project_name }}</td>
+			<td>{{ s.sample_submission_name }}</td>
+			<td>{{ s.source }}</td>
+			<td>{{ s.sample_num }}</td>
+			<td>{{ s.date_created }}</td>
+			<td>{{ s.last_updated }}</td>
+			<td>THIS SHOULD BE THE sample_submission ASSOCIATED PHENOTYPE LIST</td>
+			<td>{{ s.order_status }}</td>
+			<td> 
+				<a id="delete-sample{{s.pk}}" name="DEL_SS" class="btn delete" value="{{s.pk}}" onclick="deleteSampleSubmit(this)"><i class="icon-remove"></i></a>
+			</td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td> Dummy Data - Manifest_1210 </td>
+			<td> UK10K_CILWGA </td>
+			<td> University College London Medical School </td>
+			<td> 288 </td>
+			<td> April 5, 2013 </td>
+			<td> April 28, 2013</td>
+			<td> <a href="pheno_select"> Select Phenotypes </a></td>
+			<td> Incomplete Phenotype List </td>
+		</tr>
+		<tr>
+			<td> Dummy Data 2 - Manifest_1369 </td>
+			<td> 2019STDY </td>
+			<td> Sanger Centre </td>
+			<td> 96 </td>
+			<td> May 9, 2013 </td>
+			<td> May 15, 2013 </td>
+			<td> <a href="pheno-list"> View Phenotype List </a></td>
+			<td> <a href="welcome-collaborator"> Start Well-filling </a></td>
+		</tr>
+	</table>
+
+<!--****************** END OF INSERTED TABLE ***********************-->
