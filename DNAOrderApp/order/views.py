@@ -431,8 +431,21 @@ def project_list(request):
 def get_projectlist(user):
     return UserProject.objects.filter(username__username__exact=user)
 
-def get_phenolist(ss):
-    return Phenotype.objects.filter(samplesubmission__sample_submission_name__exact=ss)
+def get_phenolist(request, ss):
+    print ss
+    print "inside get_phenolist"
+    phenotypelist_all = Phenotype.objects.filter(samplesubmission__sample_submission_name__exact=ss)
+    print "phenotypelist_all: ", phenotypelist_all
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/phenotype-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'phenotypelist_all':phenotypelist_all,
+        })
+
+    return HttpResponse(t.render(c))
 
 
 def fm_page(request):
@@ -452,7 +465,8 @@ def fm_page(request):
         proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
         print "proj_ss_dict: ", proj_ss_dict
 
-
+    #Phenotype
+    phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
 
 
 
@@ -506,7 +520,8 @@ def fm_page(request):
     return render(request, 'order/fmprojectlist.html', {
         'username' : request.user,
         'myprojectlist' : projectlist,
-        'proj_ss_dict' : proj_ss_dict
+        'proj_ss_dict' : proj_ss_dict,
+        'phenotypeform' : phenotypeform,
         })
 
 
