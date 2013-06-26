@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.core.files import File
 
 from django.contrib.auth import login, authenticate, get_user
+from django.contrib.auth.models import User
 
 from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
 from DNAOrderApp.order.models import UserProject, Source
@@ -426,45 +427,86 @@ def project_list(request):
 
 # previous
 
+
+def get_projectlist(user):
+    return UserProject.objects.filter(username__username__exact=user)
+
+def get_phenolist(ss):
+    return Phenotype.objects.filter(samplesubmission__sample_submission_name__exact=ss)
+
+
 def fm_page(request):
 
+    # CHECK IF USER HAS BEEN LOGGED IN
     if not request.user.is_authenticated():
-        return render(request, 'order/failed_signin.html', {})
+        print request.user, "is not authenticated."
+        return HttpResponseRedirect(reverse('failed_signin'))
 
-    user = User.objects.get(username__exact=request.user)
+    # Make a dictionary with Project as key, and sample submission as value
+    projectlist = get_projectlist(request.user)
+    print "PROJECTLIST:", projectlist
 
-    if not user:
-        print "USER DOES NOT EXIST"
-    else:
-        #Extract Username
-        username = user.username
-        print "username", username
-        # User Project
-        userproject = UserProject(pk=user.id)
+    proj_ss_dict = {}
+    for project in projectlist:
+        print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
+        proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
+        print "proj_ss_dict: ", proj_ss_dict
 
-        # Project Name
-        projectname = userproject.project_name
-        print "projectname", projectname
-        #Created on
-        datecreated = userproject.date_created
 
-        #Last updated
-        lastupdated = userproject.last_updated
-        #Project status
-        projectstatus = userproject.project_status
-        # Last logged in
-        last_logged_in = user.last_login
-        # Date Joined
-        date_joined = user.date_joined
 
-    #Associated Sample submissions
-    SampleSubmission.objects.filter()
-    #Associated Phenotype list to each of the sample submissions
 
-    #Who is this sample submission for?
+
+#---------------------------------------------------------------------------------------------
+    # # What are my projects?
+    # myprojectlist = get_projectlist(request.user)
+
+    # for project in myprojectlist:
+    #     print project
+
+    # # What are the Sample Submissions for each of the projects?
+    # ss_for_each_project_dict = {}
+    # for project in myprojectlist:
+    #     ss_for_each_project_dict[project] = []
+    #     ss_for_each_project_dict[project].append(SampleSubmission.objects.filter(project_name__project_name__exact=project))
+    #     print "ss_for_each_project: ",ss_for_each_project
+
+    # # What are the Phenotypes associated with each Sample Submission
+    # # Phenotype.objects.filter(samplesubmission__sample_submission_name__exact='HELLO')
+#----------------------------------------------------------------------------------------------
+
+
+
+    #     #Extract Username
+    #     username = user.username
+    #     print "username", username
+    #     # User Project
+    #     userproject = UserProject(pk=user.id)
+
+    #     # Project Name
+    #     projectname = userproject.project_name
+    #     print "projectname", projectname
+    #     #Created on
+    #     datecreated = userproject.date_created
+
+    #     #Last updated
+    #     lastupdated = userproject.last_updated
+    #     #Project status
+    #     projectstatus = userproject.project_status
+    #     # Last logged in
+    #     last_logged_in = user.last_login
+    #     # Date Joined
+    #     date_joined = user.date_joined
+
+    # #Associated Sample submissions
+    # SampleSubmission.objects.filter()
+    # #Associated Phenotype list to each of the sample submissions
+
+    # #Who is this sample submission for?
 
     return render(request, 'order/fmprojectlist.html', {
-        'username' : request.user
+        'username' : request.user,
+        'myprojectlist' : projectlist,
+        'proj_ss_dict' : proj_ss_dict
         })
 
 
