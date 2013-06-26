@@ -1,5 +1,6 @@
 {% extends "base_template.html" %} 
 {% load render_table from django_tables2 %}
+{% load replace %}
 
 {% block title %}Project List{% endblock title %}
 
@@ -67,35 +68,134 @@ border:solid 1px #c3c3c3;
 
 			{% endfor %}
 		</table> -->
-
 		<div id="PARENT" class="accordion"></div>
-		<table class="table table-striped" border="0" cellspacing="0">
-			<thead>
-				<tr>
-					<th></th>
-					<th>Project Name</th>
-					<th>Created On</th>
-					<th>Last Updated</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for mp in myprojectlist %}
-				<tr id="{mp.pk}}">
-					<td></td>
-					<td>{{ mp.project_name }}</td>
-					<td>{{ mp.date_created }}</td>
-					<td>{{ mp.last_updated }}</td>
-				</tr>
-				{% endfor %}
-
-				{% for ss in sslist %}
-				<tr>
-					{{ ss }}
-				</tr>
-				{% endfor %}
-
-			</tbody>
+		<table class="table table-striped" id="project-table">
+			<tr>
+				<th> </th>
+				<th> Project Name </th>
+				<th> Date Created </th>
+				<th> Last Updated </th>
+				<th> # Sample Submissions </th>
+			</tr>
+			{% for proj, sslist in proj_ss_dict.items %}
+			<tr class="GroupA">
+				<td>
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a href="#{{proj.project_name|replace}}" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+								<i id="toggle" class="icon-plus"></i>
+							</a>
+						</div>
+					</div>
+				</td>
+				<td>
+					{{ proj.project_name }}
+				</td>
+				<td>
+					{{ proj.date_created }}
+				</td>
+				<td>
+					{{ proj.last_updated }}
+				</td>
+				{% if sslist|length == 0 %}
+				<td>
+					<span class="label label-warning"><i class="icon-warning-sign"></i> No Sample Submissions</span>
+				</td>
+				{% else %}
+				<td>
+					<i class="icon-list-alt"></i> {{ sslist|length }} Sample Submission(s)
+				</td>
+				{% endif %}
+			</tr>
+			<tr>
+				<td class="more"></td>
+				<td colspan="4" class="more">
+					<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
+						<div class="accordion-inner" style="border:none">
+							<table class="table table-bordered" style="border:solid 1px">
+								{% for ss in sslist %}
+								<tr>
+									<th>Sample Submission</th>
+									<th>Phenotype List</th>
+									<th> External Collaborator (Source) </th>
+									<th> # of Samples </th>
+									<th> Date Created </th>
+									<th> Last Updated </th>
+								</tr>
+								<tr>
+									<td>{{ ss.sample_submission_name }}</td>
+									<td><a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}">PhenotypeList</a></td>
+									<td>{{ ss.source }}</td>
+									<td>{{ ss.sample_num }}</td>
+									<td>{{ ss.date_created }}</td>
+									<td>{{ ss.last_updated }}</td>
+								</tr>
+								{% empty %}
+								<b> Please Add Sample Submissions </b>
+								{% endfor %}
+							</table>
+						</div>
+					</div>
+				</td>
+			</tr>
+			{% endfor %}
+			<tr class="GroupB">
+				<td width="20">
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a href="#DESC1" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+								<i id="toggle" class="icon-plus"></i>
+							</a>
+						</div>
+					</div>
+				</td>
+				<td>
+					ProjectNameTest
+				</td>
+				<td>
+					January 3, 2013
+				</td>
+				<td>
+					January 4, 2013
+				</td>
+			</tr>
+			<tr>
+				<td class="more"></td>
+				<td colspan="4" class="more">
+					<div class="accordion-body in collapse" id="DESC1">
+						<div class="accordion-inner" style="border:none">
+							<table class="table table-bordered" style="border:solid 1px">
+								<tr>
+									<th>Sample Submission</th>
+									<th>Phenotype List</th>
+									<th> Source </th>
+									<th> # of Samples </th>
+									<th> Date Created </th>
+									<th> Last Updated </th>
+								</tr>
+								<tr>
+									<td>Sample Submission Test</td>
+									<td>PhenotypeListTest </td>
+									<td> Addenbrokes Hospital </td>
+									<td> 110 </td>
+									<td> January 4, 2013 </td>
+									<td> January 4, 2013 </td>
+								</tr>
+								<tr>
+									<td>Sample Submission Test 2</td>
+									<td>PhenotypeListTest 2</td>
+									<td> Addenbrokes Hospital </td>
+									<td> 3000 </td>
+									<td> January 4, 2013 </td>
+									<td> January 4, 2013 </td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</td>
+			</tr>
 		</table>
+	
 
 		<!--****************** ADD A PROJECT FORM ***********************-->
 
@@ -125,118 +225,175 @@ border:solid 1px #c3c3c3;
 	</div>
 
 </div>
+
+<!--******************** PHENOTYPE MODAL **************************-->
+<div id="phenotypelist" class="modal hide fade" tabindex="-1" role="dialog">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal">x</button>
+		<h3 id="modallabel">Phenotype list for Sample Submission "SAMPLE SUBMISSION NAME"</h3>
+	</div>
+	<div class="modal-body">
+		<div class="container" id="phenotype-section">
+			<!--****************** PHENOTYPE TABLE ***********************-->
+			<h3> All Phenotypes </h3>
+
+			<table class="table table-striped table-bordered table-hover" id ="phenotype-table">
+				<tr>
+					<th> Phenotype Name </th>
+					<th> Phenotype Type </th>
+					<th> Phenotype Description </th>
+					<th> Phenotype Definition </th>
+					<th> Delete? </th>
+				</tr>
+				{% for p in phenotypelist_all %}
+				<tr id="{{p.pk}}">
+					<td>{{ p.phenotype_name }}</td>
+					<td>{{ p.phenotype_type_id }}</td>
+					<td>{{ p.phenotype_description }}</td>
+					<td>{{ p.phenotype_definition }}</td>
+					<td> 
+						<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+
+			<!--****************** ADD A PHENOTYPE FORM ***********************-->
+			<div id="add_a_phenotype_panel"> 
+				<h3> Add A Phenotype </h3>
+				<b>NOTE: PHENOTYPE DEFINITION CAN USE THE TAG-IT FEATURE http://aehlke.github.io/tag-it/ </b>
+				<br />
+				<form class="add_a_phenotype" method="post" id="add_a_phenotype_form">
+					{% csrf_token %}
+					<table>
+						{{ phenotypeform }}
+					</table>
+					<br />
+					<button id="add-pheno" class="btn btn-primary" type="submit">Create a Phenotype</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+	</div>
+</div>
+
+
+
 {% endblock content %}
 
+<!-- <table class="table table-striped" id="project-table">
+			<tr class="GroupA">
+				<td>
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a href="#DESC" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+								<i id="toggle" class="icon-plus"></i>
+							</a>
+						</div>
+					</div>
+				</td>
+				<td>
+					ProjectNameTest
+				</td>
+				<td>
+					January 3, 2013
+				</td>
+				<td>
+					January 4, 2013
+				</td>
+			</tr>
+			<tr>
+				<td class="more"></td>
+				<td colspan="3" class="more">
+					<div class="accordion-body in collapse" id="DESC">
+						<div class="accordion-inner" style="border:none">
+							<table class="table table-bordered" style="border:solid 1px">
+								<tr>
+									<th>Sample Submission</th>
+									<th>Phenotype List</th>
+									<th> Source </th>
+									<th> # of Samples </th>
+									<th> Date Created </th>
+									<th> Last Updated </th>
+								</tr>
+								<tr>
+									<td>Sample Submission Test</td>
+									<td>PhenotypeListTest </td>
+									<td> Addenbrokes Hospital </td>
+									<td> 110 </td>
+									<td> January 4, 2013 </td>
+									<td> January 4, 2013 </td>
+								</tr>
+								<tr>
+									<td>Sample Submission Test 2</td>
+									<td>PhenotypeListTest 2</td>
+									<td> Addenbrokes Hospital </td>
+									<td> 3000 </td>
+									<td> January 4, 2013 </td>
+									<td> January 4, 2013 </td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr class="GroupB">
+				<td width="20">
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a href="#DESC1" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+								<i id="toggle" class="icon-plus"></i>
+							</a>
+						</div>
+					</div>
+				</td>
+				<td>
+					ProjectNameTest
+				</td>
+				<td>
+					January 3, 2013
+				</td>
+				<td>
+					January 4, 2013
+				</td>
+			</tr>
+			<tr>
+				<td class="more"></td>
+				<td colspan="3" class="more">
+					<div class="accordion-body in" id="DESC">
+						<div class="accordion-inner" style="border:none">
+							<table class="table table-bordered" style="border:solid 1px">
+								<tr>
+									<th>Sample Submission</th>
+									<th>Phenotype List</th>
+									<th> Source </th>
+									<th> # of Samples </th>
+									<th> Date Created </th>
+									<th> Last Updated </th>
+								</tr>
+								<tr>
+									<td>Sample Submission Test</td>
+									<td>PhenotypeListTest </td>
+									<td> Addenbrokes Hospital </td>
+									<td> 110 </td>
+									<td> January 4, 2013 </td>
+									<td> January 4, 2013 </td>
+								</tr>
+								<tr>
+									<td>Sample Submission Test 2</td>
+									<td>PhenotypeListTest 2</td>
+									<td> Addenbrokes Hospital </td>
+									<td> 3000 </td>
+									<td> January 4, 2013 </td>
+									<td> January 4, 2013 </td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table> -->
 
-<!-- <tr class="GroupA">
-					<td>
-						<div class="accordion-group">
-							<div class="accordion-heading">
-								<a href="#DESC" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
-									<i id="toggle" class="icon-plus"></i>
-								</a>
-							</div>
-						</div>
-					</td>
-					<td>
-						ProjectNameTest
-					</td>
-					<td>
-						January 3, 2013
-					</td>
-					<td>
-						January 4, 2013
-					</td>
-				</tr>
-				<tr>
-					<td class="more"></td>
-					<td colspan="3" class="more">
-						<div class="accordion-body in collapse" id="DESC">
-							<div class="accordion-inner" style="border:none">
-								<table class="table table-bordered" style="border:solid 1px">
-									<tr>
-										<th>Sample Submission</th>
-										<th>Phenotype List</th>
-										<th> Source </th>
-										<th> # of Samples </th>
-										<th> Date Created </th>
-										<th> Last Updated </th>
-									</tr>
-									<tr>
-										<td>Sample Submission Test</td>
-										<td>PhenotypeListTest </td>
-										<td> Addenbrokes Hospital </td>
-										<td> 110 </td>
-										<td> January 4, 2013 </td>
-										<td> January 4, 2013 </td>
-									</tr>
-									<tr>
-										<td>Sample Submission Test 2</td>
-										<td>PhenotypeListTest 2</td>
-										<td> Addenbrokes Hospital </td>
-										<td> 3000 </td>
-										<td> January 4, 2013 </td>
-										<td> January 4, 2013 </td>
-									</tr>
-								</table>
-							</div>
-						</div>
-					</td>
-				</tr>
-				<tr class="GroupB">
-					<td width="20">
-						<div class="accordion-group">
-							<div class="accordion-heading">
-								<a href="#DESC1" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
-									<i id="toggle" class="icon-plus"></i>
-								</a>
-							</div>
-						</div>
-					</td>
-					<td>
-						ProjectNameTest
-					</td>
-					<td>
-						January 3, 2013
-					</td>
-					<td>
-						January 4, 2013
-					</td>
-				</tr>
-				<tr>
-					<td class="more"></td>
-					<td colspan="3" class="more">
-						<div class="accordion-body in" id="DESC">
-							<div class="accordion-inner" style="border:none">
-								<table class="table table-bordered" style="border:solid 1px">
-									<tr>
-										<th>Sample Submission</th>
-										<th>Phenotype List</th>
-										<th> Source </th>
-										<th> # of Samples </th>
-										<th> Date Created </th>
-										<th> Last Updated </th>
-									</tr>
-									<tr>
-										<td>Sample Submission Test</td>
-										<td>PhenotypeListTest </td>
-										<td> Addenbrokes Hospital </td>
-										<td> 110 </td>
-										<td> January 4, 2013 </td>
-										<td> January 4, 2013 </td>
-									</tr>
-									<tr>
-										<td>Sample Submission Test 2</td>
-										<td>PhenotypeListTest 2</td>
-										<td> Addenbrokes Hospital </td>
-										<td> 3000 </td>
-										<td> January 4, 2013 </td>
-										<td> January 4, 2013 </td>
-									</tr>
-								</table>
-							</div>
-						</div>
-					</td>
-				</tr> -->
 
 
