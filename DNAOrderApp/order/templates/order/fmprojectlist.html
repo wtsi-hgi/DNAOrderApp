@@ -12,9 +12,81 @@
 <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
 
 <script type="text/javascript">
+function getCookie(name) {
+	var cookieValue = null;
+	if (document.cookie && document.cookie != '') {
+		var cookies = document.cookie.split(';');
+		for (var i = 0; i < cookies.length; i++) {
+			var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+            	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            	break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
 $(document).ready(function() {
 	$(".collapse").collapse();
+
+	// To Add a Phenotype
+	$("#add_a_phenotype_form").ajaxForm({
+		url: '/order/api/handle_phenotype/ADD/',
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log(data);
+			$('table#phenotype-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	alert("done loading phenotype form");
+
 });
+
+function deletePhenotype(elt) {
+	var value = $(elt).attr("value");
+
+	alert($(elt).attr("name"));
+	var name = $(elt).attr("name");
+
+	$.ajax({
+		url: '/order/api/handle_phenotype/DELETE/'+value,
+		type: "DELETE",
+		headers : {"X-CSRFToken" : csrftoken},
+	}).done( function(data) {
+		console.log(data);
+		$('table#phenotype-table').replaceWith(data);
+		$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully deleted a phenotype!</div>");
+	}).fail( function(){
+		$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+	});
+
+	return false;
+}
+
+function getPhenotypeList(elt){
+	alert("getpheno!")
+	var ss = $(elt).attr("value");
+
+	$.ajax({
+		url: '/order/get_phenolist/'+ss,
+		headers : {"X-CSRFToken" : csrftoken},
+	}).done( function(data){
+		console.log(data);
+		$('table#phenotype-table').replaceWith(data);
+	}).fail( function(){
+		alert("failed ajax");
+	});
+	return false;
+}
 </script>
 
 {% endblock extra_css_js %}
@@ -124,7 +196,7 @@ border:solid 1px #c3c3c3;
 								</tr>
 								<tr>
 									<td>{{ ss.sample_submission_name }}</td>
-									<td><a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}">PhenotypeList</a></td>
+									<td><a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name|replace}}" onclick="getPhenotypeList(this)">PhenotypeList</a></td>
 									<td>{{ ss.source }}</td>
 									<td>{{ ss.sample_num }}</td>
 									<td>{{ ss.date_created }}</td>
