@@ -29,6 +29,14 @@ function getCookie(name) {
 }
 var csrftoken = getCookie('csrftoken');
 
+function refreshPhenotypeList() {
+  $("#current-list").empty();
+  for(i=0; i< source.length; i++)
+    $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+}
+var source = ['alisso','balexandre'];
+
+
 $(document).ready(function() {
 	$(".collapse").collapse();
 
@@ -47,33 +55,53 @@ $(document).ready(function() {
 			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
 		}
 	});
-	alert("done loading phenotype form");
+	console.log("done loading phenotype form");
 
-	// Changing Modal size dynamically
+	//Changing Modal size dynamically
 	$('#phenotypelist').on('show', function(){
 		console.log("width" + window.innerWidth + "height " + window.innerHeight +"margin-left" + -(window.innerWidth/2));
-		$('#phenotypelist').css({ 
-									width : window.innerWidth+'px', 
-									height : window.innerHeight+'px', 
-									'margin-left': -(window.innerWidth/2), 
-									'max-height': window.innerHeight+'px', 
-									'max-width': window.innerWidth+'px',
-									padding : '50px',
-									margin : ''
+		// $('#phenotypelist').css({ 
+		// 							width : window.innerWidth+'px', 
+		// 							height : window.innerHeight+'px', 
+		// 							'margin-left': -(window.innerWidth/2), 
+		// 							'max-height': window.innerHeight+'px', 
+		// 							'max-width': window.innerWidth+'px',
 
-					});
-		// $('.modal', this).css({ width:window.innerWidth+'px', height:window.innerHeight+'px', 'margin-left':'-(window.innerWidth/2)'});
+		// 			});
+		$('#phenotypelist').css({ 
+										width : '1000px', 
+										height : '600px', 
+										'margin-left' : '-500px',
+										'max-height': '500px',
+		});
 	});
 
+	//TypeHead Dynamic Phenotype list
+	$('.typeahead').typeahead({
+		source : source,
+		items: 16
+	});
+
+	$('form').submit(function(e) {
+
+    e.preventDefault(); // don't submit the form
+    
+    var txt = $('.typeahead').val(); // get the current item
+    console.log(txt);
+    $('.typeahead').val(""); // clean the input
+    source.push(txt); // add it to the source
+    refreshPhenotypeList(); // refresh the list
+
+	});
+
+	refreshPhenotypeList();
+
 });
-
-
-
 
 function deletePhenotype(elt) {
 	var value = $(elt).attr("value");
 
-	alert($(elt).attr("name"));
+	console.log("in deletePhenotype" + $(elt).attr("name"));
 	var name = $(elt).attr("name");
 
 	$.ajax({
@@ -92,7 +120,7 @@ function deletePhenotype(elt) {
 }
 
 function getPhenotypeList(elt){
-	alert("getpheno!")
+	console.log("getpheno!")
 	var ss = $(elt).attr("value");
 
 	$.ajax({
@@ -166,7 +194,8 @@ border:solid 1px #c3c3c3;
 				<th> Project Name </th>
 				<th> Date Created </th>
 				<th> Last Updated </th>
-				<th> # Sample Submissions </th>
+				<th> Sample Submissions Status </th>
+				<th> Phenotype list Status </th>
 			</tr>
 			{% for proj, sslist in proj_ss_dict.items %}
 			<tr class="GroupA">
@@ -197,10 +226,13 @@ border:solid 1px #c3c3c3;
 					<i class="icon-list-alt"></i> {{ sslist|length }} Sample Submission(s)
 				</td>
 				{% endif %}
+				<td>
+					<i class="icon-warning-sign"></i> Placeholder - displaying number of phenotype lists included
+				</td>
 			</tr>
 			<tr>
 				<td class="more"></td>
-				<td colspan="4" class="more">
+				<td colspan="5" class="more">
 					<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
 						<div class="accordion-inner" style="border:none">
 							<table class="table table-bordered" style="border:solid 1px">
@@ -252,7 +284,7 @@ border:solid 1px #c3c3c3;
 			</tr>
 			<tr>
 				<td class="more"></td>
-				<td colspan="4" class="more">
+				<td colspan="5" class="more">
 					<div class="accordion-body in collapse" id="DESC1">
 						<div class="accordion-inner" style="border:none">
 							<table class="table table-bordered" style="border:solid 1px">
@@ -286,10 +318,9 @@ border:solid 1px #c3c3c3;
 				</td>
 			</tr>
 		</table>
-	
+
 
 		<!--****************** ADD A PROJECT FORM ***********************-->
-
 		<div id="add_a_project_panel"> 
 			<h3> Add A Project </h3>
 
@@ -317,57 +348,38 @@ border:solid 1px #c3c3c3;
 
 </div>
 
-<!--******************** PHENOTYPE MODAL **************************-->
-<div id="phenotypelist" class="modal hide fade" tabindex="-1" role="dialog" style="width:window.innerWidth+'px'">
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal">x</button>
-		<h3 id="modallabel">Phenotype list for Sample Submission "SAMPLE SUBMISSION NAME"</h3>
-	</div>
-	<div class="modal-body">
-		<div class="container" id="phenotype-section">
-			<!--****************** PHENOTYPE TABLE ***********************-->
-			<h3> All Phenotypes </h3>
-
-			<table class="table table-striped table-bordered table-hover" id ="phenotype-table">
-				<tr>
-					<th> Phenotype Name </th>
-					<th> Phenotype Type </th>
-					<th> Phenotype Description </th>
-					<th> Phenotype Definition </th>
-					<th> Delete? </th>
-				</tr>
-				{% for p in phenotypelist_all %}
-				<tr id="{{p.pk}}">
-					<td>{{ p.phenotype_name }}</td>
-					<td>{{ p.phenotype_type_id }}</td>
-					<td>{{ p.phenotype_description }}</td>
-					<td>{{ p.phenotype_definition }}</td>
-					<td> 
-						<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
-					</td>
-				</tr>
-				{% endfor %}
-			</table>
-
-			<!--****************** ADD A PHENOTYPE FORM ***********************-->
-			<div id="add_a_phenotype_panel"> 
-				<h3> Add A Phenotype </h3>
-				<b>NOTE: PHENOTYPE DEFINITION CAN USE THE TAG-IT FEATURE http://aehlke.github.io/tag-it/ </b>
-				<br />
-				<form class="add_a_phenotype" method="post" id="add_a_phenotype_form">
-					{% csrf_token %}
-					<table>
-						{{ phenotypeform }}
-					</table>
-					<br />
-					<button id="add-pheno" class="btn btn-primary" type="submit">Create a Phenotype</button>
-				</form>
-			</div>
+<!--*************************** NEW PHENOTYPE MODAL ******************************-->
+<div class="container">
+	<div id="phenotypelist" class="modal hide fade" tabindex="-1" role="dialog">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal">x</button>
+			<h3 id-"modallabel">Phenotype List</h3>
+			<h4>Sample Submission: {{ samplesubmission_pheno }}</h4>
 		</div>
-	</div>
-	<div class="modal-footer">
+		
+		<div class="modal-body" style="max-height: 300px;">
+			<!--*************** PHENOTYPE LIST ****************************-->
+			<h3>Current Phenotype List</h3>
+			<ul id="current-list" class="nav nav-pills nav-stacked">
+			</ul>
+
+			<form action="#">
+				<div class="well">
+					<input type="text" class="span3 typeahead" data-provide="typeahead" />
+				</div>
+			</form>
+		</div>
+
+		<div class="modal-footer">
+			<a href="#" class="btn pull-right">Cancel</a>
+			<a href="#" class="btn btn-primary pull-right">Save changes</a>
+		</div>
+		
 	</div>
 </div>
+
+<!--*************************** END OF NEW PHENOTYPE MODAL ************************-->
+
 
 
 
@@ -487,4 +499,63 @@ border:solid 1px #c3c3c3;
 		</table> -->
 
 
+
+
+
+
+
+
+
+<!--******************** OLD PHENOTYPE MODAL **************************-->
+<!-- <div id="phenotypelist" class="modal hide fade" tabindex="-1" role="dialog" style="width:window.innerWidth+'px'">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal">x</button>
+		<h3 id="modallabel">Phenotype list for Sample Submission "SAMPLE SUBMISSION NAME"</h3>
+	</div>
+	<div class="modal-body">
+		<div class="container" id="phenotype-section">
+			<!****************** PHENOTYPE TABLE ***********************-->
+			<!-- <h3> All Phenotypes </h3>
+
+			<table class="table table-striped table-bordered table-hover" id ="phenotype-table">
+				<tr>
+					<th> Phenotype Name </th>
+					<th> Phenotype Type </th>
+					<th> Phenotype Description </th>
+					<th> Phenotype Definition </th>
+					<th> Delete? </th>
+				</tr>
+				{% for p in phenotypelist_all %}
+				<tr id="{{p.pk}}">
+					<td>{{ p.phenotype_name }}</td>
+					<td>{{ p.phenotype_type_id }}</td>
+					<td>{{ p.phenotype_description }}</td>
+					<td>{{ p.phenotype_definition }}</td>
+					<td> 
+						<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table> -->
+
+			<!--****************** ADD A PHENOTYPE FORM ***********************-->
+			<!-- <div id="add_a_phenotype_panel"> 
+				<h3> Add A Phenotype </h3>
+				<b>NOTE: PHENOTYPE DEFINITION CAN USE THE TAG-IT FEATURE http://aehlke.github.io/tag-it/ </b>
+				<br />
+				<form class="add_a_phenotype" method="post" id="add_a_phenotype_form">
+					{% csrf_token %}
+					<table>
+						{{ phenotypeform }}
+					</table>
+					<br />
+					<button id="add-pheno" class="btn btn-primary" type="submit">Create a Phenotype</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+	</div>
+</div> -->
+<!--- ********************************* END OF PHENOTYPE MODAL *****************************-->
 
