@@ -10,6 +10,13 @@
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
 <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+<style>
+#phenocompo{
+					max-height: 320px; 
+					height: 100%;
+					border: solid;
+}
+</style>
 
 <script type="text/javascript">
 function getCookie(name) {
@@ -83,6 +90,13 @@ $(document).ready(function() {
 		});
 	});
 
+	//Changing the phenotype section size
+	$('.phenotype-section').css({
+									'max-height': '350px', 
+									height: '100%',
+									'border': 'solid',
+	});
+
 	//TypeHead Dynamic Phenotype list
 	$('.typeahead').typeahead({
 		source : source,
@@ -126,22 +140,22 @@ function deletePhenotype(elt) {
 	return false;
 }
 
-// function getPhenotypeList(elt){
-// 	console.log("getpheno!")
-// 	var proj_name = $(elt).attr("value");
-// 	console.log(proj_name)
+function getPhenotypeList(elt){
+	console.log("getpheno!")
+	var proj_name = $(elt).attr("value");
+	console.log(proj_name)
 
-// 	$.ajax({
-// 		url: '/order/get_phenolist/'+proj_name,
-// 		headers : {"X-CSRFToken" : csrftoken},
-// 	}).done( function(data){
-// 		console.log(data);
-// 		// $('table#phenotype-table').replaceWith(data);
-// 	}).fail( function(){
-// 		alert("failed ajax - in getPhenotypeList");
-// 	});
-// 	return false;
-// }
+	$.ajax({
+		url: '/order/get_phenolist/'+proj_name,
+		headers : {"X-CSRFToken" : csrftoken},
+	}).done( function(data){
+		console.log(data);
+		// $('table#phenotype-table').replaceWith(data);
+	}).fail( function(){
+		alert("failed ajax - in getPhenotypeList");
+	});
+	return false;
+}
 
 // function getTop3PhenotypeList(elt){
 // 	console.log("in gettop3 phenolist");
@@ -337,41 +351,58 @@ border:solid 1px #c3c3c3;
 
 <!--*************************** NEW PHENOTYPE MODAL ******************************-->
 <div class="container">
-	<div id="phenotypelist" class="modal hide fade" tabindex="-1" role="dialog">
+	<div id="phenotypelist" class="modal hide fade container-fluid" tabindex="-1" role="dialog">
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal">x</button>
-			<h3 id-"modallabel">Phenotype List</h3>
-			<h4>Sample Submission: {{ samplesubmission_pheno }}</h4>
+			<h4 id-"modallabel">{{ samplesubmission_pheno }} / Phenotype List</h4>
 		</div>
 		
-		<div class="modal-body" style="max-height: 300px; height: 300px;">
+		<div class="phenotype-section"> <!--here is the style-->
 			<div class="container-fluid">
 				<div class="row-fluid" id="phenotype_list_viewer">
-					<div class="span2">
+					<div class="span4" id="phenocompo">
+						<div class="modal-body" id="phenocompo" style="padding:0">
 						<!--*************** PHENOTYPE LIST ****************************-->
 						<ul id="current-list" class="nav nav-pills nav-stacked">
 						</ul>
-
-						<form action="#">
-							<div class="well">
-								<input type="text" class="span3 typeahead" data-provide="typeahead" />
-							</div>
-						</form>
 					</div>
-					<div id="viewer">
+
+					</div>
+					<div id="viewer" class="span8" id="phenocompo">
+						<div class="modal-body" id="phenocompo">
 						HKDJFALKSJDFLAKSDFLSFD
+					</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="modal-footer container-fluid" style="max-height:30px; padding:30px; border: solid;">
-		<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
-		<a href="#" class="btn btn-primary pull-right">Save changes</a>
-	</div>
+		<div class="modal-footer" style="padding:5px; border: solid red;">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<div class="span10">
+						<form action="#">
+							<div class="well">
+								<input type="text" class="span12 typeahead" data-provide="typeahead" />
+							</div>
+						</form>
+					</div>
+					<div class="span2">
+						<div class="row-fluid">
+							<div class="span5">
+								<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
+							</div>
+							<div class="span1"></div>
+							<div class="span6">
+								<a href="#" class="btn btn-primary pull-right">Save changes</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-</div>
+		</div>
+	</div>
 </div>
 
 <!--*************************** END OF NEW PHENOTYPE MODAL ************************-->
