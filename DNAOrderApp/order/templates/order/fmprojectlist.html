@@ -69,10 +69,17 @@ $(document).ready(function() {
 
 		// 			});
 		$('#phenotypelist').css({ 
-										width : '1000px', 
-										height : '600px', 
-										'margin-left' : '-500px',
-										'max-height': '500px',
+										// width : '1200px', 
+										width : '100%',
+										height : '100%', 
+										'margin-left' : -(window.innerWidth/2)+60,
+										// 'margin-left' : '-600px',
+										'margin-top' : -80+'px',
+										'max-width' : window.innerWidth-120+'px',
+										// 'max-width' : '1500px',
+										'max-height' : window.innerHeight-60+'px',
+										// 'max-height': '600px',
+										'border' : 'solid',
 		});
 	});
 
@@ -267,12 +274,22 @@ border:solid 1px #c3c3c3;
 								<tr>
 									<td>{{ ss.sample_submission_name }}</td>
 									<td id="top3phenolist">
+										<ul>
 										{% for ss_select, phenolist in ss_pheno_dict.items %}
 											{% if ss_select == ss %}
-												{{ss_select}}{{ phenolist }}
+												<b>{{ss_select}}</b>
+												{% for pheno in phenolist|slice:":3" %}
+													<li>{{ pheno }}</li>
+												{% endfor %}
+												<!-- To SEE THE FULL LIST UNCOMMENT THIS -->
+												<!-- {% for pheno in phenolist %}
+													<li>{{ pheno }}</li>
+												{% endfor %} -->
+												<!-- UNCOMMENT UP TO HERE -->
 											{% endif %}
 										{% endfor %}
-										<!-- <a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">PhenotypeList</a></td> -->
+										<a href="#phenotypelist" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">>>See More</a></td>
+										</ul>
 									<td>{{ ss.source }}</td>
 									<td>{{ ss.sample_num }}</td>
 									<td>{{ ss.date_created }}</td>
@@ -287,61 +304,6 @@ border:solid 1px #c3c3c3;
 				</td>
 			</tr>
 			{% endfor %}
-			<tr class="GroupB">
-				<td width="20">
-					<div class="accordion-group">
-						<div class="accordion-heading">
-							<a href="#DESC1" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
-								<i id="toggle" class="icon-plus"></i>
-							</a>
-						</div>
-					</div>
-				</td>
-				<td>
-					ProjectNameTest
-				</td>
-				<td>
-					January 3, 2013
-				</td>
-				<td>
-					January 4, 2013
-				</td>
-			</tr>
-			<tr>
-				<td class="more"></td>
-				<td colspan="5" class="more">
-					<div class="accordion-body in collapse" id="DESC1">
-						<div class="accordion-inner" style="border:none">
-							<table class="table table-bordered" style="border:solid 1px">
-								<tr>
-									<th>Sample Submission</th>
-									<th>Phenotype List</th>
-									<th> Source </th>
-									<th> # of Samples </th>
-									<th> Date Created </th>
-									<th> Last Updated </th>
-								</tr>
-								<tr>
-									<td>Sample Submission Test</td>
-									<td>PhenotypeListTest </td>
-									<td> Addenbrokes Hospital </td>
-									<td> 110 </td>
-									<td> January 4, 2013 </td>
-									<td> January 4, 2013 </td>
-								</tr>
-								<tr>
-									<td>Sample Submission Test 2</td>
-									<td>PhenotypeListTest 2</td>
-									<td> Addenbrokes Hospital </td>
-									<td> 3000 </td>
-									<td> January 4, 2013 </td>
-									<td> January 4, 2013 </td>
-								</tr>
-							</table>
-						</div>
-					</div>
-				</td>
-			</tr>
 		</table>
 
 
@@ -383,24 +345,33 @@ border:solid 1px #c3c3c3;
 		</div>
 		
 		<div class="modal-body" style="max-height: 300px; height: 300px;">
-			<!--*************** PHENOTYPE LIST ****************************-->
-			<h4>Current Phenotype List</h4>
-			<ul id="current-list" class="nav nav-pills nav-stacked">
-			</ul>
+			<div class="container-fluid">
+				<div class="row-fluid" id="phenotype_list_viewer">
+					<div class="span2">
+						<!--*************** PHENOTYPE LIST ****************************-->
+						<ul id="current-list" class="nav nav-pills nav-stacked">
+						</ul>
 
-			<form action="#">
-				<div class="well">
-					<input type="text" class="span3 typeahead" data-provide="typeahead" />
+						<form action="#">
+							<div class="well">
+								<input type="text" class="span3 typeahead" data-provide="typeahead" />
+							</div>
+						</form>
+					</div>
+					<div id="viewer">
+						HKDJFALKSJDFLAKSDFLSFD
+					</div>
 				</div>
-			</form>
+			</div>
 		</div>
-
-		<div class="modal-footer container-fluid" style="max-height:30px; padding:30px; border: solid;">
-			<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
-			<a href="#" class="btn btn-primary pull-right">Save changes</a>
-		</div>
-		
 	</div>
+
+	<div class="modal-footer container-fluid" style="max-height:30px; padding:30px; border: solid;">
+		<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
+		<a href="#" class="btn btn-primary pull-right">Save changes</a>
+	</div>
+
+</div>
 </div>
 
 <!--*************************** END OF NEW PHENOTYPE MODAL ************************-->
