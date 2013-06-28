@@ -431,21 +431,60 @@ def project_list(request):
 def get_projectlist(user):
     return UserProject.objects.filter(username__username__exact=user)
 
-def get_phenolist(request, ss):
-    print ss
-    print "inside get_phenolist"
-    phenotypelist_all = Phenotype.objects.filter(samplesubmission__sample_submission_name__exact=ss)
-    print "phenotypelist_all: ", phenotypelist_all
+# def get_phenolist_render_phenotable(request, ss):
+#     print ss
+#     print "inside get_phenolist"
+#     phenotypelist_all = Phenotype.objects.filter(samplesubmission__sample_submission_name__exact=ss)
+#     print "phenotypelist_all: ", phenotypelist_all
 
-    # it should return just the updated table
-    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/phenotype-table.html')
+#     # it should return just the updated table
+#     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/phenotype-table.html')
+#     t = Template(fp.read())
+#     fp.close()
+#     c = Context({
+#             'phenotypelist_all':phenotypelist_all,
+#         })
+
+#     return HttpResponse(t.render(c))
+
+# def get_top3phenolist(request, ss):
+#     phenotypelist_all = Phenotype.objects.filter(samplesubmission__sample_submission_name__exact=ss)
+
+#     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/top3phenolist.html')
+#     t = Template(fp.read())
+#     fp.close()
+#     c = Context({
+#             'phenotypelist_all': phenotypelist_all,
+#         })
+
+#     return HttpResponse(t.render(c))
+
+def get_phenolist(request, proj_name):
+    ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
+    
+    ss_pheno_dict={}
+    for ss in ss_list:
+        ss_pheno_dict[ss] = ss.phenotype_list.all()
+
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/top3phenolist.html')
     t = Template(fp.read())
     fp.close()
     c = Context({
-            'phenotypelist_all':phenotypelist_all,
+            'ss_pheno_dict': ss_pheno_dict,
         })
+    print ss_pheno_dict
 
     return HttpResponse(t.render(c))
+
+def get_phenolist_cp(proj_name):
+    ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
+    
+    ss_pheno_dict={}
+    for ss in ss_list:
+        ss_pheno_dict[ss] = ss.phenotype_list.all()
+
+    print ss_pheno_dict
+    return ss_pheno_dict
 
 
 def fm_page(request):
@@ -459,11 +498,13 @@ def fm_page(request):
     projectlist = get_projectlist(request.user)
     print "PROJECTLIST:", projectlist
 
+    ss_pheno_dict = {}
     proj_ss_dict = {}
     for project in projectlist:
         print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
         proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
         print "proj_ss_dict: ", proj_ss_dict
+        ss_pheno_dict.update(get_phenolist_cp(project))
 
     #Phenotype
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
@@ -522,6 +563,7 @@ def fm_page(request):
         'myprojectlist' : projectlist,
         'proj_ss_dict' : proj_ss_dict,
         'phenotypeform' : phenotypeform,
+        'ss_pheno_dict' : ss_pheno_dict,
         })
 
 
