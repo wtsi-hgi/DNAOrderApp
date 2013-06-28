@@ -134,6 +134,24 @@ function getPhenotypeList(elt){
 	});
 	return false;
 }
+
+function getTop3PhenotypeList(elt){
+	console.log("in gettop3 phenolist");
+	var ss = $(elt).attr("value");
+	console.log(ss);
+
+	$.ajax({
+		url: '/order/get_top3phenolist/'+ss,
+		headers : {"X-CSRFToken" : csrftoken},
+	}).done( function(data){
+		console.log(data);
+		$('td#top3phenolist').replaceWith(data);
+	}).fail( function(){
+		alert("failed ajax - in getTop3Phenotypelist");
+	});
+
+	return false;
+}
 </script>
 
 {% endblock extra_css_js %}
@@ -202,7 +220,7 @@ border:solid 1px #c3c3c3;
 				<td>
 					<div class="accordion-group">
 						<div class="accordion-heading">
-							<a href="#{{proj.project_name|replace}}" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+							<a href="#{{proj.project_name|replace}}" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle" value="{{ss.sample_submission_name}}" onclick="getTop3PhenotypeList(this)">
 								<i id="toggle" class="icon-plus"></i>
 							</a>
 						</div>
@@ -247,7 +265,8 @@ border:solid 1px #c3c3c3;
 								</tr>
 								<tr>
 									<td>{{ ss.sample_submission_name }}</td>
-									<td><a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">PhenotypeList</a></td>
+									<td id="top3phenolist">
+										<a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">PhenotypeList</a></td>
 									<td>{{ ss.source }}</td>
 									<td>{{ ss.sample_num }}</td>
 									<td>{{ ss.date_created }}</td>
@@ -359,7 +378,7 @@ border:solid 1px #c3c3c3;
 		
 		<div class="modal-body" style="max-height: 300px; height: 300px;">
 			<!--*************** PHENOTYPE LIST ****************************-->
-			<h3>Current Phenotype List</h3>
+			<h4>Current Phenotype List</h4>
 			<ul id="current-list" class="nav nav-pills nav-stacked">
 			</ul>
 
@@ -371,7 +390,7 @@ border:solid 1px #c3c3c3;
 		</div>
 
 		<div class="modal-footer container-fluid" style="max-height:30px; padding:30px; border: solid;">
-			<a href="#" class="btn pull-right">Cancel</a>
+			<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
 			<a href="#" class="btn btn-primary pull-right">Save changes</a>
 		</div>
 		
