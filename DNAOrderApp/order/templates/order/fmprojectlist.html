@@ -119,39 +119,40 @@ function deletePhenotype(elt) {
 	return false;
 }
 
-function getPhenotypeList(elt){
-	console.log("getpheno!")
-	var ss = $(elt).attr("value");
+// function getPhenotypeList(elt){
+// 	console.log("getpheno!")
+// 	var proj_name = $(elt).attr("value");
+// 	console.log(proj_name)
 
-	$.ajax({
-		url: '/order/get_phenolist/'+ss,
-		headers : {"X-CSRFToken" : csrftoken},
-	}).done( function(data){
-		console.log(data);
-		$('table#phenotype-table').replaceWith(data);
-	}).fail( function(){
-		alert("failed ajax");
-	});
-	return false;
-}
+// 	$.ajax({
+// 		url: '/order/get_phenolist/'+proj_name,
+// 		headers : {"X-CSRFToken" : csrftoken},
+// 	}).done( function(data){
+// 		console.log(data);
+// 		// $('table#phenotype-table').replaceWith(data);
+// 	}).fail( function(){
+// 		alert("failed ajax - in getPhenotypeList");
+// 	});
+// 	return false;
+// }
 
-function getTop3PhenotypeList(elt){
-	console.log("in gettop3 phenolist");
-	var ss = $(elt).attr("value");
-	console.log(ss);
+// function getTop3PhenotypeList(elt){
+// 	console.log("in gettop3 phenolist");
+// 	var ss = $(elt).attr("value");
+// 	console.log(ss);
 
-	$.ajax({
-		url: '/order/get_top3phenolist/'+ss,
-		headers : {"X-CSRFToken" : csrftoken},
-	}).done( function(data){
-		console.log(data);
-		$('td#top3phenolist').replaceWith(data);
-	}).fail( function(){
-		alert("failed ajax - in getTop3Phenotypelist");
-	});
+// 	$.ajax({
+// 		url: '/order/get_top3phenolist/'+ss,
+// 		headers : {"X-CSRFToken" : csrftoken},
+// 	}).done( function(data){
+// 		console.log(data);
+// 		$('td#top3phenolist').replaceWith(data);
+// 	}).fail( function(){
+// 		alert("failed ajax - in getTop3Phenotypelist");
+// 	});
 
-	return false;
-}
+// 	return false;
+// }
 </script>
 
 {% endblock extra_css_js %}
@@ -220,7 +221,7 @@ border:solid 1px #c3c3c3;
 				<td>
 					<div class="accordion-group">
 						<div class="accordion-heading">
-							<a href="#{{proj.project_name|replace}}" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle" value="{{ss.sample_submission_name}}" onclick="getTop3PhenotypeList(this)">
+							<a href="#{{proj.project_name|replace}}" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
 								<i id="toggle" class="icon-plus"></i>
 							</a>
 						</div>
@@ -254,7 +255,6 @@ border:solid 1px #c3c3c3;
 					<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
 						<div class="accordion-inner" style="border:none">
 							<table class="table table-bordered" style="border:solid 1px">
-								{% for ss in sslist %}
 								<tr>
 									<th>Sample Submission</th>
 									<th>Phenotype List</th>
@@ -263,10 +263,16 @@ border:solid 1px #c3c3c3;
 									<th> Date Created </th>
 									<th> Last Updated </th>
 								</tr>
+								{% for ss in sslist %}
 								<tr>
 									<td>{{ ss.sample_submission_name }}</td>
 									<td id="top3phenolist">
-										<a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">PhenotypeList</a></td>
+										{% for ss_select, phenolist in ss_pheno_dict.items %}
+											{% if ss_select == ss %}
+												{{ss_select}}{{ phenolist }}
+											{% endif %}
+										{% endfor %}
+										<!-- <a href="#phenotypelist" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">PhenotypeList</a></td> -->
 									<td>{{ ss.source }}</td>
 									<td>{{ ss.sample_num }}</td>
 									<td>{{ ss.date_created }}</td>
