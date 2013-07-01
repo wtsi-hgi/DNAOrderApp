@@ -10,10 +10,19 @@
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
 <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+
 <style>
 #phenocompo{
 					max-height: 320px; 
 					height: 100%;
+					border: solid;
+}
+
+#phenolist-popover{
+					max-width: 800px;
+					width: auto;
+					max-height: 9000px;
+					height: auto;
 					border: solid;
 }
 </style>
@@ -46,7 +55,27 @@ var source = ['alisso','balexandre'];
 
 $(document).ready(function() {
 	$(".collapse").collapse();
+	var sample_submission_name = $("#popover-phenolist").attr("value");
+	console.log( "hello" + sample_submission_name);
+	var ssid = $("table[name='phenotype-table']").attr("value");
+	console.log("ssid:"+ssid);
 
+	$("table[name='phenotype-table']").each(function(){
+		console.log($(this).attr("value"));
+
+		var ssid = $(this).attr("value");
+		$("#trigger-phenolist-popover"+ssid).popover({ 
+															html: true,
+															trigger: 'click',
+															placement:'right',
+															content: function (ele) { return $("#phenotype-table"+ssid).html(); },
+															title: "Sample Submission " + sample_submission_name + ' / Phenotype List',
+															template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+		});
+
+	});
+
+	
 	// To Add a Phenotype
 	$("#add_a_phenotype_form").ajaxForm({
 		url: '/order/api/handle_phenotype/ADD/',
@@ -142,6 +171,7 @@ function deletePhenotype(elt) {
 
 function getPhenotypeList(elt){
 	console.log("getpheno!")
+	
 	var proj_name = $(elt).attr("value");
 	console.log(proj_name)
 
@@ -300,9 +330,33 @@ border:solid 1px #c3c3c3;
 													<li>{{ pheno }}</li>
 												{% endfor %} -->
 												<!-- UNCOMMENT UP TO HERE -->
+												<div class="container" style="display:none">
+													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}">
+														<tr>
+															<th> Phenotype Name </th>
+															<th> Phenotype Type </th>
+															<th> Phenotype Description </th>
+															<th> Phenotype Definition </th>
+															<th> Delete? </th>
+														</tr>
+														{% for p in phenolist %}
+														<tr id="{{p.pk}}">
+															<td>{{ p.phenotype_name }}</td>
+															<td>{{ p.phenotype_type_id }}</td>
+															<td>{{ p.phenotype_description }}</td>
+															<td>{{ p.phenotype_definition }}</td>
+															<td> 
+																<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
+															</td>
+														</tr>
+														{% endfor %}
+													</table> 
+												</div>
 											{% endif %}
 										{% endfor %}
-										<a href="#phenotypelist" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)">>>See More</a></td>
+										<!-- <a href="#phenotypelist" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)" id="popover-phenolist" rel="popover">>>See More</a> -->
+										<a href="#" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" >>>See More</a>
+									</td>
 										</ul>
 									<td>{{ ss.source }}</td>
 									<td>{{ ss.sample_num }}</td>
@@ -349,66 +403,34 @@ border:solid 1px #c3c3c3;
 
 </div>
 
-<!--*************************** NEW PHENOTYPE MODAL ******************************-->
-<div class="container">
-	<div id="phenotypelist" class="modal hide fade container-fluid" tabindex="-1" role="dialog">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal">x</button>
-			<h4 id-"modallabel">{{ samplesubmission_pheno }} / Phenotype List</h4>
-		</div>
-		
-		<div class="phenotype-section"> <!--here is the style-->
-			<div class="container-fluid">
-				<div class="row-fluid" id="phenotype_list_viewer">
-					<div class="span4" id="phenocompo">
-						<div class="modal-body" id="phenocompo" style="padding:0">
-						<!--*************** PHENOTYPE LIST ****************************-->
-						<ul id="current-list" class="nav nav-pills nav-stacked">
-						</ul>
-					</div>
+<!--**************************** NEW PHENOTYPE GOOGLE CALENDAR IDEA **********************************-->
 
-					</div>
-					<div id="viewer" class="span8" id="phenocompo">
-						<div class="modal-body" id="phenocompo">
-						HKDJFALKSJDFLAKSDFLSFD
-					</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="modal-footer" style="padding:5px; border: solid red;">
-			<div class="container-fluid">
-				<div class="row-fluid">
-					<div class="span10">
-						<form action="#">
-							<div class="well">
-								<input type="text" class="span12 typeahead" data-provide="typeahead" />
-							</div>
-						</form>
-					</div>
-					<div class="span2">
-						<div class="row-fluid">
-							<div class="span5">
-								<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
-							</div>
-							<div class="span1"></div>
-							<div class="span6">
-								<a href="#" class="btn btn-primary pull-right">Save changes</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-		</div>
-	</div>
+<div class="container" style="display:none">
+	<table class="table table-striped table-bordered table-hover" id ="phenotype-table">
+		<tr>
+			<th> Phenotype Name </th>
+			<th> Phenotype Type </th>
+			<th> Phenotype Description </th>
+			<th> Phenotype Definition </th>
+			<th> Delete? </th>
+		</tr>
+		{% for p in phenotypelist_all %}
+		<tr id="{{p.pk}}">
+			<td>{{ p.phenotype_name }}</td>
+			<td>{{ p.phenotype_type_id }}</td>
+			<td>{{ p.phenotype_description }}</td>
+			<td>{{ p.phenotype_definition }}</td>
+			<td> 
+				<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
+			</td>
+		</tr>
+		{% endfor %}
+	</table> 
 </div>
 
-<!--*************************** END OF NEW PHENOTYPE MODAL ************************-->
 
 
-
+<!--**************************** END OF NEW PHENOTYPE GOOGLE CALENDAR IDEA **************************-->
 
 {% endblock content %}
 
@@ -586,3 +608,103 @@ border:solid 1px #c3c3c3;
 </div> -->
 <!--- ********************************* END OF PHENOTYPE MODAL *****************************-->
 
+
+<!--*************************** BIG BOX PHENOTYPE MODAL ******************************-->
+<!--<style>
+#phenocompo{
+					max-height: 320px; 
+					height: 100%;
+					border: solid;
+}
+</style>-->
+
+<!--Changing Modal size dynamically
+	$('#phenotypelist').on('show', function(){
+		console.log("width" + window.innerWidth + "height " + window.innerHeight +"margin-left" + -(window.innerWidth/2));
+		// $('#phenotypelist').css({ 
+		// 							width : window.innerWidth+'px', 
+		// 							height : window.innerHeight+'px', 
+		// 							'margin-left': -(window.innerWidth/2), 
+		// 							'max-height': window.innerHeight+'px', 
+		// 							'max-width': window.innerWidth+'px',
+
+		// 			});
+		$('#phenotypelist').css({ 
+										// width : '1200px', 
+										width : '100%',
+										height : '100%', 
+										'margin-left' : -(window.innerWidth/2)+60,
+										// 'margin-left' : '-600px',
+										'margin-top' : -window.innerHeight*0.08+'px',
+										'max-width' : window.innerWidth-120+'px',
+										// 'max-width' : '1500px',
+										'max-height' : window.innerHeight-60+'px',
+										// 'max-height': '600px',
+										'border' : 'solid',
+		});
+	});
+
+	//Changing the phenotype section size
+	$('.phenotype-section').css({
+									'max-height': '350px', 
+									height: '100%',
+									'border': 'solid',
+	});-->
+
+
+<!-- <div class="container">
+	<div id="phenotypelist" class="modal hide fade container-fluid" tabindex="-1" role="dialog">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal">x</button>
+			<h4 id-"modallabel">{{ samplesubmission_pheno }} / Phenotype List</h4>
+		</div>
+		
+		<div class="phenotype-section"> --> <!--here is the style-->
+<!-- 			<div class="container-fluid">
+				<div class="row-fluid" id="phenotype_list_viewer">
+					<div class="span4" id="phenocompo">
+						<div class="modal-body" id="phenocompo" style="padding:0"> -->
+						<!--*************** PHENOTYPE LIST ****************************-->
+						<!-- <ul id="current-list" class="nav nav-pills nav-stacked">
+						</ul>
+					</div>
+
+					</div>
+					<div id="viewer" class="span8" id="phenocompo">
+						<div class="modal-body" id="phenocompo">
+						HKDJFALKSJDFLAKSDFLSFD
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer" style="padding:5px; border: solid red;">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<div class="span10">
+						<form action="#">
+							<div class="well">
+								<input type="text" class="span12 typeahead" data-provide="typeahead" />
+							</div>
+						</form>
+					</div>
+					<div class="span2">
+						<div class="row-fluid">
+							<div class="span5">
+								<a href="#" class="btn pull-right" data-dismiss="modal">Cancel</a>
+							</div>
+							<div class="span1"></div>
+							<div class="span6">
+								<a href="#" class="btn btn-primary pull-right">Save changes</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div> -->
+
+<!--*************************** END OF BIG BOX PHENOTYPE MODAL ************************-->
