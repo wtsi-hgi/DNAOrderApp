@@ -24,6 +24,7 @@
 					max-height: 9000px;
 					height: auto;
 					border: solid;
+					overflow-y: auto;
 }
 </style>
 
@@ -55,15 +56,12 @@ var source = ['alisso','balexandre'];
 
 $(document).ready(function() {
 	$(".collapse").collapse();
-	var sample_submission_name = $("#popover-phenolist").attr("value");
-	console.log( "hello" + sample_submission_name);
-	var ssid = $("table[name='phenotype-table']").attr("value");
-	console.log("ssid:"+ssid);
 
 	$("table[name='phenotype-table']").each(function(){
 		console.log($(this).attr("value"));
 
 		var ssid = $(this).attr("value");
+		var sample_submission_name = $(this).attr("ss-name");
 		$("#trigger-phenolist-popover"+ssid).popover({ 
 															html: true,
 															trigger: 'click',
@@ -74,6 +72,46 @@ $(document).ready(function() {
 		});
 
 	});
+
+	// Only open one popover each time
+	$(".trigger-phenolist-popover").on('click', function(event){
+		console.log($(this));
+
+		var $pElem= $(this);
+		console.log("pElem's value" + $pElem.attr("value"));
+		$("table[name='phenotype-table']").each(function(){
+			$currentPop = $(this);
+			console.log("current: " + $currentPop.attr("value"));
+			if ($currentPop.attr("value") != $pElem.attr("value")){
+				$currentPop.popover('hide');
+				console.log("hiding current Pop");
+			}
+		});
+		$pElem.popover('show');
+	});
+
+	//Clicking outside popover to close popover
+	$(':not(#example)').on('click', function (e) {
+		$('.trigger-phenolist-popover').each(function () {
+        //the 'is' for buttons that trigger popups
+        //the 'has' for icons and other elements within a button that triggers a popup
+        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+        	$(this).popover('hide');
+        	return;
+        }
+    });
+	});
+
+	// $(".trigger-phenolist-popover").click(function() {
+	// 	var $pElem= $(this);
+	// 	$("table[name='phenotype-table']").each(function(){
+	// 		$currentPop = $(this);
+	// 		if ($currentPop.prop("id") != $pElem.prop("id")){
+	// 			$currentPop.popover('hide');
+	// 		}
+	// 	});
+	// 	$pElem.popover('show');
+	// });
 
 	
 	// To Add a Phenotype
@@ -331,7 +369,7 @@ border:solid 1px #c3c3c3;
 												{% endfor %} -->
 												<!-- UNCOMMENT UP TO HERE -->
 												<div class="container" style="display:none">
-													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}">
+													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
 														<tr>
 															<th> Phenotype Name </th>
 															<th> Phenotype Type </th>
@@ -355,7 +393,7 @@ border:solid 1px #c3c3c3;
 											{% endif %}
 										{% endfor %}
 										<!-- <a href="#phenotypelist" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)" id="popover-phenolist" rel="popover">>>See More</a> -->
-										<a href="#" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" >>>See More</a>
+										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
 									</td>
 										</ul>
 									<td>{{ ss.source }}</td>
