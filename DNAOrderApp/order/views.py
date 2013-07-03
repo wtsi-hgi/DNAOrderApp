@@ -511,7 +511,8 @@ def add_phenotype_fmpage(request, id):
         alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Phenotype was added. Invalid Form. </div>'
         ss_name = ""
 
-    phenotypelist_all = Phenotype.objects.all().order_by('phenotype_name')
+    phenotypelist_all = Phenotype.objects.filter(samplesubmission__pk__exact=id)
+    # phenotypelist_all = Phenotype.objects.all().order_by('phenotype_name')
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
 
     # it should return just the updated table
@@ -519,7 +520,6 @@ def add_phenotype_fmpage(request, id):
     t = Template(fp.read())
     fp.close()
     c = Context({
-            'phenotypeform': phenotypeform,
             'phenotypelist_all':phenotypelist_all,
             'alert_msg': alert_msg,
             'ssid' : id,

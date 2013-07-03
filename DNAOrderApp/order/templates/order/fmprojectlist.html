@@ -21,7 +21,7 @@
 #phenolist-popover{
 					max-width: 900px;
 					width: auto;
-					max-height: 900px;
+					max-height: 500px;
 					height: auto;
 					border: solid;
 					overflow-y: auto;
@@ -83,12 +83,14 @@ $(document).ready(function() {
 															trigger: 'click',
 															placement:'right',
 															content: function (ele) { 
-																return $("#phenotype-table"+ssid).html(); 
+																return '<div id="phenotype-table-container{{ss.pk}}">'+$("#phenotype-table-container"+ssid).html()+'</div>'; 
 															},
 															title: "Sample Submission " + sample_submission_name + ' / Phenotype List',
 															template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div><div class="modal-footer" id="popover-footer"></div></div>',
 															callback: function() {
 																console.log("this is ssid " + ssid);
+
+
 
 																$.ajax({
 																	url: '/order/render_phenoform/'+ssid,
@@ -186,8 +188,10 @@ function addPhenotype(ssid){
 		success : function(data) {
 			console.log("successfully add phenotype");
 			console.log("this is addphenotype" + data);
-			$('table#phenotype-table'+ssid).replaceWith(data);
-			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+			// $('table#phenotype-table'+ssid).replaceWith(data);
+			$('.popover-content').replaceWith('<div class="popover-content">'+data+'</div>');
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+
 		},
 		error : function(data) {
 			console.log("failed to add phenotype");
@@ -379,7 +383,7 @@ border:solid 1px #c3c3c3;
 													<li>{{ pheno }}</li>
 												{% endfor %} -->
 												<!-- UNCOMMENT UP TO HERE -->
-												<div class="container" style="display:none">
+												<div style="display:none" id="phenotype-table-container{{ss.pk}}">
 													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
 														<tr>
 															<th> Phenotype Name </th>
