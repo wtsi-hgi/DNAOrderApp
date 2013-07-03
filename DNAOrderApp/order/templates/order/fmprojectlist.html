@@ -31,7 +31,6 @@
 	max-width: 500px;
 	width: %;
 	padding: 300px;
-	border: solid;
 }
 </style>
 
@@ -53,12 +52,12 @@ function getCookie(name) {
 }
 var csrftoken = getCookie('csrftoken');
 
-function refreshPhenotypeList() {
-  $("#current-list").empty();
-  for(i=0; i< source.length; i++)
-    $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-}
-var source = ['alisso','balexandre'];
+// function refreshPhenotypeList() {
+//   $("#current-list").empty();
+//   for(i=0; i< source.length; i++)
+//     $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+// }
+// var source = ['alisso','balexandre'];
 
 
 $(document).ready(function() {
@@ -90,8 +89,6 @@ $(document).ready(function() {
 															callback: function() {
 																console.log("this is ssid " + ssid);
 
-
-
 																$.ajax({
 																	url: '/order/render_phenoform/'+ssid,
 																}).done( function(data){
@@ -106,7 +103,7 @@ $(document).ready(function() {
 
 	});
 
-	console.log("before popover closes outside");
+	
 	//Clicking outside popover to close popover; only one popover is open at a time
 	$(':not(#example)').on('click', function (e) {
 		$('.trigger-phenolist-popover').each(function () {
@@ -130,6 +127,7 @@ $(document).ready(function() {
 		// 							'max-width': window.innerWidth+'px',
 
 		// 			});
+
 		$('#phenotypelist').css({ 
 										// width : '1200px', 
 										width : '100%',
@@ -153,24 +151,24 @@ $(document).ready(function() {
 	});
 
 	//TypeHead Dynamic Phenotype list
-	$('.typeahead').typeahead({
-		source : source,
-		items: 16
-	});
+	// $('.typeahead').typeahead({
+	// 	source : source,
+	// 	items: 16
+	// });
 
-	$('form').submit(function(e) {
+	// $('form').submit(function(e) {
 
-    e.preventDefault(); // don't submit the form
+ //    e.preventDefault(); // don't submit the form
     
-    var txt = $('.typeahead').val(); // get the current item
-    console.log(txt);
-    $('.typeahead').val(""); // clean the input
-    source.push(txt); // add it to the source
-    refreshPhenotypeList(); // refresh the list
+ //    var txt = $('.typeahead').val(); // get the current item
+ //    console.log(txt);
+ //    $('.typeahead').val(""); // clean the input
+ //    source.push(txt); // add it to the source
+ //    refreshPhenotypeList(); // refresh the list
 
-	});
+	// });
 
-	refreshPhenotypeList();
+	// refreshPhenotypeList();
 
 });
 
@@ -188,7 +186,7 @@ function addPhenotype(ssid){
 		success : function(data) {
 			console.log("successfully add phenotype");
 			console.log("this is addphenotype" + data);
-			// $('table#phenotype-table'+ssid).replaceWith(data);
+
 			$('.popover-content').replaceWith('<div class="popover-content">'+data+'</div>');
 			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
 
@@ -222,23 +220,23 @@ function deletePhenotype(elt) {
 	return false;
 }
 
-function getPhenotypeList(elt){
-	console.log("getpheno!")
+// function getPhenotypeList(elt){
+// 	console.log("getpheno!")
 	
-	var proj_name = $(elt).attr("value");
-	console.log(proj_name)
+// 	var proj_name = $(elt).attr("value");
+// 	console.log(proj_name)
 
-	$.ajax({
-		url: '/order/get_phenolist/'+proj_name,
-		headers : {"X-CSRFToken" : csrftoken},
-	}).done( function(data){
-		console.log(data);
-		// $('table#phenotype-table').replaceWith(data);
-	}).fail( function(){
-		alert("failed ajax - in getPhenotypeList");
-	});
-	return false;
-}
+// 	$.ajax({
+// 		url: '/order/get_phenolist/'+proj_name,
+// 		headers : {"X-CSRFToken" : csrftoken},
+// 	}).done( function(data){
+// 		console.log(data);
+// 		// $('table#phenotype-table').replaceWith(data);
+// 	}).fail( function(){
+// 		alert("failed ajax - in getPhenotypeList");
+// 	});
+// 	return false;
+// }
 
 // function getTop3PhenotypeList(elt){
 // 	console.log("in gettop3 phenolist");
@@ -293,23 +291,6 @@ border:solid 1px #c3c3c3;
 		<br />
 		<h3> All Projects </h3>
 
-		<!-- <table class="table table-hover" id="project-table">
-			<tr>
-				<th> Project Name </th>
-				<th> Created On </th>
-				<th> Last updated </th>
-				<th> Delete? </th>
-			</tr>
-			{% for up in userprojectlist_all %}
-			<tr id="{{up.pk}}">
-				<td>{{ up.project_name }}</td>
-				<td>{{ up.date_created }}</td>
-				<td>{{ up.last_updated }}</td>
-				<td> <a id="delete-project{{up.pk}}" name="DEL_PROJ" class="btn delete" value="{{up.pk}}" onclick="deleteProject(this)"><i class="icon-remove"></i></a></td>
-			</tr>
-
-			{% endfor %}
-		</table> -->
 		<div id="PARENT" class="accordion"></div>
 		<table class="table table-striped" id="project-table">
 			<tr>
@@ -408,7 +389,7 @@ border:solid 1px #c3c3c3;
 
 											{% endif %}
 										{% endfor %}
-										<!-- <a href="#phenotypelist" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)" id="popover-phenolist" rel="popover">>>See More</a> -->
+										
 										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
 									</td>
 										</ul>
