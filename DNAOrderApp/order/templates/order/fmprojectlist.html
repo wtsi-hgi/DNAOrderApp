@@ -19,12 +19,19 @@
 }
 
 #phenolist-popover{
-					max-width: 800px;
+					max-width: 900px;
 					width: auto;
-					max-height: 9000px;
+					max-height: 900px;
 					height: auto;
 					border: solid;
 					overflow-y: auto;
+}
+
+#phenotypeformtable{
+	max-width: 500px;
+	width: %;
+	padding: 300px;
+	border: solid;
 }
 </style>
 
@@ -68,29 +75,13 @@ $(document).ready(function() {
 															placement:'right',
 															content: function (ele) { return $("#phenotype-table"+ssid).html(); },
 															title: "Sample Submission " + sample_submission_name + ' / Phenotype List',
-															template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+															template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div><div class="modal-footer" id="popover-footer">'+$('#add_a_phenotype_panel').html()+'</div></div>',
 		});
 
 	});
 
-	// Only open one popover each time
-	$(".trigger-phenolist-popover").on('click', function(event){
-		console.log($(this));
-
-		var $pElem= $(this);
-		console.log("pElem's value" + $pElem.attr("value"));
-		$("table[name='phenotype-table']").each(function(){
-			$currentPop = $(this);
-			console.log("current: " + $currentPop.attr("value"));
-			if ($currentPop.attr("value") != $pElem.attr("value")){
-				$currentPop.popover('hide');
-				console.log("hiding current Pop");
-			}
-		});
-		$pElem.popover('show');
-	});
-
-	//Clicking outside popover to close popover
+	console.log("before popover closes outside");
+	//Clicking outside popover to close popover; only one popover is open at a time
 	$(':not(#example)').on('click', function (e) {
 		$('.trigger-phenolist-popover').each(function () {
         //the 'is' for buttons that trigger popups
@@ -101,35 +92,6 @@ $(document).ready(function() {
         }
     });
 	});
-
-	// $(".trigger-phenolist-popover").click(function() {
-	// 	var $pElem= $(this);
-	// 	$("table[name='phenotype-table']").each(function(){
-	// 		$currentPop = $(this);
-	// 		if ($currentPop.prop("id") != $pElem.prop("id")){
-	// 			$currentPop.popover('hide');
-	// 		}
-	// 	});
-	// 	$pElem.popover('show');
-	// });
-
-	
-	// To Add a Phenotype
-	$("#add_a_phenotype_form").ajaxForm({
-		url: '/order/api/handle_phenotype/ADD/',
-		type: "POST",
-		resetForm : true,
-		headers : {"X-CSRFToken" : csrftoken},
-		success : function(data) {
-			console.log(data);
-			$('table#phenotype-table').replaceWith(data);
-			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
-		},
-		error : function(data) {
-			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
-		}
-	});
-	console.log("done loading phenotype form");
 
 	//Changing Modal size dynamically
 	$('#phenotypelist').on('show', function(){
@@ -186,8 +148,35 @@ $(document).ready(function() {
 
 });
 
+
+// To Add a Phenotype
+function addPhenotype(ssid){
+	console.log("in addphenotype");
+	console.log("ID: " + ssid);
+
+
+
+	$(elt.form.id).ajaxSubmit({
+		url: '/order/api/handle_phenotype_fmpage/ADD/'+ssid,
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log("successfully add phenotype");
+			console.log(data);
+			$('table#phenotype-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+		},
+		error : function(data) {
+			console.log("failed to add phenotype");
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
 function deletePhenotype(elt) {
-	var value = $(elt).attr("value");
+	var value = elt.value;
 
 	console.log("in deletePhenotype" + $(elt).attr("name"));
 	var name = $(elt).attr("name");
@@ -390,6 +379,20 @@ border:solid 1px #c3c3c3;
 														{% endfor %}
 													</table> 
 												</div>
+												<!--**************************** ADD A PHENOTYPE FORM *******************************-->
+												<div id="add_a_phenotype_panel_{{ss.pk}}" style="display: none"> 
+
+													<form class="add_a_phenotype" method="post" id="add_a_phenotype_form">
+														{% csrf_token %}
+														<table id="phenotypeformtable">
+															{{ phenotypeform }}
+														</table>
+														<br />
+														<button id="add-pheno-button" class="btn btn-primary" type="submit" onclick="addPhenotype({{ss.pk}})">Create a Phenotype</button>
+													</form>
+												</div>
+												<!--************************ END OF PHENOTYPE FORM ************************************-->
+
 											{% endif %}
 										{% endfor %}
 										<!-- <a href="#phenotypelist" class="pull-right" data-toggle="modal" value="{{ss.sample_submission_name}}" onclick="getPhenotypeList(this)" id="popover-phenolist" rel="popover">>>See More</a> -->
@@ -434,8 +437,6 @@ border:solid 1px #c3c3c3;
 			<hr />
 			<br />
 			<br />
-
-
 		</div>
 	</div>
 
@@ -466,9 +467,11 @@ border:solid 1px #c3c3c3;
 	</table> 
 </div>
 
-
-
 <!--**************************** END OF NEW PHENOTYPE GOOGLE CALENDAR IDEA **************************-->
+
+
+
+
 
 {% endblock content %}
 
