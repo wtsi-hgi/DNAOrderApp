@@ -1,0 +1,10 @@
+<div id="add_a_phenotype_panel_{{ssid}}"> 
+	<form class="add_a_phenotype" method="post" id="add_a_phenotype_form_{{ssid}}">
+	{% csrf_token %}
+		<table id="phenotypeformtable">
+			{{ phenotypeform }}
+		</table>
+		<br />
+		<button id="add-pheno-button" class="btn btn-primary" type="button" onclick="addPhenotype({{ssid}})">Create a Phenotype</button>
+	</form>
+</div>

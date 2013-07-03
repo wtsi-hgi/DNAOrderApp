@@ -1,0 +1,22 @@
+<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ssid}}" id ="phenotype-table{{ssid}}" ss-name="{{ ss_name }}">
+	<tr>
+		<th> Phenotype Name </th>
+		<th> Phenotype Type </th>
+		<th> Phenotype Description </th>
+		<th> Phenotype Definition </th>
+		<th> Delete? </th>
+	</tr>
+	{% for p in phenotypelist_all %}
+	<tr id="{{p.pk}}">
+		<td>{{ p.phenotype_name }}</td>
+		<td>{{ p.phenotype_type_id }}</td>
+		<td>{{ p.phenotype_description }}</td>
+		<td>{{ p.phenotype_definition }}</td>
+		<td> 
+			<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+
+

@@ -17,7 +17,7 @@ from DNAOrderApp.order.forms import DocumentForm
 from django.contrib import messages
 from django.db import IntegrityError, DatabaseError
 import base64
-from django.template import Template, Context
+from django.template import Template, Context, RequestContext
 
 import csv, string, re
 
@@ -488,7 +488,7 @@ def get_phenolist_cp(proj_name):
 
 
 def add_phenotype_fmpage(request, id):
-    print "adding a phenotype"
+    print "adding a phenotype fmpage"
     print "id ", id
     alert_msg = ""
     print "this is request.POST in phenotype", request.POST
@@ -497,8 +497,11 @@ def add_phenotype_fmpage(request, id):
     if phenotypeform.is_valid():
         print "in phenotypeform"
         p1 = phenotypeform.save()
+        print "p1 is saved"
         ss = SampleSubmission.objects.get(pk=id)
+        print "ss is called"
         ss.phenotype_list.add(p1)
+        ss_name = ss.sample_submission_name
 
         print "check sample submission and phenotypes to see updates"
 
@@ -506,21 +509,30 @@ def add_phenotype_fmpage(request, id):
     else:
         print "in else"
         alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Phenotype was added. Invalid Form. </div>'
+        ss_name = ""
 
     phenotypelist_all = Phenotype.objects.all().order_by('phenotype_name')
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
 
     # it should return just the updated table
-    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/phenotype-table.html')
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/phenotype-table-fmpage.html')
     t = Template(fp.read())
     fp.close()
     c = Context({
             'phenotypeform': phenotypeform,
             'phenotypelist_all':phenotypelist_all,
             'alert_msg': alert_msg,
+            'ssid' : id,
+            'ss_name' : ss_name
         })
 
     return HttpResponse(t.render(c))
+
+def render_phenoform(request, id=None):
+    print "in render_phenoform with id, ", id
+    phenotypeform = PhenotypeForm()
+
+    return render_to_response('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/phenoform.html', { 'phenotypeform':phenotypeform, 'ssid':id} ,context_instance=RequestContext(request))
 
 def handle_phenotype_fmpage(request, action=None, id=None):
     print "in handle_phenotype_fmpage"

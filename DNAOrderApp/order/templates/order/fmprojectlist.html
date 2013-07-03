@@ -64,6 +64,15 @@ var source = ['alisso','balexandre'];
 $(document).ready(function() {
 	$(".collapse").collapse();
 
+	// To add a callback function to popover
+	var pt = $.fn.popover.Constructor.prototype.show;
+	$.fn.popover.Constructor.prototype.show = function() {
+		pt.call(this);
+		if (this.options.callback){
+			this.options.callback();
+		}
+	}
+
 	$("table[name='phenotype-table']").each(function(){
 		console.log($(this).attr("value"));
 
@@ -73,9 +82,24 @@ $(document).ready(function() {
 															html: true,
 															trigger: 'click',
 															placement:'right',
-															content: function (ele) { return $("#phenotype-table"+ssid).html(); },
+															content: function (ele) { 
+																return $("#phenotype-table"+ssid).html(); 
+															},
 															title: "Sample Submission " + sample_submission_name + ' / Phenotype List',
-															template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div><div class="modal-footer" id="popover-footer">'+$('#add_a_phenotype_panel').html()+'</div></div>',
+															template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div><div class="modal-footer" id="popover-footer"></div></div>',
+															callback: function() {
+																console.log("this is ssid " + ssid);
+
+																$.ajax({
+																	url: '/order/render_phenoform/'+ssid,
+																}).done( function(data){
+																	console.log("in ajax done"+ data);
+																	$("#popover-footer").replaceWith('<div class="modal-footer" id="popover-footer">'+data+'</div>');
+																});
+
+																$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> Ajax didn't fail!</div>");
+
+															}
 		});
 
 	});
@@ -154,18 +178,16 @@ function addPhenotype(ssid){
 	console.log("in addphenotype");
 	console.log("ID: " + ssid);
 
-
-
-	$(elt.form.id).ajaxSubmit({
+	$("#add_a_phenotype_form_"+ssid).ajaxSubmit({
 		url: '/order/api/handle_phenotype_fmpage/ADD/'+ssid,
 		type: "POST",
 		resetForm : true,
 		headers : {"X-CSRFToken" : csrftoken},
 		success : function(data) {
 			console.log("successfully add phenotype");
-			console.log(data);
-			$('table#phenotype-table').replaceWith(data);
-			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+			console.log("this is addphenotype" + data);
+			$('table#phenotype-table'+ssid).replaceWith(data);
+			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
 		},
 		error : function(data) {
 			console.log("failed to add phenotype");
@@ -379,19 +401,6 @@ border:solid 1px #c3c3c3;
 														{% endfor %}
 													</table> 
 												</div>
-												<!--**************************** ADD A PHENOTYPE FORM *******************************-->
-												<div id="add_a_phenotype_panel_{{ss.pk}}" style="display: none"> 
-
-													<form class="add_a_phenotype" method="post" id="add_a_phenotype_form">
-														{% csrf_token %}
-														<table id="phenotypeformtable">
-															{{ phenotypeform }}
-														</table>
-														<br />
-														<button id="add-pheno-button" class="btn btn-primary" type="submit" onclick="addPhenotype({{ss.pk}})">Create a Phenotype</button>
-													</form>
-												</div>
-												<!--************************ END OF PHENOTYPE FORM ************************************-->
 
 											{% endif %}
 										{% endfor %}
