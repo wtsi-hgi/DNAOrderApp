@@ -357,6 +357,7 @@ class Unit(models.Model):
     unit_name = models.CharField(max_length=100, unique=True)
 
 from django.forms import ModelForm
+from django import forms
 
 class UserForm(ModelForm):
     class Meta:
@@ -365,6 +366,10 @@ class UserForm(ModelForm):
 class PhenotypeForm(ModelForm):
     class Meta:
         model = Phenotype
+        widgets = {
+            'phenotype_description': forms.Textarea(attrs={'rows':2, 'cols':15}),
+            'phenotype_definition' : forms.Textarea(attrs={'rows':2, 'cols':15})
+        }
 
 class SampleSubmissionForm(ModelForm):
     class Meta:
