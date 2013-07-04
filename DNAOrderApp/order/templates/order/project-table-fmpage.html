@@ -1,0 +1,125 @@
+{% load replace %}
+{% load get_phenotype_type %}
+
+<div class="container" id="project-section">
+	<!--****************** PROJECT TABLE REPLACEMENT! ***********************-->
+	<div id="alert-signs">
+		{{ alert_msg|safe }}
+	</div>
+	<br />
+	<h3> All Projects </h3>
+
+	<div id="PARENT" class="accordion"></div>
+	<table class="table table-striped" id="project-table">
+		<tr>
+			<th> </th>
+			<th> Project Name </th>
+			<th> Date Created </th>
+			<th> Last Updated </th>
+			<th> Sample Submissions Status </th>
+			<th> Phenotype list Status </th>
+		</tr>
+		{% for proj, sslist in proj_ss_dict.items %}
+		<tr class="GroupA">
+			<td>
+				<div class="accordion-group">
+					<div class="accordion-heading">
+						<a href="#{{proj.project_name|replace}}" data-parent="#PARENT" data-toggle="collapse" class="accordion-toggle">
+							<i id="toggle" class="icon-plus"></i>
+						</a>
+					</div>
+				</div>
+			</td>
+			<td>
+				{{ proj.project_name }}
+			</td>
+			<td>
+				{{ proj.date_created }}
+			</td>
+			<td>
+				{{ proj.last_updated }}
+			</td>
+			{% if sslist|length == 0 %}
+			<td>
+				<span class="label label-warning"><i class="icon-warning-sign"></i> No Sample Submissions</span>
+			</td>
+			{% else %}
+			<td>
+				<i class="icon-list-alt"></i> {{ sslist|length }} Sample Submission(s)
+			</td>
+			{% endif %}
+			<td>
+				<i class="icon-warning-sign"></i> Placeholder - displaying number of phenotype lists included
+			</td>
+		</tr>
+		<tr>
+			<td class="more"></td>
+			<td colspan="5" class="more">
+				<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
+					<div class="accordion-inner" style="border:none">
+						<table class="table table-bordered" style="border:solid 1px">
+							<tr>
+								<th>Sample Submission</th>
+								<th>Phenotype List</th>
+								<th> External Collaborator (Source) </th>
+								<th> # of Samples </th>
+								<th> Date Created </th>
+								<th> Last Updated </th>
+							</tr>
+							{% for ss in sslist %}
+							<tr>
+								<td>{{ ss.sample_submission_name }}</td>
+								<td id="top3phenolist">
+									<ul>
+										{% for ss_select, phenolist in ss_pheno_dict.items %}
+											{% if ss_select == ss %}
+												<b>{{ss_select}}</b>
+												{% for pheno in phenolist|slice:":3" %}
+													<li>{{ pheno }}</li>
+												{% endfor %}
+												<!-- To SEE THE FULL LIST UNCOMMENT THIS -->
+												<!-- {% for pheno in phenolist %}
+													<li>{{ pheno }}</li>
+													{% endfor %} -->
+												<!-- UNCOMMENT UP TO HERE -->
+												<div style="display:none" id="phenotype-table-container{{ss.pk}}">
+													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
+															<tr>
+																<th> Phenotype Name </th>
+																<th> Phenotype Type </th>
+																<th> Phenotype Description </th>
+																<th> Phenotype Definition </th>
+															</tr>
+															{% for p in phenolist %}
+															<tr id="{{p.pk}}">
+																<td>{{ p.phenotype_name }}</td>
+																<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
+																<td>{{ p.phenotype_description }}</td>
+																<td>{{ p.phenotype_definition }}</td>
+															</tr>
+															{% endfor %}
+													</table> 
+												</div>
+
+											{% endif %}
+										{% endfor %}
+
+										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
+									</ul>
+								</td>
+								<td>{{ ss.source }}</td>
+								<td>{{ ss.sample_num }}</td>
+								<td>{{ ss.date_created }}</td>
+								<td>{{ ss.last_updated }}</td>
+							</tr>
+							{% empty %}
+								<b> Please Add Sample Submissions </b>
+							{% endfor %}
+						</table>
+					</div>
+				</div>
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+</div>
