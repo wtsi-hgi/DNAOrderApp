@@ -1,6 +1,7 @@
 {% extends "base_template.html" %} 
 {% load render_table from django_tables2 %}
 {% load replace %}
+{% load get_phenotype_type %}
 
 {% block title %}Project List{% endblock title %}
 
@@ -62,6 +63,22 @@ var csrftoken = getCookie('csrftoken');
 
 $(document).ready(function() {
 	$(".collapse").collapse();
+
+	// To Add Projects
+	$("#add_a_project_form").ajaxForm({
+		url: '/order/api/handle_project/ADD/',
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log(data);
+			$('table#project-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
 
 	// To add a callback function to popover
 	var pt = $.fn.popover.Constructor.prototype.show;
@@ -371,17 +388,13 @@ border:solid 1px #c3c3c3;
 															<th> Phenotype Type </th>
 															<th> Phenotype Description </th>
 															<th> Phenotype Definition </th>
-															<th> Delete? </th>
 														</tr>
 														{% for p in phenolist %}
 														<tr id="{{p.pk}}">
 															<td>{{ p.phenotype_name }}</td>
-															<td>{{ p.phenotype_type_id }}</td>
+															<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
 															<td>{{ p.phenotype_description }}</td>
 															<td>{{ p.phenotype_definition }}</td>
-															<td> 
-																<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
-															</td>
 														</tr>
 														{% endfor %}
 													</table> 
@@ -411,28 +424,26 @@ border:solid 1px #c3c3c3;
 
 
 		<!--****************** ADD A PROJECT FORM ***********************-->
+		<!-- Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
+		associated with the specific user. But I should still be able to associate External Collaborators with the Projects. -->
 		<div id="add_a_project_panel"> 
 			<h3> Add A Project </h3>
 
-			<b>Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
-				associated with the specific user.</b>
+			<form class="add_a_project" method="post" id="add_a_project_form">
+				{% csrf_token %}
+				<table>
+					{{ userprojectform }}
+				</table>
 				<br />
-				<br />
-				<form class="add_a_project" method="post" id="add_a_project_form">
-					{% csrf_token %}
-					<table>
-						{{ userprojectform }}
-					</table>
-					<br />
-					<button id="add-a-project-button" class="btn btn-primary" type="submit" name="ADD_PROJ">Create a Project</button>
-				</form>
-			</div>
-			<br />
-			<hr />
-			<br />
-			<br />
+				<button id="add-a-project-button" class="btn btn-primary pull-right" type="submit" name="ADD_PROJ">Create a Project</button>
+			</form>
 		</div>
+		<br />
+		<hr />
+		<br />
+		<br />
 	</div>
+</div>
 
 </div>
 
