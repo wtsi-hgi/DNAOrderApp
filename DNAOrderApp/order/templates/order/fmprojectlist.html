@@ -65,20 +65,26 @@ $(document).ready(function() {
 	$(".collapse").collapse();
 
 	// To Add Projects
-	$("#add_a_project_form").ajaxForm({
-		url: '/order/api/handle_project/ADD/',
-		type: "POST",
-		resetForm : true,
-		headers : {"X-CSRFToken" : csrftoken},
-		success : function(data) {
-			console.log(data);
-			$('table#project-table').replaceWith(data);
-			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
-		},
-		error : function(data) {
-			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
-		}
+	$('#add-a-project-button').click( function(data){
+		console.log(this);
+		console.log(data);
+		$("#add_a_project_form").ajaxSubmit({
+												url: '/order/api/handle_project_fmpage/ADD/',
+												type: "POST",
+												resetForm : true,
+												headers : {"X-CSRFToken" : csrftoken},
+												success : function(data) {
+																			console.log('test' + data);
+																			$('#project-section').replaceWith(data);
+																			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
+																			$(".collapse").collapse();
+												},
+												error : function(data) {
+																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+												}
+		});
 	});
+	
 
 	// To add a callback function to popover
 	var pt = $.fn.popover.Constructor.prototype.show;
@@ -404,8 +410,10 @@ border:solid 1px #c3c3c3;
 										{% endfor %}
 										
 										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
-									</td>
-										</ul>
+									<!-- </td>
+										</ul> -->
+									</ul>
+								</td>
 									<td>{{ ss.source }}</td>
 									<td>{{ ss.sample_num }}</td>
 									<td>{{ ss.date_created }}</td>
@@ -421,9 +429,10 @@ border:solid 1px #c3c3c3;
 			</tr>
 			{% endfor %}
 		</table>
+	</div>
+	<!--**************************** END OF PROJECT TABLE **************************************-->
 
-
-		<!--****************** ADD A PROJECT FORM ***********************-->
+	<!--****************** ADD A PROJECT FORM ***********************-->
 		<!-- Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
 		associated with the specific user. But I should still be able to associate External Collaborators with the Projects. -->
 		<div id="add_a_project_panel"> 
@@ -435,7 +444,7 @@ border:solid 1px #c3c3c3;
 					{{ userprojectform }}
 				</table>
 				<br />
-				<button id="add-a-project-button" class="btn btn-primary pull-right" type="submit" name="ADD_PROJ">Create a Project</button>
+				<button id="add-a-project-button" class="btn btn-primary pull-right" type="button">Create a Project</button>
 			</form>
 		</div>
 		<br />
@@ -444,38 +453,6 @@ border:solid 1px #c3c3c3;
 		<br />
 	</div>
 </div>
-
-</div>
-
-<!--**************************** NEW PHENOTYPE GOOGLE CALENDAR IDEA **********************************-->
-
-<div class="container" style="display:none">
-	<table class="table table-striped table-bordered table-hover" id ="phenotype-table">
-		<tr>
-			<th> Phenotype Name </th>
-			<th> Phenotype Type </th>
-			<th> Phenotype Description </th>
-			<th> Phenotype Definition </th>
-			<th> Delete? </th>
-		</tr>
-		{% for p in phenotypelist_all %}
-		<tr id="{{p.pk}}">
-			<td>{{ p.phenotype_name }}</td>
-			<td>{{ p.phenotype_type_id }}</td>
-			<td>{{ p.phenotype_description }}</td>
-			<td>{{ p.phenotype_definition }}</td>
-			<td> 
-				<a id="delete-phenotype{{p.pk}}" name="DEL_PHENO" class="btn delete" value="{{p.pk}}" onclick="deletePhenotype(this)"><i class="icon-remove"></i></a>
-			</td>
-		</tr>
-		{% endfor %}
-	</table> 
-</div>
-
-<!--**************************** END OF NEW PHENOTYPE GOOGLE CALENDAR IDEA **************************-->
-
-
-
 
 
 {% endblock content %}
