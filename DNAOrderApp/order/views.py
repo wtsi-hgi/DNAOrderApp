@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
 from DNAOrderApp.order.models import UserProject, Source
 
-from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm
+from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM
 #from DNAOrderApp.order.models import SampleForm, StudyForm
 from DNAOrderApp.order.forms import DocumentForm
 
@@ -459,22 +459,22 @@ def get_projectlist(user):
 
 #     return HttpResponse(t.render(c))
 
-def get_phenolist(request, proj_name):
-    ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
+# def get_phenolist(request, proj_name):
+#     ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
     
-    ss_pheno_dict={}
-    for ss in ss_list:
-        ss_pheno_dict[ss] = ss.phenotype_list.all()
+#     ss_pheno_dict={}
+#     for ss in ss_list:
+#         ss_pheno_dict[ss] = ss.phenotype_list.all()
 
-    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/top3phenolist.html')
-    t = Template(fp.read())
-    fp.close()
-    c = Context({
-            'ss_pheno_dict': ss_pheno_dict,
-        })
-    print ss_pheno_dict
+#     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/top3phenolist.html')
+#     t = Template(fp.read())
+#     fp.close()
+#     c = Context({
+#             'ss_pheno_dict': ss_pheno_dict,
+#         })
+#     print ss_pheno_dict
 
-    return HttpResponse(t.render(c))
+#     return HttpResponse(t.render(c))
 
 def get_phenolist_cp(proj_name):
     ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
@@ -545,6 +545,80 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
+def add_project_fmpage(request):
+    print "adding a project - inside add project fmproject"
+    alert_msg = ""
+    print "tis is request.POST in add_project:", request.POST
+    userprojectform = UserProjectForm(request.POST)
+
+    if userprojectform.is_valid():
+        userprojectform.save()
+        print "this is request.user", request.user
+
+        print "Check userproject table to see if it has been saved properly."
+        print "Successfully added a project"
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>"
+
+    else:
+        print "userproject not valid ", userprojectform, " ", userproject
+        print e
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No project was added. Invalid Form. </div>'
+
+
+    # Make a dictionary with Project as key, and sample submission as value
+    projectlist = get_projectlist(request.user)
+    print "PROJECTLIST:", projectlist
+
+    ss_pheno_dict = {}
+    proj_ss_dict = {}
+    for project in projectlist:
+        print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
+        proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
+        print "proj_ss_dict: ", proj_ss_dict
+        ss_pheno_dict.update(get_phenolist_cp(project))
+
+    #Phenotype
+    phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+
+    #Project
+    userprojectform = UserProjectForm_FM(initial={'username': request.user, 'project_name': "HELLO!"}) #unbound form, no associated data, empty form
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/project-table-fmpage.html')
+    print "fp:" ,fp
+    t1 = fp.read()
+    print "template", t1
+    try:
+        t = Template(t1)
+    except Exception as e:
+        print e.message
+    print "after Template"
+    fp.close()
+    c = Context({
+            'username' : request.user,
+            'myprojectlist' : projectlist,
+            'proj_ss_dict' : proj_ss_dict,
+            'phenotypeform' : phenotypeform,
+            'ss_pheno_dict' : ss_pheno_dict,
+            'userprojectform' : userprojectform,
+            'alert_msg': alert_msg,
+        })
+    print "render", t.render(c)
+    print HttpResponse(t.render(c))
+    return HttpResponse(t.render(c))
+        
+
+def handle_project_fmpage(request, action=None, id=None):
+    print "in handle_project_fmpage"
+    if action == "DELETE":
+        if id != None:
+            pass
+            # return delete_project(id)
+    elif action == "ADD":
+        print "adding a project"
+        return add_project_fmpage(request)
+    else:
+        return HttpResponse("Everything failed! - handle project")
 
 def fm_page(request):
 
@@ -567,6 +641,11 @@ def fm_page(request):
 
     #Phenotype
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+
+    #Project
+    print "this is request.user", request.user
+    userprojectform = UserProjectForm_FM(initial={'username': request.user}) #unbound form, no associated data, empty form
+
 
 
 
@@ -623,6 +702,7 @@ def fm_page(request):
         'proj_ss_dict' : proj_ss_dict,
         'phenotypeform' : phenotypeform,
         'ss_pheno_dict' : ss_pheno_dict,
+        'userprojectform' : userprojectform,
         })
 
 
