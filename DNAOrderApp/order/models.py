@@ -131,8 +131,9 @@ class UserProject(models.Model):
 class Phenotype(models.Model):
     phenotype_name = models.CharField(max_length=100, unique=True)
     phenotype_type = models.ForeignKey(PhenotypeType)
-    phenotype_description = models.TextField()
-    phenotype_definition = models.TextField()  # Not too sure if should be CharField or TextField...should be unique
+    phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.')
+    phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
+                                        for autism spectrum disorder.')  # Not too sure if should be CharField or TextField...should be unique
 
     def __unicode__(self):
         return self.phenotype_name
@@ -376,9 +377,17 @@ class SampleSubmissionForm(ModelForm):
         model = SampleSubmission
         # exclude = ['phenotype_list']
 
+#For the Admin
 class UserProjectForm(ModelForm):
     class Meta:
         model = UserProject
+
+#For the Faculty Member
+class UserProjectForm_FM(ModelForm):
+
+    class Meta:
+        model = UserProject
+        # exclude = ('username',)
 
 
 '''
