@@ -114,16 +114,16 @@ class PhenotypeType(models.Model):
 
 class UserProject(models.Model):
 
-    STATUS = (
-        ('In Progress', 'In Progress'),
-        ('Complete', 'Complete'),
-    )
+    # STATUS = (
+    #     ('In Progress', 'In Progress'),
+    #     ('Complete', 'Complete'),
+    # )
 
     username = models.ForeignKey(User)
     project_name = models.CharField(max_length=100, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
-    project_status = models.CharField(max_length=100, choices=STATUS, default='In Progress')
+    # project_status = models.CharField(max_length=100, choices=STATUS, default='In Progress')
 
     def __unicode__(self):
         return self.project_name
