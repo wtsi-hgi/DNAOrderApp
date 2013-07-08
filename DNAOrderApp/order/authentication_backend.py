@@ -5,11 +5,12 @@ from time import time
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 import django.contrib.auth
+from DNAOrderApp.order.models import DNAOrderAppUser
 
 from django.db import IntegrityError
 from DNAOrderApp.order.exception import InvalidTokenError
 
-class AuthenticationBackend(ModelBackend):
+class DNAOrderAppUserAuthenticationBackend(ModelBackend):
 	
 	def __init__(self,):
 		self.sekret = "F1eFi2G2+UlIrv1uhY7jsOGsen3JA6NZregtaGPf8wE="
@@ -80,18 +81,27 @@ class AuthenticationBackend(ModelBackend):
 			if self.hmac(parts) == base64.b64decode(padded_pw) and currentTime < float(expiry):
 				print "in here!"
 				try:
-					print "before user"
-					user = User.objects.get(username=realuser)
+					print "before dnaorderappuser"
+					dnaorderappuser = DNAOrderAppUser.objects.get(username=realuser)
+					# user = User.objects.get(username=realuser)
 					print "after user!"
-				except User.DoesNotExist:
+				except DNAOrderAppUser.DoesNotExist:
+				# except User.DoesNotExist:
 					# Create a new user. Note that we can set password
 					# to anything, because it won't be checked; the password
 					# from settings.py will.
-					user = User(username=realuser, password='not a password really')
-					user.is_staff = True
-					user.is_superuser = True
-					user.save()
-				return user
+					dnaorderappuser = DNAOrderAppUser(username=realuser, password='not a password really')
+					dnaorderappuser.is_staff = True
+					dnaorderappuser.is_superuser = True
+					dnaorderappuser.save()
+
+					# user = User(username=realuser, password='not a password really')
+					# user.is_staff = True
+					# user.is_superuser = True
+					# user.save()
+
+				return dnaorderappuser	
+				# return user
 				print "no user"
 				return None
 		except InvalidTokenError as e:
@@ -104,7 +114,8 @@ class AuthenticationBackend(ModelBackend):
 	# THIS FUNCTION IS CALLED FROM auth/__init__.py
 	def get_user(self, user_id):
 		try:
-			return User.objects.get(pk=user_id)
+			return DNAOrderAppUser.objects.get(pk=user_id)
+			# return User.objects.get(pk=user_id)
 		except:
 			return None
 
