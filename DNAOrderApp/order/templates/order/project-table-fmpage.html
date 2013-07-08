@@ -57,11 +57,14 @@
 			<td colspan="5" class="more">
 				<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
 					<div class="accordion-inner" style="border:none">
+						<a href="#" type="button" class="pull-right"> [+] Add Sample Submission </a>
+								</a>
 						<table class="table table-bordered" style="border:solid 1px">
 							<tr>
 								<th>Sample Submission</th>
 								<th>Phenotype List</th>
-								<th> External Collaborator (Source) </th>
+								<th> Afiliated Institute (External Collaborator) </th>
+								<th> External Collaborator Contact </th>
 								<th> # of Samples </th>
 								<th> Date Created </th>
 								<th> Last Updated </th>
@@ -107,14 +110,37 @@
 										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
 									</ul>
 								</td>
-								<td>{{ ss.source }}</td>
+								<td>{{ ss.affiliatedinstitute }}</td>
+								<td></td>
 								<td>{{ ss.sample_num }}</td>
 								<td>{{ ss.date_created }}</td>
 								<td>{{ ss.last_updated }}</td>
 							</tr>
 							{% empty %}
-								<b> Please Add Sample Submissions </b>
-							{% endfor %}
+								<tr>
+									<td></td>
+									<td></td>
+									<td>
+										<form action="#" id="affiliated-institute-form">
+											<input id="affiliated-institute-input" type="text" data-provide="typeahead">
+										</form>
+
+										<ol id="current-affiliated-institute-list">
+										</ol>
+									</td>
+									<td>
+										<form action="#" id="contact-list-form">
+											<input id="contact-list-input" type="text" data-provide="typeahead">
+										</form>
+										<ol id="current-contact-list">
+										</ol>
+									</td>
+									<td></td>
+									<td></td>
+									<td></td>
+								</tr>
+								<!-- {{ samplesubmissionform }} -->
+								{% endfor %}
 						</table>
 					</div>
 				</div>
