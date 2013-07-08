@@ -2,6 +2,8 @@
 {% load render_table from django_tables2 %}
 {% load replace %}
 {% load get_phenotype_type %}
+{% load get_contact_list %}
+{% load get_affiliated_institute_list %}
 
 {% block title %}Project List{% endblock title %}
 
@@ -11,6 +13,7 @@
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
 <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+
 
 <style>
 #phenocompo{
@@ -58,8 +61,24 @@ var csrftoken = getCookie('csrftoken');
 //   for(i=0; i< source.length; i++)
 //     $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
 // }
-// var source = ['alisso','balexandre'];
 
+console.log({{ contact_list|get_all_contacts|safe }});
+var contact_list_source = {{ contact_list|get_all_contacts|safe }};
+// Refresh Contact List
+function refreshContactList(projid){
+	$("#current-contact-list-"+projid).empty();
+	for(i=0; i<contact_list_source.length; i++)
+		$("#current-contact-list-"+projid).append("<li><a href=\"#\">" + contact_list_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+}
+
+//Refresh Affiliated Institute List
+var affiliated_institute_source = {{ affiliated_institute_list|get_all_affiliated_institute|safe }};
+console.log(affiliated_institute_source);
+function refreshAffiliatedInstituteList(projid){
+	$("#current-affiliated-institute-list-"+projid).empty();
+	for(i=0; i<affiliated_institute_source.length; i++)
+		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+}
 
 $(document).ready(function() {
 	$(".collapse").collapse();
@@ -123,6 +142,7 @@ $(document).ready(function() {
 
 															}
 		});
+		
 
 	});
 
@@ -173,26 +193,55 @@ $(document).ready(function() {
 									'border': 'solid',
 	});
 
-	//TypeHead Dynamic Phenotype list
-	// $('.typeahead').typeahead({
-	// 	source : source,
-	// 	items: 16
-	// });
+	//For each project section
+	$("tr[name='project-section']").each(function(){
+		var projid = $(this).attr("value");
+		console.log(projid);
 
-	// $('form').submit(function(e) {
+		//Contact List
+		$('#contact-list-input-'+projid).typeahead({
+			source : contact_list_source,
+			items: 16
+		});
 
- //    e.preventDefault(); // don't submit the form
-    
- //    var txt = $('.typeahead').val(); // get the current item
- //    console.log(txt);
- //    $('.typeahead').val(""); // clean the input
- //    source.push(txt); // add it to the source
- //    refreshPhenotypeList(); // refresh the list
+		$('#contact-list-form-'+projid).submit(function(e) {
 
-	// });
+    	e.preventDefault(); // don't submit the form
 
+    	var txt = $('#contact-list-input-'+projid).val(); // get the current item
+    	console.log(txt);
+    	$('#contact-list-input-'+projid).val(""); // clean the input
+    	contact_list_source.push(txt); // add it to the source
+    	refreshContactList(projid);
+    	// refreshPhenotypeList(); // refresh the list
+
+    });
+
+		refreshContactList(projid);
 	// refreshPhenotypeList();
 
+	//Affiliated Institute
+	$('#affiliated-institute-input-'+projid).typeahead({
+		source : affiliated_institute_source,
+		items: 16
+	});
+
+	$('#affiliated-institute-form-'+projid).submit(function(e) {
+
+    	e.preventDefault(); // don't submit the form
+
+    	var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
+    	console.log(txt);
+    	$('#affiliated-institute-input-'+projid).val(""); // clean the input
+    	affiliated_institute_source.push(txt); // add it to the source
+    	refreshAffiliatedInstituteList(projid);
+
+    });
+
+	refreshAffiliatedInstituteList(projid);
+});
+
+	
 });
 
 
@@ -312,7 +361,7 @@ border:solid 1px #c3c3c3;
 			{{ alert_msg|safe }}
 		</div>
 		<br />
-		<h3> All Projects </h3>
+		<h3> Project List </h3>
 
 		<div id="PARENT" class="accordion"></div>
 		<table class="table table-striped" id="project-table">
@@ -325,7 +374,7 @@ border:solid 1px #c3c3c3;
 				<th> Phenotype list Status </th>
 			</tr>
 			{% for proj, sslist in proj_ss_dict.items %}
-			<tr class="GroupA">
+			<tr class="Project-{{proj.pk}}" name="project-section" value="{{proj.pk}}">
 				<td>
 					<div class="accordion-group">
 						<div class="accordion-heading">
@@ -362,11 +411,14 @@ border:solid 1px #c3c3c3;
 				<td colspan="5" class="more">
 					<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
 						<div class="accordion-inner" style="border:none">
+							<a href="#" type="button" class="pull-right"> [+] Add Sample Submission </a>
+								</a>
 							<table class="table table-bordered" style="border:solid 1px">
 								<tr>
 									<th>Sample Submission</th>
 									<th>Phenotype List</th>
-									<th> External Collaborator (Source) </th>
+									<th> Ex-Co: Affiliated Institute </th>
+									<th> Ex-Co: Contact(s) </th>
 									<th> # of Samples </th>
 									<th> Date Created </th>
 									<th> Last Updated </th>
@@ -410,17 +462,39 @@ border:solid 1px #c3c3c3;
 										{% endfor %}
 										
 										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
-									<!-- </td>
-										</ul> -->
-									</ul>
-								</td>
-									<td>{{ ss.source }}</td>
+										</ul>
+									</td>
+									<td>{{ ss.affiliatedinstitute }}</td>
+									<td></td>
 									<td>{{ ss.sample_num }}</td>
 									<td>{{ ss.date_created }}</td>
 									<td>{{ ss.last_updated }}</td>
 								</tr>
 								{% empty %}
-								<b> Please Add Sample Submissions </b>
+								
+								<tr>
+									<td></td>
+									<td></td>
+									<td>
+										<form action="#" id="affiliated-institute-form-{{proj.pk}}">
+											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
+										</form>
+
+										<ol id="current-affiliated-institute-list-{{proj.pk}}">
+										</ol>
+									</td>
+									<td>
+										<form action="#" id="contact-list-form-{{proj.pk}}">
+											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
+										</form>
+										<ol id="current-contact-list-{{proj.pk}}">
+										</ol>
+									</td>
+									<td></td>
+									<td></td>
+									<td></td>
+								</tr>
+								<!-- {{ samplesubmissionform }} -->
 								{% endfor %}
 							</table>
 						</div>
@@ -453,6 +527,7 @@ border:solid 1px #c3c3c3;
 		<br />
 	</div>
 </div>
+
 
 
 {% endblock content %}
