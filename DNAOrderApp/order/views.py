@@ -8,10 +8,10 @@ from django.contrib.auth import login, authenticate, get_user
 from django.contrib.auth.models import User
 
 from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
-from DNAOrderApp.order.models import UserProject, Source
+from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser
 
 from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM
-#from DNAOrderApp.order.models import SampleForm, StudyForm
+from DNAOrderApp.order.models import DNAOrderAppUserForm
 from DNAOrderApp.order.forms import DocumentForm
 
 from django.contrib import messages
@@ -342,8 +342,20 @@ def admin_page(request, table=None, pkid=None):
     userlist_all = User.objects.all().order_by('username')
     userform = UserForm() #unbound form, no associated data, empty form
 
+    dnaorderappuserform = DNAOrderAppUserForm()
+
     phenotypelist_all = Phenotype.objects.all().order_by('phenotype_name')
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+
+    #FOR DEMO PURPOSES, INITIALIZE WITH PHENOTYPE TYPE FILLED
+    if not PhenotypeType.objects.all():
+        p1 = PhenotypeType(phenotype_type="AffectionStatus")
+        p2 = PhenotypeType(phenotype_type="Qualitative")
+        p3 = PhenotypeType(phenotype_type="Quantitative")
+
+        p1.save()
+        p2.save()
+        p3.save()
 
 
     ucf = UserCreationForm()
@@ -357,6 +369,7 @@ def admin_page(request, table=None, pkid=None):
             'userform': userform,
             'phenotypeform': phenotypeform,
             'phenotypelist_all':phenotypelist_all,
+            'dnaorderappuserform' : dnaorderappuserform,
 
             'ucf': ucf,
            
@@ -603,7 +616,6 @@ def add_project_fmpage(request):
             'userprojectform' : userprojectform,
             'alert_msg': alert_msg,
         })
-    print "render", t.render(c)
     print HttpResponse(t.render(c))
     return HttpResponse(t.render(c))
         
@@ -646,7 +658,15 @@ def fm_page(request):
     print "this is request.user", request.user
     userprojectform = UserProjectForm_FM(initial={'username': request.user}) #unbound form, no associated data, empty form
 
+    #Sample Submission form
+    samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
 
+    #Contact list
+    contact_list = DNAOrderAppUser.objects.all()
+
+    #Affiliated Institute List
+    affiliated_institute_list = AffiliatedInstitute.objects.all()
+    print "this is affiliated_institute list", affiliated_institute_list
 
 
 #---------------------------------------------------------------------------------------------
@@ -703,8 +723,10 @@ def fm_page(request):
         'phenotypeform' : phenotypeform,
         'ss_pheno_dict' : ss_pheno_dict,
         'userprojectform' : userprojectform,
+        'samplesubmissionform' : samplesubmissionform,
+        'contact_list' : contact_list,
+        'affiliated_institute_list' : affiliated_institute_list
         })
-
 
 def collab_page(request):
 
@@ -941,21 +963,18 @@ def pheno_select(request, id=-1):
         return self.sample_submission_name
 
 
-
-
-
-def basic_http_auth(f):
+def basic_http_auth_dnaorderappuser(f):
     def wrap(request, *args, **kwargs):
         if request.META.get('HTTP_AUTHORIZATION', False):
             authtype, auth = request.META['HTTP_AUTHORIZATION'].split(' ')
             auth = base64.b64decode(auth)
             username, password = auth.split(':')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                print "user.is_active", user.is_active
-                if user.is_active:
+            dnaorderappuser = authenticate(username=username, password=password)
+            if dnaorderappuser is not None:
+                print "dnaorderappuser.is_active", dnaorderappuser.is_active
+                if dnaorderappuser.is_active:
                     #attaches the authenticated user to current session, saves userid in session.
-                    login(request,user)
+                    login(request,dnaorderappuser)
                     print "get_user:", get_user(request)
                     
                     #Successful login
@@ -977,7 +996,42 @@ def basic_http_auth(f):
         
     return wrap
 
-@basic_http_auth
+
+# def basic_http_auth(f):
+#     def wrap(request, *args, **kwargs):
+#         if request.META.get('HTTP_AUTHORIZATION', False):
+#             authtype, auth = request.META['HTTP_AUTHORIZATION'].split(' ')
+#             auth = base64.b64decode(auth)
+#             username, password = auth.split(':')
+#             user = authenticate(username=username, password=password)
+#             if user is not None:
+#                 print "user.is_active", user.is_active
+#                 if user.is_active:
+#                     #attaches the authenticated user to current session, saves userid in session.
+#                     login(request,user)
+#                     print "get_user:", get_user(request)
+                    
+#                     #Successful login
+#                     return f(request, *args, **kwargs)
+#                 else:
+#                     #Return a 'disabled account' error message
+#                     print "disabled account error message"
+
+#             else:
+#                 # Return an 'invalid login' error message
+#                 print "User does not exist"
+#                 r = HttpResponse("Auth Required", status = 401)
+#                 r['WWW-Authenticate'] = 'Basic realm="bat"'
+#                 return r
+#         print "HTTP_AUTHORIZATION CANNOT BE FOUND IN request.META"
+#         r = HttpResponse("Auth Required", status = 401)
+#         r['WWW-Authenticate'] = 'Basic realm="bat"'
+#         return r
+        
+#     return wrap
+
+# @basic_http_auth
+@basic_http_auth_dnaorderappuser
 def signin(request):
     title = 'Sign In'
     print "inside login page"
