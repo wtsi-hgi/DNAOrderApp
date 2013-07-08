@@ -7,10 +7,12 @@ from django.conf.urls.static import static
 from django.views.generic.simple import redirect_to
 from django.conf import settings
 
+import autocomplete_light
+autocomplete_light.autodiscover()
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
@@ -21,7 +23,10 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
+    
+    # Testing pages and autocomplete plugin
+    url(r'autocomplete/', include('autocomplete_light.urls')),
     
     url(r'^order/', include('DNAOrderApp.order.urls')),
     url(r'^$', redirect_to, {'url': '/order/manifest_upload/'}), # Just for ease of use.
