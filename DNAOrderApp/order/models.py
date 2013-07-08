@@ -54,25 +54,29 @@ At the moment that is not the main focus. This is already being done by another 
 
 
 """ ACTUAL DNA ORDER APP """
+class AffiliatedInstitute(models.Model):
+    ai_name = models.CharField(max_length=100, unique=True)
+    ai_description = models.TextField()
+
+    def __unicode__(self):
+        return self.ai_name
+
+class DNAOrderAppUser(User):
+    # Inheriting from User
+    affiliated_institute = models.ManyToManyField(AffiliatedInstitute)
+
+    def __unicode__(self):
+        return self.username
 
 class Individual(models.Model):
     active = models.ForeignKey('self', null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
-# EXTERNAL COLLABORATORS
-class Source(models.Model):
-    source_name = models.CharField(max_length=100, unique=True)
-    contact_name = models.CharField(max_length=100)
-    source_description = models.TextField()
-    
-    def __unicode__(self):
-        return self.source_name
-
 class IndividualIdentifier(models.Model):
     individual = models.ForeignKey(Individual)
     individual_string = models.CharField(max_length=100)
-    source = models.ForeignKey(Source)
+    affiliated_institute = models.ForeignKey(AffiliatedInstitute)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -84,7 +88,7 @@ class Collection(models.Model):
     collection_description = models.TextField()
     
     def __unicode__(self):
-        return self.source_name
+        return self.collection_name
 
 class IndividualCollection(models.Model):
     individual = models.ForeignKey(Individual)
@@ -128,6 +132,15 @@ class UserProject(models.Model):
     def __unicode__(self):
         return self.project_name
 
+# class UserAffiliatedInstitute(models.Model):
+#     username = models.ForeignKey(User)
+#     affiliated_institute_name = models.CharField(max_length=100, unique=True)
+#     contact = models.ForeignKey(User)
+#     ai_description = models.TextField()
+    
+#     def __unicode__(self):
+#         return self.affiliated_institute_name
+
 class Phenotype(models.Model):
     phenotype_name = models.CharField(max_length=100, unique=True)
     phenotype_type = models.ForeignKey(PhenotypeType)
@@ -148,10 +161,11 @@ class SampleSubmission(models.Model):
 
     sample_submission_name = models.CharField(max_length=100, unique=True)
     project_name = models.ForeignKey(UserProject)
-    source = models.ForeignKey(Source)
+    affiliated_institute = models.ForeignKey(AffiliatedInstitute)
+    contact_list = models.ForeignKey(DNAOrderAppUser)
     sample_num = models.IntegerField() #two end users don't need to worry about manifest, we can generate the sample id 
     phenotype_list = models.ManyToManyField(Phenotype) #Associated phenotype list, will generate m2m table
-    order_status = models.CharField(max_length=100, choices=STATUS, default='Incomplete Phenotype List')
+    # order_status = models.CharField(max_length=100, choices=STATUS, default='Incomplete Phenotype List')
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
@@ -363,6 +377,12 @@ from django import forms
 class UserForm(ModelForm):
     class Meta:
         model = User
+
+class DNAOrderAppUserForm(forms.ModelForm):
+    class Meta:
+        model = DNAOrderAppUser
+        # fields = ('first_name', 'last_name', 'username', 'email', 'affiliated_institute')
+        # exclude = ('is_staff', 'is_active', 'password', 'date_joined', 'last_login')
 
 class PhenotypeForm(ModelForm):
     class Meta:
