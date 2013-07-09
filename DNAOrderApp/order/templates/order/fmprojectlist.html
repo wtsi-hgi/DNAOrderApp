@@ -206,40 +206,59 @@ $(document).ready(function() {
 
 		$('#contact-list-form-'+projid).submit(function(e) {
 
-    	e.preventDefault(); // don't submit the form
+    		e.preventDefault(); // don't submit the form
 
-    	var txt = $('#contact-list-input-'+projid).val(); // get the current item
-    	console.log(txt);
-    	$('#contact-list-input-'+projid).val(""); // clean the input
-    	contact_list_source.push(txt); // add it to the source
-    	refreshContactList(projid);
-    	// refreshPhenotypeList(); // refresh the list
+    		var txt = $('#contact-list-input-'+projid).val(); // get the current item
+    		console.log(txt);
+    		$('#contact-list-input-'+projid).val(""); // clean the input
+    		contact_list_source.push(txt); // add it to the source
 
-    });
+
+    	// AJAX SUBMIT to add contact into dnaorderuser
+  //   	$("#contact-list-form-"+projid).ajaxSubmit({
+		// 										url: '/order/api/handle_contact_fmpage/ADD/'+txt,
+		// 										type: "POST",
+		// 										resetForm : true,
+		// 										headers : {"X-CSRFToken" : csrftoken},
+		// 										success : function(data) {
+		// 																	console.log('test' + data);
+		// 																	$('#project-section').replaceWith(data);
+		// 																	$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
+		// 																	$(".collapse").collapse();
+		// 										},
+		// 										error : function(data) {
+		// 																	$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		// 										}
+		// });
+
+			refreshContactList(projid);
+    		// refreshPhenotypeList(); // refresh the list
+
+    	});
 
 		refreshContactList(projid);
 	// refreshPhenotypeList();
 
 	//Affiliated Institute
-	$('#affiliated-institute-input-'+projid).typeahead({
-		source : affiliated_institute_source,
-		items: 16
+		$('#affiliated-institute-input-'+projid).typeahead({
+			source : affiliated_institute_source,
+			items: 16
+		});
+
+		$('#affiliated-institute-form-'+projid).submit(function(e) {
+
+    		e.preventDefault(); // don't submit the form
+
+    		var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
+    		console.log(txt);
+    		$('#affiliated-institute-input-'+projid).val(""); // clean the input
+    		affiliated_institute_source.push(txt); // add it to the source
+    		refreshAffiliatedInstituteList(projid);
+
+    	});
+
+			refreshAffiliatedInstituteList(projid);
 	});
-
-	$('#affiliated-institute-form-'+projid).submit(function(e) {
-
-    	e.preventDefault(); // don't submit the form
-
-    	var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
-    	console.log(txt);
-    	$('#affiliated-institute-input-'+projid).val(""); // clean the input
-    	affiliated_institute_source.push(txt); // add it to the source
-    	refreshAffiliatedInstituteList(projid);
-
-    });
-
-	refreshAffiliatedInstituteList(projid);
-});
 
 	
 });
@@ -476,24 +495,28 @@ border:solid 1px #c3c3c3;
 									<td></td>
 									<td></td>
 									<td>
-										<form action="#" id="affiliated-institute-form-{{proj.pk}}">
+										<form id="affiliated-institute-form-{{proj.pk}}">
 											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
-										</form>
 
-										<ol id="current-affiliated-institute-list-{{proj.pk}}">
-										</ol>
+											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+											</ul>
+										</form>
 									</td>
 									<td>
-										<form action="#" id="contact-list-form-{{proj.pk}}">
+										<form id="contact-list-form-{{proj.pk}}">
 											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
+
+											<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+											</ul>
 										</form>
-										<ol id="current-contact-list-{{proj.pk}}">
-										</ol>
 									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
+									<td>
+									</form>
+								</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 								<!-- {{ samplesubmissionform }} -->
 								{% endfor %}
 							</table>
