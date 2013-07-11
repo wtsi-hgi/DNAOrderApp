@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, UserManager
 
 """
 MODELS.PY
@@ -56,7 +56,7 @@ At the moment that is not the main focus. This is already being done by another 
 """ ACTUAL DNA ORDER APP """
 class AffiliatedInstitute(models.Model):
     ai_name = models.CharField(max_length=100, unique=True)
-    ai_description = models.TextField()
+    ai_description = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.ai_name
@@ -64,6 +64,10 @@ class AffiliatedInstitute(models.Model):
 class DNAOrderAppUser(User):
     # Inheriting from User
     affiliated_institute = models.ManyToManyField(AffiliatedInstitute)
+
+    # User UserManager to get the create_user method, etc.
+    # http://scottbarnham.com/blog/2008/08/21/extending-the-django-user-model-with-inheritance/
+    objects = UserManager()
 
     def __unicode__(self):
         return self.username
@@ -144,9 +148,9 @@ class UserProject(models.Model):
 class Phenotype(models.Model):
     phenotype_name = models.CharField(max_length=100, unique=True)
     phenotype_type = models.ForeignKey(PhenotypeType)
-    phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.')
+    phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.', blank=True)
     phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
-                                        for autism spectrum disorder.')  # Not too sure if should be CharField or TextField...should be unique
+                                        for autism spectrum disorder.', blank=True)  # Not too sure if should be CharField or TextField...should be unique
 
     def __unicode__(self):
         return self.phenotype_name
@@ -162,7 +166,7 @@ class SampleSubmission(models.Model):
     sample_submission_name = models.CharField(max_length=100, unique=True)
     project_name = models.ForeignKey(UserProject)
     affiliated_institute = models.ForeignKey(AffiliatedInstitute)
-    contact_list = models.ForeignKey(DNAOrderAppUser)
+    contact_list = models.ManyToManyField(DNAOrderAppUser)
     sample_num = models.IntegerField() #two end users don't need to worry about manifest, we can generate the sample id 
     phenotype_list = models.ManyToManyField(Phenotype) #Associated phenotype list, will generate m2m table
     # order_status = models.CharField(max_length=100, choices=STATUS, default='Incomplete Phenotype List')
@@ -232,7 +236,7 @@ class PlatformType(models.Model):
 class Platform(models.Model):
     platform_name = models.CharField(max_length=100, unique=True)
     platform_type = models.ForeignKey(PlatformType)
-    platform_description = models.TextField()
+    platform_description = models.TextField(blank=True)
     
     def __unicode__(self):
         return self.platform_name
@@ -244,7 +248,7 @@ class Study(models.Model):
     study_name = models.CharField(max_length=100, unique=True)
     platform = models.ForeignKey(Platform, null=True, blank=True)
     data_location = models.CharField(max_length=200)
-    methodology_desc = models.TextField()
+    methodology_desc = models.TextField(blank=True)
     comment = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -392,10 +396,15 @@ class PhenotypeForm(ModelForm):
             'phenotype_definition' : forms.Textarea(attrs={'rows':2, 'cols':15})
         }
 
+from django.forms import CheckboxInput
+
 class SampleSubmissionForm(ModelForm):
     class Meta:
         model = SampleSubmission
         # exclude = ['phenotype_list']
+        widgets = {
+            'sample_submission_name': CheckboxInput,
+        }
 
 #For the Admin
 class UserProjectForm(ModelForm):
