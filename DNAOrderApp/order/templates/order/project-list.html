@@ -322,13 +322,13 @@
 	associated with the specific user.</b>
 	<br />
 	<br />
-	<form class="add_a_project" method="post" action="{% url project-list %}">
+	<form class="add_a_project" method="post" action="{% url "project-list" %}">
 		{% csrf_token %}
 		<table>
 			{{ userprojectform }}
 		</table>
 		<br />
-		<button id="add-a-project" class="btn btn-primary" type="submit" action="{% url project-list %}">Create a Project</button>
+		<button id="add-a-project" class="btn btn-primary" type="submit" action="{% url "project-list" %}">Create a Project</button>
 	</form>
 </div>
 
@@ -353,8 +353,8 @@
 		<h4> Upload the Manifest </h4>
 
 		<!-- Upload form. Note enctype attribute! -->
-		<!--form action="{% url project-list %}" method="post" enctype="multipart/form-data" id="project-list-form"-->
-		<form id="project-list-form" action="{% url project-list %}" method="post" enctype="multipart/form-data" >
+		<!--form action="{% url "project-list" %}" method="post" enctype="multipart/form-data" id="project-list-form"-->
+		<form id="project-list-form" action="{% url "project-list" %}" method="post" enctype="multipart/form-data" >
 			{% csrf_token %}
 
 			<p>{{ form.non_field_errors }}</p>

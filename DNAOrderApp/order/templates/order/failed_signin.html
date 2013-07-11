@@ -124,14 +124,14 @@ $(document).ready( function() {
 <!-- <div id="panel" style="display:none"> 
 	<h1> Sign Up Now! </h1>
 	<br />
-	<form class="sign-up" method="post" action="{% url index %}">
+	<form class="sign-up" method="post" action="{% url "index" %}">
 		{% csrf_token %}
 		<table>
 			{{ UserForm }}
 		</table>
 		<br />
-		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign In</button>
-		<button class="btn btn-primary" type="submit" method="post" action="{% url sign-up %}">Sign Up</button>
+		<button class="btn btn-primary" type="submit" method="post" action="{% url "sign-up" %}">Sign In</button>
+		<button class="btn btn-primary" type="submit" method="post" action="{% url "sign-up" %}">Sign Up</button>
 	</form>
 </div> -->
 
