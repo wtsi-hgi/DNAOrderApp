@@ -430,8 +430,6 @@ border:solid 1px #c3c3c3;
 				<td colspan="5" class="more">
 					<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
 						<div class="accordion-inner" style="border:none">
-							<a href="#" type="button" class="pull-right"> [+] Add Sample Submission </a>
-								</a>
 							<table class="table table-bordered" style="border:solid 1px">
 								<tr>
 									<th>Sample Submission</th>
@@ -489,6 +487,32 @@ border:solid 1px #c3c3c3;
 									<td>{{ ss.date_created }}</td>
 									<td>{{ ss.last_updated }}</td>
 								</tr>
+								{% if forloop.last %}
+								<tr>
+									<td></td>
+									<td></td>
+									<td>
+										<form id="affiliated-institute-form-{{proj.pk}}">
+											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
+
+											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+											</ul>
+										</form>
+									</td>
+									<td>
+										<form id="contact-list-form-{{proj.pk}}">
+											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
+
+											<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+											</ul>
+										</form>
+									</td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+								</tr>
+								{% endif %}
 								{% empty %}
 								
 								<tr>
@@ -510,16 +534,19 @@ border:solid 1px #c3c3c3;
 											</ul>
 										</form>
 									</td>
-									<td>
-									</form>
-								</td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
+									<td></td>
+									<td></td>
+									<td></td>
+								</tr>
 								<!-- {{ samplesubmissionform }} -->
+
 								{% endfor %}
+
+
 							</table>
+							<a href="#" type="button" class="pull-right"> [+] Save Sample Submission </a>
+							<br />
+							<br />
 						</div>
 					</div>
 				</td>
