@@ -121,19 +121,18 @@
 									<td></td>
 									<td></td>
 									<td>
-										<form action="#" id="affiliated-institute-form">
-											<input id="affiliated-institute-input" type="text" data-provide="typeahead">
-										</form>
+										<form action="#" id="dnaorderappuser-form-{{proj.pk}}">
+											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
+											
+											<ol id="current-affiliated-institute-list-{{proj.pk}}">
+											</ol>
+										</td>
+										<td>
+											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
 
-										<ol id="current-affiliated-institute-list">
-										</ol>
-									</td>
-									<td>
-										<form action="#" id="contact-list-form">
-											<input id="contact-list-input" type="text" data-provide="typeahead">
+											<ol id="current-contact-list-{{proj.pk}}">
+											</ol>
 										</form>
-										<ol id="current-contact-list">
-										</ol>
 									</td>
 									<td></td>
 									<td></td>
