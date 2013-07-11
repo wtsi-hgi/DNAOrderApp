@@ -1,3 +1,5 @@
+{% load get_phenotype_type %}
+
 <div id="phenotype-table-container{{ss.pk}}">
 <table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ssid}}" id ="phenotype-table{{ssid}}" ss-name="{{ ss_name }}">
 	<tr>
@@ -9,7 +11,7 @@
 	{% for p in phenotypelist_all %}
 	<tr id="{{p.pk}}">
 		<td>{{ p.phenotype_name }}</td>
-		<td>{{ p.phenotype_type_id }}</td>
+		<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
 		<td>{{ p.phenotype_description }}</td>
 		<td>{{ p.phenotype_definition }}</td>
 	</tr>
