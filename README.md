@@ -11,11 +11,34 @@ For Mac OSX, first install macports, then:
 port install py27-virtualenv py27-mysql py27-django
 # Configure a python virtualenv 
 virtualenv-2.7 ~/python-virtualenv
+# Enter the virtualenv
+. ~/python-virtualenv/bin/activate
 # Clone git repository into virtualenv directory and install settings template
 (cd ~/python-virtualenv &&  git clone https://github.com/wtsi-hgi/DNAOrderApp.git && cp DNAOrderApp/DNAOrderApp/settings.py.tmpl DNAOrderApp/DNAOrderApp/settings.py)
-# Edit settings (DNAOrderApp/DNAOrderApp/settings.py) as needed
+# Edit settings (DNAOrderApp/DNAOrderApp/settings.py) as needed (with your favorite text editor)
+emacs ~/python-virtualenv/DNAOrderApp/DNAOrderApp/settings.py
 # Run server
 VIRTUAL_ENV=$(echo ~/python-virtualenv) python ~/python-virtualenv/DNAOrderApp/manage.py runserver
+```
+
+On Ubuntu Linux, you could run:
+```bash
+# Install prerequisites
+sudo apt-get install python-virtualenv
+sudo apt-get build-dep python-mysqldb
+# Configure a python virtualenv 
+virtualenv ~/python-virtualenv 
+# Enter the virtualenv
+. ~/python-virtualenv/bin/activate
+# Install django and mysqldb
+pip install Django
+pip install MySQL-python
+# Clone git repository into virtualenv directory and install settings template
+(cd ~/python-virtualenv &&  git clone https://github.com/wtsi-hgi/DNAOrderApp.git && cp DNAOrderApp/DNAOrderApp/settings.py.tmpl DNAOrderApp/DNAOrderApp/settings.py)
+# Edit settings (DNAOrderApp/DNAOrderApp/settings.py) as needed (with your favorite text editor)
+emacs ~/python-virtualenv/DNAOrderApp/DNAOrderApp/settings.py
+# Run server
+python ~/python-virtualenv/DNAOrderApp/manage.py runserver
 ```
 
 Forked
