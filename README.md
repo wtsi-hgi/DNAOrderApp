@@ -48,6 +48,11 @@ https://github.com/sigurdga/django-jquery-file-upload <br>
 https://github.com/doph/minimal-django-file-upload-example <br>
 https://github.com/python-excel/xlrd <br>
 
+Other JQuery
+==============
+
+https://code.google.com/p/jquery-watermark/
+
 
 License
 =======
