@@ -52,6 +52,7 @@ Other JQuery
 ==============
 
 https://code.google.com/p/jquery-watermark/
+https://github.com/tcrosen/twitter-bootstrap-typeahead
 
 
 License
