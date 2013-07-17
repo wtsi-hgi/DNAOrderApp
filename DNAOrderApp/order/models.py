@@ -375,8 +375,53 @@ class Display(models.Model):
 class Unit(models.Model):
     unit_name = models.CharField(max_length=100, unique=True)
 
-from django.forms import ModelForm
+from django.forms import ModelForm, TextInput, Textarea
 from django import forms
+from django.forms.util import ErrorList
+import re
+
+class AffiliatedInstituteForm(forms.ModelForm):
+
+    def __init__(self, projid=None, *args, **kwargs):
+        super(AffiliatedInstituteForm, self).__init__(*args, **kwargs)
+        self.fields['ai_name'].widget.attrs['id'] = self.add_prefix(field_name)
+        self.fields['ai_name'].widget.attrs['name'] = self.add_prefix(field_name)
+
+    # From BaseForm
+    def add_prefix(self, field_name):
+        print "inside Affiliated Institute"
+        print self.prefix
+        print field_name
+        # does not have id, so it is name
+        if not re.findall('id{1,}', field_name):
+            print "this is name attribute"
+            prefix = ""
+            print prefix and field_name or field_name
+            return prefix and field_name or field_name
+        else:
+            print 'self.prefix', self.prefix
+            print "field_name", field_name
+            print self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
+            return self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
+
+        
+
+    class Meta:
+        model = AffiliatedInstitute
+        widgets = {
+            'ai_name' : TextInput(attrs={
+                        'class':'affiliated-institute-title-input', 
+                        'data-provided' : 'typeahead',
+                        'placeholder' : 'Insert Affiliated Institute...',
+                        'autocomplete' : 'off'
+        }),
+            'ai_description' : Textarea(attrs={
+                        'class' : 'affiliated-institute-description-input',
+                        'data-provided' : 'typeahead',
+                        'placeholder' : 'Insert description...',
+                        'autocomplete' : 'off'
+        }),
+        }
 
 class UserForm(ModelForm):
     class Meta:
