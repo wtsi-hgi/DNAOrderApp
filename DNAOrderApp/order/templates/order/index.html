@@ -29,33 +29,592 @@ body{
 	border-radius: 6px;
 }
 
+.colorstrip{
+	width: 100%; height: 300px;
+	border-style: solid;
+	border-color: white;
+	background-color: white;
+}
+
+<!-- Taken from Legend -->
+section.single-page {
+	padding: 4.75em 0; /* 76px */
+}
+section.single-page h1 {
+	text-align: center;
+	font-family:  'Patua One', cursive;
+	margin-bottom: 2em; /* 72px */
+	font-size: 2.25em; /* 36px */
+}
+#feature {
+	padding-top: 50px;
+	/* padding-bottom: 50px;*/
+	background: url("../../static/legend-by-Dzyngiri/img/yellow.png") repeat-x 0 0;
+	height: 350px;
+	z-index: 500;
+	box-shadow: 0 5px 16px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0 5px 16px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0 5px 16px rgba(0, 0, 0, 0.3);
+}
+#feature article {
+	text-align: center;
+	max-width: 1170px;
+}
+#feature-headline {
+	font-family: 'Patua One', cursive;
+	text-transform: uppercase;
+	color: rgba(228, 229, 229, 1);
+	margin-bottom: 3%; /* 39px */
+	margin-top: -.25em;
+	height: 109px;
+	background-size: 100% auto;
+}
+#feature-headline span {
+	font-family: 'Patua One', cursive;
+	text-transform: lowercase;
+}
+#feature article p {
+	font-family: 'Patua One', cursive;
+	font-size: 40px;
+	margin-bottom: 0;
+	line-height: 1.35;
+	color: #333;
+}
+#feature h1{
+	font-family: 'Patua One', cursive;
+	font-size: 5em;
+	/* margin-bottom: 1em; */
+	margin-top: 0.5em;
+	text-align: center;
+}
+
+
+/* ---------------------------------------------------------------------------------------------------------- 
+09 Media queries --------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------- */
+
+
+/* RESPONSIVE 
+-------------------------------------------------- */
+
+    @media (max-width: 1186px) {
+ .banner-caption {
+	    	/*	width: 18%; */
+	    	position: absolute;
+ left: 20%;
+ top: 6%;
+ color: #007ac3;
+}
+ #intro-caption {
+ font-family: 'Open Sans', sans-serif;
+ text-align: center;
+ font-size: 60px;
+ line-height: 70px;
+}
+ .banner-caption p {
+ font-size: 1em;
+}
+}
+ @media (max-width: 979px) {
+ .navbar-fixed-top {
+ margin-bottom: 0;
+}
+ .navbar .container {
+ width: 100%;
+}
+ .navbar .brand {
+ margin-top: 0;
+}
+ .navbar .btn-navbar {
+ margin-top: 0;
+}
+ .navbar-fixed-top .navbar-inner {
+ padding: 0px;
+}
+ .featurette {
+ height: auto;
+ padding: 0;
+}
+ .featurette-image.pull-left,  .featurette-image.pull-right {
+ display: block;
+ float: none;
+ max-width: 40%;
+ margin: 0 auto 20px;
+}
+}
+ @media (min-width: 768px) and (max-width: 979px) {
+ #headerwrap {
+ padding-top:0;
+}
+}
+ @media (max-width: 767px) {
+ .container {
+ padding-right: 5px;
+ padding-left: 5px;
+}
+ .navbar-fixed-top,  .navbar-fixed-bottom,  .navbar-static-top {
+ margin-right: 0px;
+ margin-left: 0px;
+ margin-bottom:0px;
+ padding-bottom:0px;
+}
+ .navbar-inner {
+ margin: 0;
+}
+ .carousel {
+ margin-left: -20px;
+ margin-right: -20px;
+}
+ .carousel .container {
+}
+ .carousel-caption {
+ width: 65%;
+ padding: 0 70px;
+ margin-top: 100px;
+}
+ .carousel-caption h1 {
+ font-size: 30px;
+}
+ .carousel-caption .lead,  .carousel-caption .btn {
+ font-size: 18px;
+}
+ .featurette-heading {
+ font-size: 30px;
+}
+ .featurette .lead {
+ font-size: 18px;
+ line-height: 1.5;
+}
+}
+    
+    /* Smaller screens ----------- */
+	@media (max-width : 480px) {
+ #headerwrap {
+ padding-top:0;
+}
+ #headerwrap h1 {
+ font-size:2em;
+}
+ #headerwrap h2 {
+ font-size:1em;
+}
+ #headerwrap input[type="text"] {
+ width: 100%;
+}
+ #headerwrap input[type="submit"] {
+ margin-top:1em;
+ width: 135px;
+}
+ .container {
+1px solid yellow;
+}
+ #team .team-thumb {
+ margin-right: auto;
+ margin-left: auto;
+ width: 150px;
+ display: block;
+ text-align:center
+}
+ #feature article p {
+ font-family: 'Open Sans', sans-serif;
+ font-size: 26px; /* font-size: 26px; */
+ margin-bottom: 0;
+ line-height: 30px;
+ color: #fff;
+}
+}
+    
+    /* Smartphones (portrait and landscape) ----------- */
+	@media only screen  and (min-device-width : 320px)  and (max-device-width : 480px) {
+ #feature-headline {
+ background: transparent;
+ text-indent: 0;
+ overflow: visible;
+ margin-top: 1.5em;
+}
+ #navbar-inner {
+ margin:	0;
+}
+ #banner { /*display: none;*/
+}
+ section.single-page {
+ padding: 1em 0;
+}
+		
+		/* Feature */
+		#feature-badge {
+/*	display: none; */
+		}
+		
+		/* Portfolio & News */
+		
+		#news h1 {
+ background: transparent;
+}
+ #news h1 span {
+ background: transparent;
+ padding: 0;
+}
+ #portfolio .container {
+ top: 0 !important;
+}
+ #feature article p {
+ font-family: 'Open Sans', sans-serif;
+ font-size: 26px; /* font-size: 26px; */
+ margin-bottom: 0;
+ line-height: 30px;
+ color: #fff;
+}
+ .img-news {
+ width: 100%;
+}
+ .img-news {
+ margin-right: auto;
+ margin-left: auto;
+ display: block;
+}
+ section#portfolio hgroup h2 {
+ margin-top: 1.5em;
+}
+	
+		/* Services */
+		
+		#services h1 {
+ background: transparent;
+}
+ #services h1 span {
+ background: transparent;
+ padding: 0;
+}
+ section#services h2 {
+ margin-bottom: 0.25em;
+}
+ section#services h2, section#services ul {
+ text-align: center;
+}
+		
+
+	    /* Testimonials */
+	    
+		section#testimonials { /*display: none;*/
+}
+	
+		/* team */
+		
+		#team .team-thumb {
+ margin-right: auto;
+ margin-left: auto;
+ width: 150px;
+ display: block;
+ text-align:center
+}
+ .job-position: {
+ margin-bottom: 1.5em;
+}
+ .navbar-fixed-top, .navbar-fixed-bottom, .navbar-static-top {
+ margin-left: auto;
+ margin-right: auto;
+}
+		
+		/* Contact Form */
+
+		#theme-form {
+ overflow: hidden;
+}
+ #theme-form input[type=submit] {
+ width: 100%;
+}
+}
+
+	/* Smartphones (landscape) ----------- */
+	@media only screen  and (min-width : 321px) {
+ #feature-headline {
+ font-size: 32px; /* 34px */
+}
+}
+	
+	/* Smartphones (portrait) ----------- */
+	@media only screen  and (max-width : 320px) {
+ #feature-headline {
+ font-size: 1.1875em; /* 19px */
+}
+ #feature article p {
+ font-family: 'Open Sans', sans-serif;
+ font-size: 26px; /* font-size: 26px; */
+ margin-bottom: 0;
+ line-height: 30px;
+ color: #fff;
+}
+}
+	
+	/* iPads (portrait and landscape) ----------- */
+	@media only screen  and (min-device-width : 768px)  and (max-device-width : 1024px) {
+ .banner-caption p {
+ font-size: 0.6em;
+}
+ #intro-caption {
+ font-size: 4em;
+}
+}
+	
+	/* iPads (landscape) ----------- */
+	@media only screen  and (min-device-width : 768px)  and (max-device-width : 1024px)  and (orientation : landscape) {
+/* Styles */
+	}
+	
+	/* iPads (portrait) ----------- */
+	@media only screen  and (min-device-width : 768px)  and (max-device-width : 1024px)  and (orientation : portrait) {
+/* Styles */
+	}
+	
+	/* Desktops and laptops ----------- */
+	@media only screen  and (min-width : 1224px) {
+/* Styles */
+	}
+
 {% endblock extrahead %}
 
 {% block extra_css_js %}
+<!-- Google Web fonts -->
+<link href='http://fonts.googleapis.com/css?family=Quattrocento:400,700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Patua+One' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Special+Elite' rel='stylesheet' type='text/css'>
+<link href="../../static/legend-by-Dzyngiri/css/fontello.css" type="text/css" rel="stylesheet">
+ <!-- <link href="../../static/legend-by-Dzyngiri/css/style.css" rel="stylesheet"> -->
 
 {% endblock extra_css_js %}
-
 
 {% block title %}{{ title }}{% endblock title %}
 
 {% block active-navbar %} 
-<li class="active"><a href="index">Home</a></li>
-<li><a href="about">About</a></li>
-<li><a href="contact">Contact</a></li>
+<li class="active"><a href="#home">Home</a></li>
+<li><a href="#feature">Mission</a></li>
+<li><a href="#contact">Get Started</a></li>
+<li><a href="#services">Contact</a></li>
 {% endblock active-navbar %}
 
 {% block content %}
 
-<!-- Main hero unit for a primary marketing message or call to action -->
-<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0);">
-	<h1> Need to order some DNA?</h1>
-	<p> The DNA Order Application aims to make the DNA ordering process easy for both faculty members and collaborators. </p>
-	<p>
-		<a id="go-to-project-list" class="btn btn-primary btn-large pull-right" href="signin"> Start Now! </a>
-	</p>
+<!--******** Main hero unit for a primary marketing message or call to action *****-->
+<div id="home"></div>
+<div class="container">
+	<div class="hero-unit" style="background-color: rgba(255, 255, 255, 0.5); color: rgb(0,0,0); margin-top:50px;">
+		<div class="row-fluid">
+			<div class="span7">
+				<h1> Need to <br />order some DNA?</h1>
+				<br/>
+				<p> Making DNA ordering process easy for both faculty members and collaborators. </p>
+			</div>
+		</div>
+		<p>
+			<a id="go-to-project-list" class="btn btn-primary btn-large pull-right" href="signin"> Start Now! </a>
+		</p>
+	</div>
 </div>
+<br />
+<br />
+
+<!--**************---MISSION STATEMENT---************************-->
+<section id="feature">
+	<div class="container single-page">
+		<div class="row-fluid">
+			<div class="span12">
+				<h1>Mission</h1>
+				<br />
+				<div class="row-fluid">
+					<div class="span12">
+						<article>
+							<p> We work to reduce the rate of mislabelling wells in the DNA ordering process by bettering the user interface.</p>
+						</article>
+					</div>
+				</div>
+				<!-- ./span12 -->
+			</div>
+			<!-- .row -->
+		</div>
+	</div>
+	<!-- ./container -->
+</section>
+
+
+<!--******************** Services Section ********************-->
+<style>
+#services h1 {
+	font-size: 3em;
+	margin-bottom: 0.5em;
+	margin-top: 0.5em;
+	text-align: center;
+	font-family:  'Patua One', cursive;
+}
+
+section#services {
+	padding-bottom: 5em;
+	padding-top: 2em;
+}
+
+</style>
+
+
+<section id="services" class="single-page scrollblock" style="background-color: rgba(225, 225, 225, 0.5); color: rgb(0,0,0);">
+	<div class="container">
+		<h1>Contact Us</h1>
+		<div class="row">
+			<div class="span12">
+				<h3>Human Genetics Informatics Team</h3>
+				<p>Wellcome Trust Sanger Institute</p>
+				<p>Wellcome Trust Genome Campus</p>
+				<p> Hinxton, Cambridgeshire </p>
+				<p> CB10 1SA </p>
+				<p> United Kingdom </p>
+
+				<p> Tel: +44(0)1223 834244 </p>
+				<p> Fax: +44(0)1223 494919 </p>
+			</div>
+		</div>
+		<!-- /.row -->
+	</div>
+	<!-- /.container -->
+</section>
+
+<!--******************** Contact Section ********************-->
+<style>
+/* Team and Contact */
+
+section#team, section#contact {
+	color: #e4e5e2;
+	background:#312A1E;
+}
+section#team .align, section#contact .align {
+	font-size: 6em;
+	text-align: center;
+}
+#team h1, #contact h1 {
+	font-size: 3em;
+	margin-bottom: 1em;
+	margin-top: 0.5em;
+}
+#contact, #team {
+	padding-top: 4.75em;
+}
+#team {
+	padding-bottom: 0;
+}
+#contact {
+	padding-bottom: 0;
+}
+
+/* Contact Form */
+
+#theme-form {
+	position: relative;
+	z-index: 999;
+}
+#theme-form input[type=text], .cform-form textarea {
+	background: rgba(227, 231, 228, 1);
+	font-family: 'Open Sans', sans serif;
+	border: 0;
+	text-align: left;
+	vertical-align: middle;
+}
+#theme-form input[type=text]:focus, .cform-form textarea:focus {
+	background: rgba(101, 106, 100, 1);
+	color: #eff1ef;
+	box-shadow: none;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	transition: background 0.25 ease-in;
+	-moz-transition: background 0.25 ease-in;
+	-webkit-transition: background 0.25 ease-in;
+}
+#theme-form input[type=text] {
+	height: 3.25em;
+}
+#theme-form input[type=submit] {
+	font-family: 'Patua One', cursive;
+	color: #fff;
+	width: 185px;
+	height: 60px;
+	text-shadow: none;
+	font-size: 1.3125em; /* 21px */
+	padding:0.5em;
+	letter-spacing: 0.05em;
+	margin: 0 0 20px 0;
+	display: block;
+	border: 0;
+	text-transform: none;
+	background: #f0bf00 !important;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: none;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+}
+#theme-form input[type=submit]:hover, #theme-form input[type=submit]:active {
+	background: #43413e !important;
+}
+#theme-form textarea {
+	padding-top: 1em;
+}
+div.cform-response-output {
+	max-width: 60%;
+	text-align: center;
+	margin-left: 40% !important;
+	margin-top: 0.5em !important;
+	padding: 0.5em !important;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+.cform-not-valid-tip {
+	color: #888;
+	border: 1px dotted #ad3729 !important;
+	width: 100% !important;
+	left: 0 !important;
+	padding: 0.5em !important;
+	font-family: 'Open Sans', sans-serif;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+
+</style>
+
+
+<section id="contact" class="single-page scrollblock">
+	<div class="container">
+		<h1>Get Started</h1>
+		<div class="row">
+			<div class="span12">
+				<p> If you're a member of Sanger Institute, you may log in: </p>
+				<form action="#" method="post" class="login-form">
+					<input type="text" name="your-email" placeholder="Your Email" size="30">
+					<input type="text" name="your-password"  placeholder="Your Password" size="30">
+					<input type="submit" value="Log In">
+				</form>
+				<p> If not, send us an email: </p>
+				<form action="#" method="post" class="outsider-login-form">
+					<input type="text" name="outsider-email" placeholder="Your Email" size="30">
+					<br />
+					<textarea cols="300" rows="10" name="outsider-message" placeholder="Your Message" size="30"></textarea>
+					<input type="submit" value="Send Email">
+				</form>
+
+			</div>
+			<!-- ./span12 -->
+		</div>
+		<!-- /.row -->
+	</div>
+	<!-- /.container -->
+</section>
 
 {% endblock content %}
+
+
 
 <!-- to add to parent block instea od completely overriding it, use {{ block.super }}-->
 
