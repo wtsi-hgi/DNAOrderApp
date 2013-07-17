@@ -1,9 +1,10 @@
 {% extends "base_template.html" %} 
-{% load render_table from django_tables2 %}
 {% load replace %}
 {% load get_phenotype_type %}
 {% load get_contact_list %}
 {% load get_affiliated_institute_list %}
+{% load create_formset_list %}
+{% load create_aiform %}
 
 {% block title %}Project List{% endblock title %}
 
@@ -12,7 +13,11 @@
 <link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
-<link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+<!-- <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" /> -->
+<script src="{{ STATIC_URL }}jquery.watermark-3.1.4/jquery.watermark.js" rel="text/javascript" media="screen"></script>
+<!--https://code.google.com/p/jquery-watermark/-->
+<!-- <script src="{{ STATIC_URL }}twitter-bootstrap-typeahead/js/bootstrap-typeahead.js" rel="text/javascript" media="screen"></script> -->
+<!-- https://github.com/tcrosen/twitter-bootstrap-typeahead -->
 
 
 <style>
@@ -32,9 +37,9 @@
 }
 
 #phenotypeformtable{
-	max-width: 500px;
-	width: %;
-	padding: 300px;
+					max-width: 500px;
+					/*width: %;*/
+					padding: 300px;
 }
 </style>
 
@@ -67,18 +72,20 @@ var contact_list_source = {{ contact_list|get_all_contacts|safe }};
 // Refresh Contact List
 function refreshContactList(projid){
 	$("#current-contact-list-"+projid).empty();
-	for(i=0; i<contact_list_source.length; i++)
+	for(i=0; i<contact_list_source.length; i++){
 		$("#current-contact-list-"+projid).append("<li><a href=\"#\">" + contact_list_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+	}
 }
 
 //Refresh Affiliated Institute List
+//DEPRECATED: THERE IS NO MULTIPLE AFFILIATED INSTITUTES ASSOCIATED TO SAMPLE SUBMISSION ANYMORE. JUST ONE. SINCE IT IS BY FOREIGN KEY NOT M2M.
 var affiliated_institute_source = {{ affiliated_institute_list|get_all_affiliated_institute|safe }};
 console.log(affiliated_institute_source);
-function refreshAffiliatedInstituteList(projid){
-	$("#current-affiliated-institute-list-"+projid).empty();
-	for(i=0; i<affiliated_institute_source.length; i++)
-		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-}
+// function refreshAffiliatedInstituteList(projid){
+// 	$("#current-affiliated-institute-list-"+projid).empty();
+// 	for(i=0; i<affiliated_institute_source.length; i++)
+// 		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+// }
 
 $(document).ready(function() {
 	$(".collapse").collapse();
@@ -103,7 +110,27 @@ $(document).ready(function() {
 												}
 		});
 	});
-	
+
+	// To Add Affiliated Institute
+	$('.save-ai-button').click( function(data){
+		alert("save button!");
+		console.log(data);
+		console.log(this);
+		var projid = $(this).attr("value");
+		$("#affiliated-institute-form-"+projid).ajaxSubmit({
+						url: '/order/api/handle_ai_fmpage/ADD/',
+						type: "POST",
+						resetForm: true,
+						headers: {"X-CSRFToken" : csrftoken},
+						success : function(data) {
+							alert("success!");
+						},
+						error: function(data) {
+							alert("FAILED!");
+						}
+		});
+
+	});
 
 	// To add a callback function to popover
 	var pt = $.fn.popover.Constructor.prototype.show;
@@ -142,8 +169,6 @@ $(document).ready(function() {
 
 															}
 		});
-		
-
 	});
 
 	
@@ -156,7 +181,7 @@ $(document).ready(function() {
         	$(this).popover('hide');
         	return;
         }
-    });
+    	});
 	});
 
 	//Changing Modal size dynamically
@@ -213,7 +238,6 @@ $(document).ready(function() {
     		$('#contact-list-input-'+projid).val(""); // clean the input
     		contact_list_source.push(txt); // add it to the source
 
-
     	// AJAX SUBMIT to add contact into dnaorderuser
   //   	$("#contact-list-form-"+projid).ajaxSubmit({
 		// 										url: '/order/api/handle_contact_fmpage/ADD/'+txt,
@@ -239,29 +263,78 @@ $(document).ready(function() {
 		refreshContactList(projid);
 	// refreshPhenotypeList();
 
+/////////////// THIS CODE /////////////////////////////////////////////////
+	//check to see if browser supports placeholder function
+	// jQuery.support.placeholder = (function(){
+	// 	var i = document.createElement('input');
+	// 	return 'placeholder' in i;
+	// })();
+	// jQuery.support.placeholder = false;
+
+	// $("#affiliated-institute-title").click(function(event){
+	// 	if (jQuery.support.placeholder){
+	// 		console.log("inside if");
+	// 		$(this).html("<input name='ai' id='ai-title-input' type='text' data-provide='typeahead' placeholder='Insert Affiliated Institute...' autocomplete='off'>");
+	// 	}
+	// 	else{
+	// 		console.log("else ");
+	// 		$(this).html("<input name='ai' id='ai-title-input' type='text' data-provide='typeahead' autocomplete='off'>");
+	// 		$('#ai-title-input').watermark('Insert Affiliated Institute...');
+	// 	}
+ //    });
+   
+ //    $("#affiliated-institute-description").click(function(event){
+ //    	if (jQuery.support.placeholder){
+ //    		$(this).html("<input name='ai' id='ai-description-input' type=\"text\" data-provide=\"typeahead\" placeholder='Insert description...' autocomplete='off'>");
+ //    	}
+ //    	else{
+ //    		$(this).html("<input name='ai' id='ai-description-input' type=\"text\" data-provide=\"typeahead\" placeholder='Insert description...' autocomplete='off'>");
+ //    		$('#ai-description-input').watermark('Insert description...');
+ //    	}
+ //    });
+
+//////////////////////END OF THIS CODE////////////////////////////////////////
+
+
 	//Affiliated Institute
-		$('#affiliated-institute-input-'+projid).typeahead({
-			source : affiliated_institute_source,
-			items: 16
-		});
-
-		$('#affiliated-institute-form-'+projid).submit(function(e) {
-
-    		e.preventDefault(); // don't submit the form
-
-    		var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
-    		console.log(txt);
-    		$('#affiliated-institute-input-'+projid).val(""); // clean the input
-    		affiliated_institute_source.push(txt); // add it to the source
-    		refreshAffiliatedInstituteList(projid);
-
-    	});
-
-			refreshAffiliatedInstituteList(projid);
+	$('.affiliated-institute-title-input').typeahead({
+		source : affiliated_institute_source,
+		items: 16
 	});
 
-	
+	// !!!!!! this helps add onto the list of affiliated institute
+	// best to have a function that updates the 'querying' the affiliated institute list 
+	// to update the affiliated_institute_source.!!!!
+
+	//So as of this moment - this is deprecated. need to renew this function.
+	// $('#affiliated-institute-form-'+projid).submit(function(e) {
+
+ //    		e.preventDefault(); // don't submit the form
+
+ //    		var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
+ //    		console.log(txt);
+ //    		$('#affiliated-institute-input-'+projid).val(""); // clean the input
+ //    		affiliated_institute_source.push(txt); // add it to the source
+ //    		refreshAffiliatedInstituteList(projid);
+
+ //    	});
+
+	// refreshAffiliatedInstituteList(projid);
+
+	$('.affiliated-institute-description-input').typeahead({
+		source: [
+			'is a genome research institute primarily funded by the Wellcome Trust.',
+			'is a world renowned teaching hospital in Cambridge, England, with strong affiliations to the University of Cambridge.',
+			'is Hello World.'
+		]
+	});
 });
+});
+
+	
+
+	
+
 
 
 // To Add a Phenotype
@@ -392,6 +465,7 @@ border:solid 1px #c3c3c3;
 				<th> Sample Submissions Status </th>
 				<th> Phenotype list Status </th>
 			</tr>
+			
 			{% for proj, sslist in proj_ss_dict.items %}
 			<tr class="Project-{{proj.pk}}" name="project-section" value="{{proj.pk}}">
 				<td>
@@ -445,118 +519,140 @@ border:solid 1px #c3c3c3;
 									<td>{{ ss.sample_submission_name }}</td>
 									<td id="top3phenolist">
 										<ul>
-										{% for ss_select, phenolist in ss_pheno_dict.items %}
+											{% for ss_select, phenolist in ss_pheno_dict.items %}
 											{% if ss_select == ss %}
-												<b>{{ss_select}}</b>
-												{% for pheno in phenolist|slice:":3" %}
-													<li>{{ pheno }}</li>
-												{% endfor %}
-												<!-- To SEE THE FULL LIST UNCOMMENT THIS -->
+											<b>{{ss_select}}</b>
+											{% for pheno in phenolist|slice:":3" %}
+											<li>{{ pheno }}</li>
+											{% endfor %}
+											<!-- To SEE THE FULL LIST UNCOMMENT THIS -->
 												<!-- {% for pheno in phenolist %}
 													<li>{{ pheno }}</li>
-												{% endfor %} -->
-												<!-- UNCOMMENT UP TO HERE -->
-												<div style="display:none" id="phenotype-table-container{{ss.pk}}">
-													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
-														<tr>
-															<th> Phenotype Name </th>
-															<th> Phenotype Type </th>
-															<th> Phenotype Description </th>
-															<th> Phenotype Definition </th>
-														</tr>
-														{% for p in phenolist %}
-														<tr id="{{p.pk}}">
-															<td>{{ p.phenotype_name }}</td>
-															<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
-															<td>{{ p.phenotype_description }}</td>
-															<td>{{ p.phenotype_definition }}</td>
-														</tr>
-														{% endfor %}
-													</table> 
+													{% endfor %} -->
+													<!-- UNCOMMENT UP TO HERE -->
+													<div style="display:none" id="phenotype-table-container{{ss.pk}}">
+														<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
+															<tr>
+																<th> Phenotype Name </th>
+																<th> Phenotype Type </th>
+																<th> Phenotype Description </th>
+																<th> Phenotype Definition </th>
+															</tr>
+															{% for p in phenolist %}
+															<tr id="{{p.pk}}">
+																<td>{{ p.phenotype_name }}</td>
+																<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
+																<td>{{ p.phenotype_description }}</td>
+																<td>{{ p.phenotype_definition }}</td>
+															</tr>
+															{% endfor %}
+														</table> 
+													</div>
+
+													{% endif %}
+													{% endfor %}
+
+													<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
+												</ul>
+											</td>
+											<td>{{ ss.affiliatedinstitute }}</td>
+											<td></td>
+											<td>{{ ss.sample_num }}</td>
+											<td>{{ ss.date_created }}</td>
+											<td>{{ ss.last_updated }}</td>
+										</tr>
+										{% if forloop.last %}
+										<tr>
+											<td></td>
+											<td></td>
+											<td>
+												<!-- <form id="affiliated-institute-form-{{proj.pk}}">
+													<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
+
+													<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+													</ul>
+												</form> -->
+												<div class="alert alert-block">
+												<form id="affiliated-institute-form-{{proj.pk}}">
+													{% csrf_token %}
+													{{ proj.pk|create_aiform }}
+													<a href="#" class="save-ai-button pull-right" id="save-ai-button-{{proj.pk}}" type="button" value="{{proj.pk}}">Save</a>
+												</form>
 												</div>
+											</td>
+											<td>
+												<div class="alert alert-block">
+													<button type="button" class="close" data-dismiss="alert">&times;</button>
+													<form id="contact-list-form-{{proj.pk}}">
+														<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
 
-											{% endif %}
-										{% endfor %}
-										
-										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
-										</ul>
-									</td>
-									<td>{{ ss.affiliatedinstitute }}</td>
-									<td></td>
-									<td>{{ ss.sample_num }}</td>
-									<td>{{ ss.date_created }}</td>
-									<td>{{ ss.last_updated }}</td>
-								</tr>
-								{% if forloop.last %}
-								<tr>
-									<td></td>
-									<td></td>
-									<td>
-										<form id="affiliated-institute-form-{{proj.pk}}">
+														<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+														</ul>
+													</form>
+												</div>
+											</td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+										</tr>
+										{% endif %}
+										{% empty %}
+
+										<tr>
+											<td></td>
+											<td></td>
+											<td>
+										<!-- <form id="affiliated-institute-form-{{proj.pk}}">
 											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
 
 											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
 											</ul>
-										</form>
-									</td>
-									<td>
-										<form id="contact-list-form-{{proj.pk}}">
-											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
+										</form> -->
 
-											<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-								{% endif %}
-								{% empty %}
-								
-								<tr>
-									<td></td>
-									<td></td>
-									<td>
-										<form id="affiliated-institute-form-{{proj.pk}}">
-											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
+										<div class="alert alert-block">
+											<button type="button" class="close" data-dismiss="alert">&times;</button>
+											<form id="affiliated-institute-form-{{proj.pk}}">
+												<div id="affiliated-institute-title">
+													<input id="affiliated-institute-title-input-{{proj.pk}}" type="text" data-provide="typeahead" placeholder="Insert Affiliated Institute..." autocomplete="off">
+												</div>
+												<div id="affiliated-institute-description">
+													<input id="affiliated-institute-description-input-{{proj.pk}}" type="text" data-provide="typeahead" placeholder="Insert description..." autocomplete="off">
+													<a href="#" class="pull-right" id="save-ai-button" type="button" value="{{proj.pk}}">Save</a>
+												</form>
+											</div>
+										</td>
+										<td>
+											<form id="contact-list-form-{{proj.pk}}">
+												<input id="contact-list-input-{{proj.pk}}" type="text" data-provided="typeahead">
 
-											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td>
-										<form id="contact-list-form-{{proj.pk}}">
-											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
+												<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+												</ul>
+											</form>
+										</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<!-- {{ samplesubmissionform }} -->
 
-											<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-								<!-- {{ samplesubmissionform }} -->
-
-								{% endfor %}
+									{% endfor %}
 
 
-							</table>
-							<a href="#" type="button" class="pull-right"> [+] Save Sample Submission </a>
-							<br />
-							<br />
+								</table>
+								<a href="#" type="button" class="pull-right"> [+] Save Sample Submission </a>
+								<br />
+								<br />
+							</div>
 						</div>
-					</div>
-				</td>
-			</tr>
-			{% endfor %}
-		</table>
-	</div>
-	<!--**************************** END OF PROJECT TABLE **************************************-->
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<!--**************************** END OF PROJECT TABLE **************************************-->
 
-	<!--****************** ADD A PROJECT FORM ***********************-->
+		<!--****************** ADD A PROJECT FORM ***********************-->
 		<!-- Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
 		associated with the specific user. But I should still be able to associate External Collaborators with the Projects. -->
 		<div id="add_a_project_panel"> 
@@ -575,9 +671,10 @@ border:solid 1px #c3c3c3;
 		<hr />
 		<br />
 		<br />
+
+
 	</div>
 </div>
-
 
 
 {% endblock content %}
