@@ -11,7 +11,7 @@ from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype
 from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser
 
 from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM
-from DNAOrderApp.order.models import DNAOrderAppUserForm
+from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm
 from DNAOrderApp.order.forms import DocumentForm
 
 from django.contrib import messages
@@ -360,6 +360,28 @@ def admin_page(request, table=None, pkid=None):
 
     ucf = UserCreationForm()
 
+    # EXPERIMENTING FORMSETS 
+    # from django.forms.formsets import formset_factory
+    # PhenotypeFormSet = formset_factory(PhenotypeForm, extra=2)
+    # formset = PhenotypeFormSet(initial=[
+    #     {'phenotype_name': 'Monkeys',
+    #     'phenotype_description': 'hello world',
+    #     }
+    # ])
+
+    # print "this is formset", formset
+
+    # EXPERIMENTING MODEL FORMSETS
+    # from django.forms.models import modelformset_factory
+    # PhenotypeFormSet = modelformset_factory(Phenotype, can_delete=True)
+
+    # formset = PhenotypeFormSet(queryset=Phenotype.objects.none())
+    # print "this is phenotypeformset ", formset
+
+
+    # EXPERIMENTING WITH INLINE FORMSETS
+   
+
     return render(request, 'order/admin-page.html', {
             'userprojectform': userprojectform,
             'userprojectlist_all': userprojectlist_all,
@@ -370,6 +392,7 @@ def admin_page(request, table=None, pkid=None):
             'phenotypeform': phenotypeform,
             'phenotypelist_all':phenotypelist_all,
             'dnaorderappuserform' : dnaorderappuserform,
+            # 'PhenotypeFormSet' : formset,
 
             'ucf': ucf,
            
@@ -488,6 +511,53 @@ def get_projectlist(user):
 #     print ss_pheno_dict
 
 #     return HttpResponse(t.render(c))
+
+def handle_ai_fmpage(request, action=None, id=None):
+    print "in handle_ai_fmpage"
+    if action == "DELETE":
+        print "deleting an AI"
+        if id != None:
+            return delete_ai_fmpage(id)
+    elif action == "ADD":
+        return add_ai_fmpage(request)
+    else:
+        return HttpResponse("Everything failed! - phenotype")
+
+
+def add_ai_fmpage(request):
+    '''
+    When you see the AI displayed on the label, this hasn't been associated with 
+    the sample submission yet. To be associated you need to create the entire 
+    sample submission first. Clicking the save button will only save the existence
+    of this affiliated institute.
+    '''
+    print "inside add_ai_fmpage"
+    alert_msg = ""
+    print "this is request.POST in ai", request.POST
+    aiform = AffiliatedInstituteForm(request.POST)
+
+    if aiform.is_valid():
+        print "in if"
+        ai = aiform.save()
+        print 'this is ai', ai.ai_name, ai.ai_description
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
+    else:
+        print "in else"
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
+
+    #aiform = AffiliatedInstituteForm()
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-label-fmpage.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'alert_msg': alert_msg,
+            'aiform' : aiform
+        })
+
+    return HttpResponse(t.render(c))
+
 
 def get_phenolist_cp(proj_name):
     ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
@@ -632,6 +702,28 @@ def handle_project_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - handle project")
 
+
+def add_contact_fmpage(request):
+    print "in add_contact_fmpage"
+    alert_msg = ""
+
+    d = DNAOrderAppUser.objects.create_user(username="johnlennon",)
+
+
+
+
+def handle_contact_fmpage(request, action=None, id=None):
+    print "in handle_contact_fmpage"
+    if action == "DELETE":
+        if id != None:
+            pass
+    elif action == "ADD":
+        print "adding a contact"
+        return add_contact_fmpage(request)
+    else:
+        return HttpResponse("Everything failed - handle contact fmpage")
+
+
 def fm_page(request):
 
     # CHECK IF USER HAS BEEN LOGGED IN
@@ -725,7 +817,7 @@ def fm_page(request):
         'userprojectform' : userprojectform,
         'samplesubmissionform' : samplesubmissionform,
         'contact_list' : contact_list,
-        'affiliated_institute_list' : affiliated_institute_list
+        'affiliated_institute_list' : affiliated_institute_list,
         })
 
 def collab_page(request):
