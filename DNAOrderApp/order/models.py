@@ -382,27 +382,27 @@ import re
 
 class AffiliatedInstituteForm(forms.ModelForm):
 
-    def __init__(self, projid=None, *args, **kwargs):
-        super(AffiliatedInstituteForm, self).__init__(*args, **kwargs)
-        self.fields['ai_name'].widget.attrs['id'] = self.add_prefix(field_name)
-        self.fields['ai_name'].widget.attrs['name'] = self.add_prefix(field_name)
+    # def __init__(self, projid=None, *args, **kwargs):
+    #     super(AffiliatedInstituteForm, self).__init__(*args, **kwargs)
+    #     self.fields['ai_name'].widget.attrs['id'] = self.add_prefix(field_name)
+    #     self.fields['ai_name'].widget.attrs['name'] = self.add_prefix(field_name)
 
-    # From BaseForm
-    def add_prefix(self, field_name):
-        print "inside Affiliated Institute"
-        print self.prefix
-        print field_name
-        # does not have id, so it is name
-        if not re.findall('id{1,}', field_name):
-            print "this is name attribute"
-            prefix = ""
-            print prefix and field_name or field_name
-            return prefix and field_name or field_name
-        else:
-            print 'self.prefix', self.prefix
-            print "field_name", field_name
-            print self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
-            return self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
+    # # From BaseForm
+    # def add_prefix(self, field_name):
+    #     print "inside Affiliated Institute"
+    #     print self.prefix
+    #     print field_name
+    #     # does not have id, so it is name
+    #     if not re.findall('id{1,}', field_name):
+    #         print "this is name attribute"
+    #         prefix = ""
+    #         print prefix and field_name or field_name
+    #         return prefix and field_name or field_name
+    #     else:
+    #         print 'self.prefix', self.prefix
+    #         print "field_name", field_name
+    #         print self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
+    #         return self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
 
         
 
@@ -441,15 +441,10 @@ class PhenotypeForm(ModelForm):
             'phenotype_definition' : forms.Textarea(attrs={'rows':2, 'cols':15})
         }
 
-from django.forms import CheckboxInput
-
 class SampleSubmissionForm(ModelForm):
     class Meta:
         model = SampleSubmission
-        # exclude = ['phenotype_list']
-        widgets = {
-            'sample_submission_name': CheckboxInput,
-        }
+        exclude = ['affiliated_institute', 'contact_list', 'phenotype_list', 'project_name']
 
 #For the Admin
 class UserProjectForm(ModelForm):
