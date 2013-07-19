@@ -541,17 +541,27 @@ def add_ai_fmpage(request):
         ai = aiform.save()
         print 'this is ai', ai.ai_name, ai.ai_description
         alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
+        ai_name = ai.ai_name
+        ai_description = ai.ai_description
+
+        fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-label-fmpage.html')
+        t = Template(fp.read())
+        fp.close()
+        c = Context({
+            'alert_msg': alert_msg,
+            'ai_name' : ai_name,
+            'ai_description': ai_description
+        })
+
     else:
         print "in else"
         alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
+        aiform = AffiliatedInstituteForm()
 
-    #aiform = AffiliatedInstituteForm()
-
-    # it should return just the updated table
-    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-label-fmpage.html')
-    t = Template(fp.read())
-    fp.close()
-    c = Context({
+        fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-label-fmpage.html')
+        t = Template(fp.read())
+        fp.close()
+        c = Context({
             'alert_msg': alert_msg,
             'aiform' : aiform
         })
@@ -722,7 +732,6 @@ def handle_contact_fmpage(request, action=None, id=None):
         return add_contact_fmpage(request)
     else:
         return HttpResponse("Everything failed - handle contact fmpage")
-
 
 def fm_page(request):
 
