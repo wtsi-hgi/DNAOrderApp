@@ -113,7 +113,6 @@ $(document).ready(function() {
 
 	// To Add Affiliated Institute
 	$('.save-ai-button').click( function(data){
-		alert("save button!");
 		console.log(data);
 		console.log(this);
 		var projid = $(this).attr("value");
@@ -123,13 +122,37 @@ $(document).ready(function() {
 						resetForm: true,
 						headers: {"X-CSRFToken" : csrftoken},
 						success : function(data) {
-							alert("success!");
+							console.log('this is data:' + data);
+							$('#affiliated-institute-form-'+projid).replaceWith(data);
 						},
 						error: function(data) {
 							alert("FAILED!");
 						}
 		});
 
+	});
+
+	//To Add Contactlist 
+	$('.save-contact-button').click( function(data){
+		console.log(data);
+		console.log(this);
+		var projid = $(this).attr("value");
+
+		//loop through the list of emails, pass it via url. without submitting any forms.
+		$.
+
+		$("#contact-list-form-"+projid).ajaxSubmit({
+						url: '/order/api/handle_contact_fmpage/ADD/',
+						type: "POST",
+						resetForm: true,
+						headers: {"X-CSRFToken" : csrftoken},
+						success : function(data) {
+							alert("SUCCESS");
+						},
+						error: function(data) {
+							alert("FAILED!")
+						}
+		});
 	});
 
 	// To add a callback function to popover
@@ -141,6 +164,7 @@ $(document).ready(function() {
 		}
 	}
 
+	// Attach popover with each "See More" link
 	$("table[name='phenotype-table']").each(function(){
 		console.log($(this).attr("value"));
 
@@ -169,12 +193,57 @@ $(document).ready(function() {
 
 															}
 		});
+	
+		
+
+	});
+
+	// Attach popover with each "[+] Add Phenotypes" link
+	$("table[name='empty-phenotype-table']").each(function(){
+		console.log("inside empty phenotype table");
+		console.log($(this).attr("value"));
+
+		var projid = $(this).attr("value");
+
+		$("#trigger-empty-phenolist-popover"+projid).popover({
+																html: true,
+																trigger: 'click',
+																placement: 'right',
+																content: function (ele) {
+																	return '<div id="phenotype-table-container{{proj.pk}}">'+$("#empty-phenotype-table-container"+projid).html()+'</div>'; 
+																},
+																title: "New Sample Submission / Phenotype List",
+																template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div><div class="modal-footer" id="popover-footer"></div></div>',
+																callback: function() {
+																	console.log("this is ssid " + ssid);
+
+																	$.ajax({
+																		url: '/order/render_phenoform/'+ssid,
+																	}).done( function(data){
+																		console.log("in ajax done"+ data);
+																		$("#popover-footer").replaceWith('<div class="modal-footer" id="popover-footer">'+data+'</div>');
+																	});
+
+																	$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> Ajax didn't fail!</div>");
+																}
+
+		});
+
 	});
 
 	
 	//Clicking outside popover to close popover; only one popover is open at a time
 	$(':not(#example)').on('click', function (e) {
 		$('.trigger-phenolist-popover').each(function () {
+        //the 'is' for buttons that trigger popups
+        //the 'has' for icons and other elements within a button that triggers a popup
+        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+        	$(this).popover('hide');
+        	return;
+        }
+    	});
+
+    	$('.trigger-empty-phenolist-popover').each(function () {
         //the 'is' for buttons that trigger popups
         //the 'has' for icons and other elements within a button that triggers a popup
         if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
@@ -562,16 +631,30 @@ border:solid 1px #c3c3c3;
 											<td>{{ ss.last_updated }}</td>
 										</tr>
 										{% if forloop.last %}
+										<!-- THIS IS THE EMPTY CASE -->
 										<tr>
-											<td></td>
-											<td></td>
 											<td>
-												<!-- <form id="affiliated-institute-form-{{proj.pk}}">
-													<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
-
-													<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-													</ul>
-												</form> -->
+												{{ samplesubmissionform.sample_submission_name.errors }}
+												{{ samplesubmissionform.sample_submission_name.label_tag }}
+												{{ samplesubmissionform.sample_submission_name }}
+											</td>
+											<td>
+												<!-- PHENOTYPES!!!! -->
+												<div style="display:none" id="empty-phenotype-table-container{{proj.pk}}">
+													<table class="table table-striped table-bordered table-hover" name="empty-phenotype-table" id="empty-phenotype-table{{proj.pk}}" value="{{proj.pk}}" >
+														<tr>
+															<th> Phenotype Name </th>
+															<th> Phenotype Type </th>
+															<th> Phenotype Description </th>
+															<th> Phenotype Definition </th>
+														</tr>
+														
+													</table> 
+												</div>
+												<a href="#" class="trigger-empty-phenolist-popover pull-right" data-toggle="modal" value="{{proj.pk}}" id="trigger-empty-phenolist-popover{{proj.pk}}" rel="popover" data-container="body">[+] Add Phenotypes</a>
+												<!-- END OF PHENOTYPES -->
+											</td>
+											<td>
 												<div class="alert alert-block">
 												<form id="affiliated-institute-form-{{proj.pk}}">
 													{% csrf_token %}
@@ -581,17 +664,20 @@ border:solid 1px #c3c3c3;
 												</div>
 											</td>
 											<td>
-												<div class="alert alert-block">
-													<button type="button" class="close" data-dismiss="alert">&times;</button>
-													<form id="contact-list-form-{{proj.pk}}">
-														<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
+												Contact List
+												<form id="contact-list-form-{{proj.pk}}">
+													<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
 
-														<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-														</ul>
-													</form>
-												</div>
+													<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+													</ul>
+													<a href="#" class="save-contact-button pull-right" id="save-contact-button-{{proj.pk}}" type="button" value="{{proj.pk}}">Save</a>
+												</form>
 											</td>
-											<td></td>
+											<td>
+												{{ samplesubmissionform.sample_num.errors }}
+												{{ samplesubmissionform.sample_num.label_tag }}
+												{{ samplesubmissionform.sample_num }}
+											</td>
 											<td></td>
 											<td></td>
 											<td></td>
@@ -611,16 +697,12 @@ border:solid 1px #c3c3c3;
 										</form> -->
 
 										<div class="alert alert-block">
-											<button type="button" class="close" data-dismiss="alert">&times;</button>
 											<form id="affiliated-institute-form-{{proj.pk}}">
-												<div id="affiliated-institute-title">
-													<input id="affiliated-institute-title-input-{{proj.pk}}" type="text" data-provide="typeahead" placeholder="Insert Affiliated Institute..." autocomplete="off">
-												</div>
-												<div id="affiliated-institute-description">
-													<input id="affiliated-institute-description-input-{{proj.pk}}" type="text" data-provide="typeahead" placeholder="Insert description..." autocomplete="off">
-													<a href="#" class="pull-right" id="save-ai-button" type="button" value="{{proj.pk}}">Save</a>
-												</form>
-											</div>
+												{% csrf_token %}
+												{{ proj.pk|create_aiform }}
+												<a href="#" class="save-ai-button pull-right" id="save-ai-button-{{proj.pk}}" type="button" value="{{proj.pk}}">Save</a>
+											</form>
+										</div>
 										</td>
 										<td>
 											<form id="contact-list-form-{{proj.pk}}">
@@ -953,3 +1035,10 @@ border:solid 1px #c3c3c3;
 </div> -->
 
 <!--*************************** END OF BIG BOX PHENOTYPE MODAL ************************-->
+
+												<!-- <form id="affiliated-institute-form-{{proj.pk}}">
+													<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
+
+													<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+													</ul>
+												</form> -->
