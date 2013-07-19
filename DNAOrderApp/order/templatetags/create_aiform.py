@@ -6,7 +6,7 @@ register = template.Library()
 
 def create_aiform(projid):
 	"""You call this whenever you want an aiform to be made"""
-	aiform = AffiliatedInstituteForm(projid=projid)
+	aiform = AffiliatedInstituteForm(auto_id=True) 
 	aiform = aiform.as_p()
 	print "this is aiform", aiform
 	return aiform
