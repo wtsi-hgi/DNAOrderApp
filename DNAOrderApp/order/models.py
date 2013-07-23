@@ -357,6 +357,25 @@ class BulkUpload(models.Model):
     pass   
 
 
+""" TEMP MODELS FOR SAMPLE SUBMISSIONS """
+class TempSampleSubmission(models.Model):
+    tmp_sample_submission_name = models.CharField(max_length=100, unique=True)
+    tmp_sample_num = models.IntegerField()
+    tmp_project_name = models.ForeignKey(UserProject)
+
+    def __unicode__(self):
+        return self.tmp_sample_submission_name
+
+
+class TempSSPhenotype(models.Model):
+    tmp_ss = models.ForeignKey(TempSampleSubmission)
+    tmp_phenotype_name = models.CharField(max_length=100, unique=True)
+    tmp_phenotype_type = models.ForeignKey(PhenotypeType)
+    tmp_phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.', blank=True)
+    tmp_phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
+                                        for autism spectrum disorder.', blank=True)  # Not too sure if should be CharField or TextField...should b
+
+
 """ MANIFEST UPLOAD """
 
 # Stores the user uploaded files
@@ -374,6 +393,10 @@ class Display(models.Model):
 
 class Unit(models.Model):
     unit_name = models.CharField(max_length=100, unique=True)
+
+
+
+""" FORMS """
 
 from django.forms import ModelForm, TextInput, Textarea
 from django import forms
@@ -444,7 +467,22 @@ class PhenotypeForm(ModelForm):
 class SampleSubmissionForm(ModelForm):
     class Meta:
         model = SampleSubmission
-        exclude = ['affiliated_institute', 'contact_list', 'phenotype_list', 'project_name']
+        # exclude = ['affiliated_institute', 'contact_list', 'phenotype_list', 'project_name']
+
+class TempSampleSubmissionForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(TempSampleSubmissionForm, self).__init__(*args, **kwargs)
+        self.fields['tmp_sample_submission_name'].label = "Temporary Sample Submission Name"
+        self.fields['tmp_sample_num'].label = "Temporary Sample Number"
+    class Meta:
+        model = TempSampleSubmission
+        exclude = ('tmp_project_name',)
+
+class TempSSPhenotypeForm(ModelForm):
+    class Meta:
+        model = TempSSPhenotype
+        exclude = ('tmp_ss')
 
 #For the Admin
 class UserProjectForm(ModelForm):

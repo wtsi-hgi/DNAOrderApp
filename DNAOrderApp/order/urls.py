@@ -19,10 +19,18 @@ urlpatterns = patterns('',
     url(r'^render_phenoform/?(?P<id>\d+)?/?$', views.render_phenoform, name='render_phenoform'),
     url(r'^api/handle_contact_fmpage/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_contact_fmpage, name='handle_contact_fmpage'),
     url(r'^api/handle_ai_fmpage/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_ai_fmpage, name='handle_ai_fmpage'),
+
+    url(r'^api/handle_affiliated_institute/(?P<action>\w+)/?', views.handle_affiliated_institute, name='handle_affiliated_institute'),
     # url(r'^get_top3phenolist/(?P<ss>[\w ]+)/?$', views.get_top3phenolist, name='get_top3phenolist'),
     # url(r'^admin-page$', views.admin_page, name='admin-page'),
     # url(r'^admin-page/(?P<table>[^/]+)/(?P<pkid>\d+)/$', views.admin_page, name='admin-page-table-pkid'),
-    
+
+    # Temp SS page
+    url(r'^add_tmp_ss/(?P<projid>\d+)?/?', views.add_tmp_sample_submission, name='add_tmp_ss'), #sample name and sample num
+    url(r'^tss-page-2/?(?P<tssid>\d+)?/?$', views.tss_page_2, name='tss-page-2'), #phenotype list
+    url(r'^tss-page-3/?(?P<tssid>\d+)?/?$', views.tss_page_3, name='tss-page-3'), #affiliated institute 
+    url(r'^tss-page-4$', views.tss_page_4, name='tss-page-4'), #personnels
+
     # Collaborator PI page
     url(r'^collab-page$', views.collab_page, name='collab-page'),
 

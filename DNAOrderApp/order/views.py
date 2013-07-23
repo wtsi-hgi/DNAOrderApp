@@ -10,8 +10,8 @@ from django.contrib.auth.models import User
 from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
 from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser
 
-from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM
-from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm
+from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM, TempSSPhenotype
+from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm, TempSampleSubmissionForm, TempSampleSubmission, TempSSPhenotypeForm
 from DNAOrderApp.order.forms import DocumentForm
 
 from django.contrib import messages
@@ -319,6 +319,39 @@ def handle_user(request, action=None, id=None):
         return HttpResponse("Everything failed! - user")
 
 
+def add_affiliated_institute(request):
+    print "add affiliated institute"
+    aif = AffiliatedInstituteForm(request.POST)
+
+    if aif.is_valid():
+        aif.save()
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
+    else:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
+
+    ailist_all = AffiliatedInstitute.objects.all().order_by('ai_name')
+    aif = AffiliatedInstituteForm()
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'aif': aif,
+            'ailist_all': ailist_all,
+            'alert_msg': alert_msg,
+        })
+
+    return HttpResponse(t.render(c))
+
+
+def handle_affiliated_institute(request, action=None):
+    print "affiliated institute"
+    if action == "ADD":
+        return add_affiliated_institute(request)
+    else:
+        return HttpResponse("Everything failed! - affiliated institute")
+
 # RENDER THE ADMIN PAGE
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.forms import PasswordResetForm, UserChangeForm, UserCreationForm, SetPasswordForm
@@ -359,6 +392,9 @@ def admin_page(request, table=None, pkid=None):
 
 
     ucf = UserCreationForm()
+    aif = AffiliatedInstituteForm()
+
+    ailist_all = AffiliatedInstitute.objects.all().order_by('ai_name')
 
     # EXPERIMENTING FORMSETS 
     # from django.forms.formsets import formset_factory
@@ -392,6 +428,8 @@ def admin_page(request, table=None, pkid=None):
             'phenotypeform': phenotypeform,
             'phenotypelist_all':phenotypelist_all,
             'dnaorderappuserform' : dnaorderappuserform,
+            'aif' : aif,
+            'ailist_all' : ailist_all,
             # 'PhenotypeFormSet' : formset,
 
             'ucf': ucf,
@@ -638,6 +676,103 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
+
+def tss_page_2(request, tssid=None):
+    print "in tss page 2"
+    if request.method == "POST":
+        print "in post"
+        tempssphenotypeform = TempSSPhenotypeForm(request.POST)
+        print "fail here?", tempssphenotypeform
+        alert_msg=""
+
+        if tempssphenotypeform.is_valid():
+            print "in if - tss page 2"
+            tempssphenotype = tempssphenotypeform.save(commit=False)
+            print "tempsspheno false commit", tempssphenotype
+            tempssphenotype.tmp_ss = TempSampleSubmission(pk=tssid)
+            print tempssphenotype.tmp_ss
+            tempssphenotype.save()
+            print "tempssphentypesave!"
+            tssid = tssid
+            alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>"
+        else:
+            print "in the else - tss page 2"
+            tempssphenotypeform = TempSSPhenotypeForm()
+            tssid=""
+            alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Phenotype was added. Invalid Form. </div>'
+
+    else:
+        print "fresh form"
+        tempssphenotypeform = TempSSPhenotypeForm()
+        print "tempssphenotypeform", tempssphenotypeform
+        tssid=tssid
+        alert_msg=""
+
+    tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
+    print tempphenotypelist_all
+    tempssphenotypeform = TempSSPhenotypeForm()
+
+    return render(request, 'order/tmp-sample-submission-2.html', {
+        'tempssphenotypeform': tempssphenotypeform,
+        'alert_msg': alert_msg,
+        'tssid' : tssid,
+        'tempphenotypelist_all' : tempphenotypelist_all
+        })
+
+def tss_page_3(request, tssid=None):
+    print "in tss page 3"
+    return render(request, 'order/tmp-sample-submission-3.html', {})
+
+def tss_page_4(request):
+    print "in tss page 4"
+    return render(request, 'order/tmp-sample-submission-4.html', {})
+
+
+def add_tmp_sample_submission(request, projid=None):
+
+    if request.method == "POST":
+        print "inside add tmp sample submission"
+        print request.POST
+        tssform = TempSampleSubmissionForm(request.POST)
+        alert_msg = ""
+
+        if tssform.is_valid():
+            try:
+                print "here", tssform
+                tss = tssform.save(commit=False)
+                print 'tss', tss
+                proj = UserProject.objects.get(pk=projid)
+                print proj
+                tss.tmp_project_name = proj
+                print tss.tmp_project_name
+                tss.save()
+                print "here again", tss.id
+                tssid = tss.id
+                alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a temporary Sample Submission!</div>"
+                print "added tss"
+            except DoesNotExist:
+                print "User Project does not exist"
+                alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. User Project does not exist. </div>"
+            except ValueError: #save() will check form.errors and check if form is valid.
+                print "Invalid tss Form"
+                alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. Invalid Form. </div>"
+            except Exception as e:
+                alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. General Exception Thrown. </div>"
+        else:
+            alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. Invalid Form. </div>"
+
+    else:
+        print "add tmp sample submission, in else"
+        tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
+        alert_msg = ""
+        tssid = ""
+
+    return render(request, 'order/tmp-sample-submission-1.html', {
+        'alert_msg' : alert_msg,
+        'tssform' : tssform,
+        'tssid' : tssid
+        })
+
 def add_project_fmpage(request):
     print "adding a project - inside add project fmproject"
     alert_msg = ""
@@ -733,6 +868,8 @@ def handle_contact_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed - handle contact fmpage")
 
+
+
 def fm_page(request):
 
     # CHECK IF USER HAS BEEN LOGGED IN
@@ -759,15 +896,16 @@ def fm_page(request):
     print "this is request.user", request.user
     userprojectform = UserProjectForm_FM(initial={'username': request.user}) #unbound form, no associated data, empty form
 
-    #Sample Submission form
-    samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
-
     #Contact list
     contact_list = DNAOrderAppUser.objects.all()
 
     #Affiliated Institute List
     affiliated_institute_list = AffiliatedInstitute.objects.all()
     print "this is affiliated_institute list", affiliated_institute_list
+
+    #Sample Submission form
+    samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
+
 
 
 #---------------------------------------------------------------------------------------------
@@ -828,6 +966,9 @@ def fm_page(request):
         'contact_list' : contact_list,
         'affiliated_institute_list' : affiliated_institute_list,
         })
+
+def tss_page(request):
+    return render(request, 'order/tmp-sample-submission-1.html', {})
 
 def collab_page(request):
 
