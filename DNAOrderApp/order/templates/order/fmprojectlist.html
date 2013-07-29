@@ -87,12 +87,35 @@ console.log(affiliated_institute_source);
 // 		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
 // }
 
-//Passing projid to modal button 
+//Adding attribute and value to the Next Button in Modal
 function addAttributeToModalButton(attribute, value){
 	$("#next-tss-button").attr(attribute, value);
 	return false;
 }
 
+//Save Temporary Affiliated Institute
+function saveTempAI(tssid){
+	// To Add Affiliated Institute
+	console.log("in save temp ai");
+	$('.save-tmp-ai-button').click( function(data){
+		console.log(data);
+		console.log(this);
+		$("#tmp-affiliated-institute-form-"+tssid).ajaxSubmit({
+						url: '/order/tss-page-3/'+tssid,
+						type: "POST",
+						resetForm: true,
+						headers: {"X-CSRFToken" : csrftoken},
+						success : function(data) {
+							console.log('this is data:' + data);
+							$('#tmp-sample-submission-modal-body').replaceWith(data);
+						},
+						error: function(data) {
+							alert("FAILED!");
+						}
+		});
+
+	});
+}
 
 
 var tss_pages = ['tss-page-2', 'tss-page-3', 'tss-page-4'];
@@ -123,6 +146,7 @@ $(document).ready(function() {
 																			$('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
 																			$('input[name=tmp_sample_num]').attr('disabled', 'disabled');
 																			addAttributeToModalButton('target', tss_pages[0]);
+
 																			var tss = $('#add_a_tmp_ss_form').attr('tss');
 																			addAttributeToModalButton('tss', tss);
 												},
@@ -135,14 +159,22 @@ $(document).ready(function() {
 	//To Add Temporary Sample Submission 
 	$('#next-tss-button').click( function(data){
 		var target = $(this).attr("target");
-		var tss = $('#add_a_tmp_ss_form').attr('tss');
+		// var tss = $('#add_a_tmp_ss_form').attr('tss');
 		var tss = $(this).attr('tss');
 		console.log(target);
 		console.log(tss);
 		$.get(target+'/'+tss+'/', function(data){
 			console.log(data);
 			$("#tmp-sample-submission-modal-body").replaceWith(data);
-			$('#save-tss-button').attr('disabled', 'disabled');
+
+			if (target == tss_pages[1]){
+				$('#save-tss-button').attr('disabled', 'disabled');
+				addAttributeToModalButton('target', tss_pages[2]);
+			}
+			else if (target == tss_pages[2]){
+				$('#save-tss-button').removeAttr('disabled');
+				saveTempAI(tss);
+			}
 		});
 	});
 
