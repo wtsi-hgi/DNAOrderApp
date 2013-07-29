@@ -376,6 +376,11 @@ class TempSSPhenotype(models.Model):
                                         for autism spectrum disorder.', blank=True)  # Not too sure if should be CharField or TextField...should b
 
 
+class TempSSAffiliatedInstitute(models.Model):
+    tmp_ss =  models.ForeignKey(TempSampleSubmission)
+    tmp_ai_name = models.CharField(max_length=100, unique=True)
+    tmp_ai_description = models.TextField(blank=True)
+
 """ MANIFEST UPLOAD """
 
 # Stores the user uploaded files
@@ -482,6 +487,11 @@ class TempSampleSubmissionForm(ModelForm):
 class TempSSPhenotypeForm(ModelForm):
     class Meta:
         model = TempSSPhenotype
+        exclude = ('tmp_ss')
+
+class TempSSAffiliatedInstituteForm(ModelForm):
+    class Meta:
+        model = TempSSAffiliatedInstitute
         exclude = ('tmp_ss')
 
 #For the Admin
