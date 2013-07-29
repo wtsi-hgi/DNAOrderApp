@@ -1,3 +1,16 @@
+
 <div class="modal-body" id="tmp-sample-submission-modal-body">
-THIS IS TSS PAGE 3
+	<h3> Affiliated Institute </h3>
+
+	<div id="alert-signs">
+		{{ alert_msg|safe }}
+	</div>
+
+	<div class="alert alert-block">
+		<form id="tmp-affiliated-institute-form-{{tssid}}">
+			{% csrf_token %}
+			{{ tssaiform }}
+			<a href="#" class="save-tmp-ai-button pull-right" id="save-tmp-ai-button-{{tssid}}" type="button" value="{{tssid}}">Save</a>
+		</form>
+	</div>
 </div>
