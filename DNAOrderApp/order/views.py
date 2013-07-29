@@ -7,8 +7,8 @@ from django.core.files import File
 from django.contrib.auth import login, authenticate, get_user
 from django.contrib.auth.models import User
 
-from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
-from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser
+from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission, TempSSAffiliatedInstituteForm
+from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser, TempSSAffiliatedInstitute
 
 from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM, TempSSPhenotype
 from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm, TempSampleSubmissionForm, TempSampleSubmission, TempSSPhenotypeForm
@@ -721,7 +721,34 @@ def tss_page_2(request, tssid=None):
 
 def tss_page_3(request, tssid=None):
     print "in tss page 3"
-    return render(request, 'order/tmp-sample-submission-3.html', {})
+
+    if request.method == "POST":
+        print "inside post - tss page 3"
+        tssaiform = TempSSAffiliatedInstituteForm(request.POST)
+        alert_msg = ""
+
+        if tssaiform.is_valid():
+            tssai = tssaidform.save(commit=False)
+            tssai.tmp_ss = TempSampleSubmission(pk=tssid)
+            tssai.save()
+            tssid = tssid
+            alert_msg="<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
+        else:
+            print "in the else - tss page 3"
+            tssaiform = TempSSAffiliatedInstituteForm()
+            tssid=""
+            alert_msg='<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
+    else:
+        print "fresh form - tss page 3"
+        tssaiform = TempSSAffiliatedInstituteForm()
+        tssid=tssid
+        alert_msg=""
+
+    return render(request, 'order/tmp-sample-submission-3.html', {
+        'alert_msg': alert_msg,
+        'tssid' : tssid,
+        'tssaiform' : tssaiform
+        })
 
 def tss_page_4(request):
     print "in tss page 4"
