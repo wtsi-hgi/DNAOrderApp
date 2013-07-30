@@ -7,8 +7,8 @@ from django.conf.urls.static import static
 from django.views.generic.simple import redirect_to
 from django.conf import settings
 
-import autocomplete_light
-autocomplete_light.autodiscover()
+# import autocomplete_light
+# autocomplete_light.autodiscover()
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
