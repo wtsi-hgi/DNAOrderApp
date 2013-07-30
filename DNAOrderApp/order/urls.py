@@ -26,7 +26,8 @@ urlpatterns = patterns('',
     # url(r'^admin-page/(?P<table>[^/]+)/(?P<pkid>\d+)/$', views.admin_page, name='admin-page-table-pkid'),
 
     # Temp SS page
-    url(r'^add_tmp_ss/(?P<projid>\d+)?/?', views.add_tmp_sample_submission, name='add_tmp_ss'), #sample name and sample num
+    url(r'^handle_tss_pages/(?P<action>\w+)/?(?P<projid>\d+)?/?(?P<tssid>\d+)?/?$', views.handle_tss_pages, name="handle_tss_pages"), #next button
+    url(r'^tss-page-1/(?P<projid>\d+)?/?', views.tss_page_1, name='tss-page-1'), #sample name and sample num
     url(r'^tss-page-2/?(?P<tssid>\d+)?/?$', views.tss_page_2, name='tss-page-2'), #phenotype list
     url(r'^tss-page-3/?(?P<tssid>\d+)?/?$', views.tss_page_3, name='tss-page-3'), #affiliated institute 
     url(r'^tss-page-4$', views.tss_page_4, name='tss-page-4'), #personnels
