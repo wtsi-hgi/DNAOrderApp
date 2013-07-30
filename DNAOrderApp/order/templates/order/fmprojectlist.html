@@ -126,26 +126,34 @@ $(document).ready(function() {
 	$("#add-ss-button").click( function(data){
 		var value = $(this).attr("project-id");
 		addAttributeToModalButton('project-id', value);
-		addAttributeToModalButton('target', 'tss-page-2');
-
-		$("#save-tss-button").attr('project-id', value);
+		addAttributeToModalButton('next-page-is', 'TSS2');
+		addAttributeToModalButton('current-page-is', 'TSS1');
+		// addAttributeToModalButton('target', 'tss-page-2');
+		// $("#save-tss-button").attr('project-id', value);
 	});
 
-	// Save Sample Name and Sample Num
-	$('#save-tss-button').click( function(data){
+	//To Add Temporary Sample Submission - First time from clicking the [+]Add Sample Submission
+	$('#next-tss-button').click( function(data){
+
+		//Save the Tssform
 		var projid = $(this).attr("project-id");
+		var nextpage = $(this).attr("next-page-is");
+		var currpage = $(this).attr("current-page-is");
 		$("#add_a_tmp_ss_form").ajaxSubmit({
-												url: '/order/add_tmp_ss/'+projid,
+												// url: '/order/add_tmp_ss/'+projid,
+												// url: '/order/handle_tss_pages/'+currpage,
 												type: "POST",
 												resetForm : true,
 												headers : {"X-CSRFToken" : csrftoken},
 												success : function(data) {
 																			console.log("success" + data);
 																			$("#tmp-sample-submission-modal-body").replaceWith(data);
-																			$('#next-tss-button').removeAttr('disabled');
-																			$('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
-																			$('input[name=tmp_sample_num]').attr('disabled', 'disabled');
-																			addAttributeToModalButton('target', tss_pages[0]);
+																			// $("#dynamic-modal-section").replaceWith(data);
+
+																			// $('#next-tss-button').removeAttr('disabled');
+																			// $('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
+																			// $('input[name=tmp_sample_num]').attr('disabled', 'disabled');
+																			// addAttributeToModalButton('target', tss_pages[0]);
 
 																			var tss = $('#add_a_tmp_ss_form').attr('tss');
 																			addAttributeToModalButton('tss', tss);
@@ -154,28 +162,7 @@ $(document).ready(function() {
 																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
 												}
 		});
-	});
 
-	//To Add Temporary Sample Submission 
-	$('#next-tss-button').click( function(data){
-		var target = $(this).attr("target");
-		// var tss = $('#add_a_tmp_ss_form').attr('tss');
-		var tss = $(this).attr('tss');
-		console.log(target);
-		console.log(tss);
-		$.get(target+'/'+tss+'/', function(data){
-			console.log(data);
-			$("#tmp-sample-submission-modal-body").replaceWith(data);
-
-			if (target == tss_pages[1]){
-				$('#save-tss-button').attr('disabled', 'disabled');
-				addAttributeToModalButton('target', tss_pages[2]);
-			}
-			else if (target == tss_pages[2]){
-				$('#save-tss-button').removeAttr('disabled');
-				saveTempAI(tss);
-			}
-		});
 	});
 
 	// To Add Projects
@@ -779,7 +766,7 @@ border:solid 1px #c3c3c3;
 
 
 								</table>
-								<a href="add_tmp_ss/{{proj.pk}}" id="add-ss-button" role="button" class="pull-right" class="btn" data-toggle="modal" project-id="{{proj.pk}}" onclick="addAttributeToModalButton('project-id', {{proj.pk}})" data-target="#add-sample-submission-modal"> [+] Add Sample Submission </a>
+								<a href="tss-page-1/{{proj.pk}}" id="add-ss-button" role="button" class="pull-right" class="btn" data-toggle="modal" project-id="{{proj.pk}}" onclick="addAttributeToModalButton('project-id', {{proj.pk}})" data-target="#add-sample-submission-modal"> [+] Add Sample Submission </a>
 
 								<br />
 								<br />
@@ -818,13 +805,15 @@ border:solid 1px #c3c3c3;
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 				<h3 id="add-sample-submission-label">Add Sample Submission</h3>
 			</div>
+			
 			<div class="modal-body" id="tmp-sample-submission-modal-body">
 			</div>
 			<div class="modal-footer">
-				<button id="save-tss-button" role="button" class="btn">Save</button>
-				<button id="next-tss-button" role="button" class="btn" target="" disabled>Next</button>
+				<!-- <button id="save-tss-button" role="button" class="btn">Save</button> -->
+				<button id="next-tss-button" role="button" class="btn">Next</button>
 			</div>
 		</div>
+		
 
 		<!--***************************************** END OF MODAL ************************************************************-->
 
