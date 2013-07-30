@@ -31,6 +31,22 @@ var csrftoken = getCookie('csrftoken');
 $().ready(function() {
 	alert("Dom is now ready - this is admin-page-2");
 
+	// To Add Affiliated Institute
+	$("#add_a_affiliated_institute_form").ajaxForm({
+		url: '/order/api/handle_affiliated_institute/ADD/',
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log(data);
+			$('table#ai-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an affiliated institute!</div>");
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+
 	// To Add Projects
 	$("#add_a_project_form").ajaxForm({
 		url: '/order/api/handle_project/ADD/',
@@ -445,6 +461,37 @@ h3 {
 			</table>
 			<br />
 			<button id="add-pheno" class="btn btn-primary" type="submit">Create a Phenotype</button>
+		</form>
+	</div>
+</div>
+
+<div class="container" id="affiliated-institute-section">
+
+	Check database to see if it's ai's been added.
+	<h3> All Affiliated Institute </h3>
+	<table class="table table-hover" id="ai-table">
+		<tr>
+			<th> Affiliated Institute Name </th>
+			<th> Affiliated Institute Description </th>
+		</tr>
+		{% for u in ailist_all %}
+		<tr id="{{u.pk}}">
+			<td>{{ u.ai_name }}</td>
+			<td>{{ u.ai_description }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+
+	<div id="add_affiliated_institute_panel">
+		<h3> Add An Affiliated Institute </h3>
+		<form class="add_affiliated_institute" method="post" id="add_a_affiliated_institute_form">
+			{% csrf_token %}
+			<table>
+				{{ aif }}
+			</table>
+			<br />
+			<button id="add-ai" class="btn btn-primary" type="submit">Create An Affiliated Institute</button>
 		</form>
 	</div>
 </div>
