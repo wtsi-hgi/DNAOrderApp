@@ -186,13 +186,13 @@ You shouldn't be able to delete any of these. They are the accumulation of every
 <div id="add_a_sample_submission_panel"> 
 	<h3> Add A Sample Submission </h3>
 	<br />
-	<form class="add_a_sample_submission" method="post" action="{% url sample-submission %}">
+	<form class="add_a_sample_submission" method="post" action="{% url "sample-submission" %}">
 		{% csrf_token %}
 		<table>
 			{{ sform }}
 		</table>
 		<br />
-		<button id="add-sample-submit" class="btn btn-primary" type="submit" action="{% url sample-submission %}">Create a Sample Submission</button>
+		<button id="add-sample-submit" class="btn btn-primary" type="submit" action="{% url "sample-submission" %}">Create a Sample Submission</button>
 	</form>
 </div>
 
@@ -216,8 +216,8 @@ You shouldn't be able to delete any of these. They are the accumulation of every
 		<h4> Upload the Manifest </h4>
 
 		<!-- Upload form. Note enctype attribute! -->
-		<!--form action="{% url project-list %}" method="post" enctype="multipart/form-data" id="project-list-form"-->
-		<form id="project-list-form" action="{% url sample-submission %}" method="post" enctype="multipart/form-data">
+		<!--form action="{% url "project-list" %}" method="post" enctype="multipart/form-data" id="project-list-form"-->
+		<form id="project-list-form" action="{% url "sample-submission" %}" method="post" enctype="multipart/form-data">
 			{% csrf_token %}
 
 			<p>{{ form.non_field_errors }}</p>
