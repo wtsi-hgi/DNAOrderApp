@@ -16,6 +16,7 @@ from DNAOrderApp.order.forms import DocumentForm
 
 from django.contrib import messages
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
 import base64
 from django.template import Template, Context, RequestContext
 
@@ -680,50 +681,84 @@ def handle_phenotype_fmpage(request, action=None, id=None):
 def tss_page_2(request, tssid=None):
     print "in tss page 2"
     if request.method == "POST":
-        print "in post"
-        tempssphenotypeform = TempSSPhenotypeForm(request.POST)
-        print "fail here?", tempssphenotypeform
-        alert_msg=""
+        tssphenoform = TempSSPhenotypeForm(request.POST)
 
-        if tempssphenotypeform.is_valid():
-            print "in if - tss page 2"
-            tempssphenotype = tempssphenotypeform.save(commit=False)
-            print "tempsspheno false commit", tempssphenotype
-            tempssphenotype.tmp_ss = TempSampleSubmission(pk=tssid)
-            print tempssphenotype.tmp_ss
-            tempssphenotype.save()
-            print "tempssphentypesave!"
-            tssid = tssid
+        if tssphenoform.is_valid():
+            try:
+                tsspheno = tssphenoform.save(commit=False)
+                tsspheno.tmp_ss = TempSampleSubmission(pk=tssid)
+                tsspheno.save()
 
-            request.session['session_id'] = tssid
-            print "request.session", request.session['session_id']
-
-            alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>"
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
         else:
-            print "in the else - tss page 2"
-            tempssphenotypeform = TempSSPhenotypeForm()
-            tssid=""
-            alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Phenotype was added. Invalid Form. </div>'
-
+            print "invalid form"
     else:
-        # if 'session_id' in request.session:
-
-        print "fresh form"
-        tempssphenotypeform = TempSSPhenotypeForm()
-        print "tempssphenotypeform", tempssphenotypeform
-        tssid=tssid
-        alert_msg=""
+        #first time webpage is being called
+        print "not in post - tss page 2"
+        tssphenoform = TempSSPhenotypeForm()
 
     tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
-    print tempphenotypelist_all
-    tempssphenotypeform = TempSSPhenotypeForm()
 
     return render(request, 'order/tmp-sample-submission-2.html', {
-        'tempssphenotypeform': tempssphenotypeform,
-        'alert_msg': alert_msg,
+        'tssphenoform': tssphenoform,
         'tssid' : tssid,
         'tempphenotypelist_all' : tempphenotypelist_all
         })
+
+def tss_page_1(request, projid=None):
+    print "in tss page 1"
+    print "this projid", projid
+
+    if request.method == "POST":
+        print "in post?" #Allows user to modify 
+        proj = UserProject.objects.get(pk=projid)
+        instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
+        tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
+        print "tss form?"
+        
+        if tssform.is_valid():
+            try:
+                tss = tssform.save(commit=False)
+                proj = UserProject.objects.get(pk=projid)
+                tss.tmp_project_name = proj
+                tss.save()
+                print "in valid"
+
+                return HttpResponseRedirect(reverse("tss-page-2"))
+            except ObjectDoesNotExist:
+                print "User Project does not exist"
+            except ValueError:
+                print "Invalid tss form"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form", tssform.errors
+    else:
+        #first time webpage is being called, using GET
+        print "not in post"
+        try:
+            #if a tss exist for projid = (user, project), UserProject
+            proj = UserProject.objects.get(pk=projid)
+            tss_old = TempSampleSubmission.objects.get(tmp_project_name=proj) #if tss exists
+            data = {    'tmp_project_name' : tss_old.tmp_project_name,
+                        'tmp_sample_submission_name' : tss_old.tmp_sample_submission_name, 
+                        'tmp_sample_num' : tss_old.tmp_sample_num }
+
+            tssform = TempSampleSubmissionForm(data) #instantiate it with a form, allows user to update
+            print "check if tssform is bound:", tssform.is_bound
+            print "check if tssform is valid: ", tssform.is_valid()
+            print tssform.errors
+        except ObjectDoesNotExist:
+            tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
+
+    return render(request, 'order/tmp-sample-submission-1.html', {
+        'tssform' : tssform,
+        'projid' : projid,
+        })
+
 
 def tss_page_3(request, tssid=None):
     print "in tss page 3"
@@ -762,87 +797,7 @@ def tss_page_4(request):
     return render(request, 'order/tmp-sample-submission-4.html', {})
 
 
-def tss_page_1(request, projid=None):
 
-    if request.method == "POST":
-        print "inside add tmp sample submission"
-        print request.POST
-        tssform = TempSampleSubmissionForm(request.POST)
-        alert_msg = ""
-
-        if tssform.is_valid():
-            if 'session_id' in request.session: #Allows for updating the temp sample submission
-                print "updating tss"
-                tss_new = tssform.save(commit=False)
-                tss_old = TempSampleSubmission.objects.get(id=request.session['session_id'])
-                tss_old.tmp_sample_submission_name = tss_new.tmp_sample_submission_name
-                tss_old.tmp_sample_num = tss_new.tmp_sample_num
-                tss_old.save()
-                exist = True
-                request.method = "GET"
-                return tss_page_2(request, tss_old.id)
-            else:
-                try:
-                    print "here", tssform
-                    tss = tssform.save(commit=False)
-                    print 'tss', tss
-                    proj = UserProject.objects.get(pk=projid)
-                    print proj
-                    tss.tmp_project_name = proj
-                    print tss.tmp_project_name
-                    tss.save()
-                    print "here again", tss.id
-                    request.session['session_id'] = tss.id
-                    alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a temporary Sample Submission!</div>"
-                    exist = True
-                    print "added tss"
-                    request.method = "GET"
-                    return tss_page_2(request, tss.id)
-                except DoesNotExist:
-                    print "User Project does not exist"
-                    alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. User Project does not exist. </div>"
-                    exist = False
-                except ValueError: #save() will check form.errors and check if form is valid.
-                    print "Invalid tss Form"
-                    alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. Invalid Form. </div>"
-                    exist = False
-                except Exception as e:
-                    alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. General Exception Thrown. </div>"
-                    exist = False
-        else:
-            alert_msg = "<div class=\"alert alert-error\"><b>Uh Oh!</b> No temp ss was added. Invalid Form. </div>"
-            exist = False
-
-    else:
-        if 'session_id' in request.session:
-            try:
-                tss = TempSampleSubmission.objects.get(id=request.session['session_id'])
-                tssform = TempSampleSubmissionForm(instance=tss)
-                alert_msg = "<div class=\"alert alert-info\"><b>Incomplete Form or it already exist. </b> Please complete the rest of the form or click next.</div>"
-                exist = True
-
-                #What if they changed the field? You want to be able to update
-            except ObjectDoesNotExist:
-                del request.session['session_id']
-                tssform = TempSampleSubmissionForm()
-                alert_msg = ""
-                exist = False
-        else:
-            print "add tmp sample submission, in else"
-            tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
-            alert_msg = ""
-            exist = False
-
-    tssid = request.session['session_id']
-    print "tssid", tssid
-
-    return render(request, 'order/tmp-sample-submission-1-first.html', {
-        'alert_msg' : alert_msg,
-        'tssform' : tssform,
-        'tssid' : tssid,
-        'exist' : exist,
-        'projid' : projid
-        })
 
 def handle_tss_pages(request, action=None, projid=None, tssid=None):
     print "in handle_tss_pages"
@@ -1056,8 +1011,6 @@ def fm_page(request):
         'affiliated_institute_list' : affiliated_institute_list,
         })
 
-def tss_page(request):
-    return render(request, 'order/tmp-sample-submission-1.html', {})
 
 def collab_page(request):
 

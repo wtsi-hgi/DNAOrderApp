@@ -1,6 +1,6 @@
 <!--THIS IS AFTER FIRST PRESSING ADD SAMPLE SUBMISSION BUTTON -->
 
-<div class="modal-body" id="tmp-sample-submission-modal-body">
+<div class="modal-body" id="tmp-sample-submission-modal-body" name="1">
 	THIS IS TSS PAGE 1
 
 	<form class="add_a_temp_ss" method="post" id="add_a_tmp_ss_form" tss="{{tssid}}" action="tss-page-1/{{ projid }}">
@@ -11,12 +11,6 @@
 	</form>
 	<div id="alert-signs">
 		{{ alert_msg|safe }}
-		{{ tssform.errors }}
-		{% if exist %}
-		<div class="pull-right"><i class="icon-ok-sign icon-2x"></i></div>
-		{% else %}
-		<div class="pull-right"><i class="icon-remove-sign icon-2x"></i></div>
-		{% endif %}
 	</div>
 </div>
 

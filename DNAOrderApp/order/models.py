@@ -359,9 +359,10 @@ class BulkUpload(models.Model):
 
 """ TEMP MODELS FOR SAMPLE SUBMISSIONS """
 class TempSampleSubmission(models.Model):
+    tmp_project_name = models.OneToOneField(UserProject)
     tmp_sample_submission_name = models.CharField(max_length=100, unique=True)
     tmp_sample_num = models.IntegerField()
-    tmp_project_name = models.ForeignKey(UserProject)
+    
 
     def __unicode__(self):
         return self.tmp_sample_submission_name

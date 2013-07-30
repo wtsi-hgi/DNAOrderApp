@@ -41,6 +41,9 @@
 					/*width: %;*/
 					padding: 300px;
 }
+ul.errorlist {
+					display: none;
+}
 </style>
 
 <script type="text/javascript">
@@ -117,19 +120,45 @@ function saveTempAI(tssid){
 	});
 }
 
+//Clicking a back button gets you back to the previous page
+function backButton(data){
+	var $this = $(data);
+	console.log($this);
+	console.log($this.parent().siblings()[1].getAttribute("name"));
 
-var tss_pages = ['tss-page-2', 'tss-page-3', 'tss-page-4'];
+	switch ($this.parent().siblings()[1].getAttribute("name")){
+		case "1":
+			console.log("in ss - goes back to nowhere");
+			break;
+		case "2":
+			console.log("in pheno - need to go back to ss");
+			var projid = $(this).attr("project-id");
+			$("#tmp-sample-submission-modal-body").load('tss-page-1/'+projid);
+			break;
+		case "3":
+			console.log("in ai - goes back to pheno");
+			break;
+		case "4":
+			console.log("in personnel - goes back to ai");
+			break;
+		default:
+	}
+}
+
+
 
 $(document).ready(function() {
 	$(".collapse").collapse();
 
-	$("#add-ss-button").click( function(data){
-		var value = $(this).attr("project-id");
-		addAttributeToModalButton('project-id', value);
-		addAttributeToModalButton('next-page-is', 'TSS2');
-		addAttributeToModalButton('current-page-is', 'TSS1');
-		// addAttributeToModalButton('target', 'tss-page-2');
-		// $("#save-tss-button").attr('project-id', value);
+	//clicking on the [+] Sample Submission 
+	$('.add-ss-button').click( function(data){
+		data.preventDefault();
+		var projid = $(this).attr("project-id");
+		console.log(projid);
+		$("#tmp-sample-submission-modal-body").load('tss-page-1/'+projid);
+		$('#back-tss-button').attr('style', 'display: none');
+		addAttributeToModalButton('project-id', projid);
+		$('#back-tss-button').attr('project-id', projid);
 	});
 
 	//To Add Temporary Sample Submission - First time from clicking the [+]Add Sample Submission
@@ -137,9 +166,15 @@ $(document).ready(function() {
 
 		//Save the Tssform
 		var projid = $(this).attr("project-id");
-		var nextpage = $(this).attr("next-page-is");
-		var currpage = $(this).attr("current-page-is");
-		$("#add_a_tmp_ss_form").ajaxSubmit({
+
+		var page = $(this).parent().siblings()[1].getAttribute("name")
+
+		if (page != 1){
+			console.log("projid" + projid);
+			$('#back-tss-button').removeAttr("style");
+		}
+
+		$(".add_a_temp_ss").ajaxSubmit({
 												// url: '/order/add_tmp_ss/'+projid,
 												// url: '/order/handle_tss_pages/'+currpage,
 												type: "POST",
@@ -155,8 +190,6 @@ $(document).ready(function() {
 																			// $('input[name=tmp_sample_num]').attr('disabled', 'disabled');
 																			// addAttributeToModalButton('target', tss_pages[0]);
 
-																			var tss = $('#add_a_tmp_ss_form').attr('tss');
-																			addAttributeToModalButton('tss', tss);
 												},
 												error : function(data) {
 																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
@@ -766,7 +799,7 @@ border:solid 1px #c3c3c3;
 
 
 								</table>
-								<a href="tss-page-1/{{proj.pk}}" id="add-ss-button" role="button" class="pull-right" class="btn" data-toggle="modal" project-id="{{proj.pk}}" onclick="addAttributeToModalButton('project-id', {{proj.pk}})" data-target="#add-sample-submission-modal"> [+] Add Sample Submission </a>
+								<button id="add-ss-button-{{proj.pk}}" role="button" class="add-ss-button pull-right" data-toggle="modal" project-id="{{proj.pk}}" data-target="#add-sample-submission-modal"> [+] Add Sample Submission </button>
 
 								<br />
 								<br />
@@ -805,11 +838,10 @@ border:solid 1px #c3c3c3;
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 				<h3 id="add-sample-submission-label">Add Sample Submission</h3>
 			</div>
-			
 			<div class="modal-body" id="tmp-sample-submission-modal-body">
 			</div>
 			<div class="modal-footer">
-				<!-- <button id="save-tss-button" role="button" class="btn">Save</button> -->
+				<button id="back-tss-button" role="button" class="btn pull-left" style="display: none" onclick="backButton(this)">Back</button>
 				<button id="next-tss-button" role="button" class="btn">Next</button>
 			</div>
 		</div>
