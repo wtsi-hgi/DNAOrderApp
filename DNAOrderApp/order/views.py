@@ -677,36 +677,10 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
-def tss_page_3(request, tssid=None):
-    print "in tss page 3"
-
-    if request.method == "POST":
-        print "inside post - tss page 3"
-        tssaiform = TempSSAffiliatedInstituteForm(request.POST)
-        alert_msg = ""
-
-        if tssaiform.is_valid():
-            tssai = tssaidform.save(commit=False)
-            tssai.tmp_ss = TempSampleSubmission(pk=tssid)
-            tssai.save()
-            tssid = tssid
-            alert_msg="<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
-        else:
-            print "in the else - tss page 3"
-            tssaiform = TempSSAffiliatedInstituteForm()
-            tssid=""
-            alert_msg='<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
-    else:
-        print "fresh form - tss page 3"
-        tssaiform = TempSSAffiliatedInstituteForm()
-        tssid=tssid
-        alert_msg=""
-
-    return render(request, 'order/tmp-sample-submission-3.html', {
-        'alert_msg': alert_msg,
-        'tssid' : tssid,
-        'tssaiform' : tssaiform
-        })
+def tss_page_4(request, tssid=None):
+    print "in tss page 4"
+    # del request.session['session_id']
+    return render(request, 'order/tmp-sample-submission-4.html', {})
 
 def tss_page_2(request, tssid=None):
     print "in tss page 2"
@@ -760,6 +734,60 @@ def tss_page_2(request, tssid=None):
         'tssphenoform': tssphenoform,
         'tssid' : tssid,
         'tempphenotypelist_all' : tempphenotypelist_all
+        })
+
+def tss_page_3(request, tssid=None):
+    print "in tss page 3"
+
+    if request.method == "POST":
+        print "in post - tss page 3"
+        try:
+            #if tssai exists already and just want to update
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
+            print "tssaiform? "
+        except ObjectDoesNotExist:
+            #If tssai does not exist
+            print "tssai does not exist"
+            tssaiform = TempSSAffiliatedInstituteForm(request.POST)
+
+        if tssaiform.is_valid():
+            try:
+                tssai = tssaiform.save(commit=False)
+                tss = TempSampleSubmission.objects.get(pk=tssid)
+                tssai.tmp_ss = tss 
+                tssai.save()
+                print "in valid - tss page 3", tssai.id
+                return HttpResponseRedirect(reverse('tss-page-4', args=[tssid]))
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown - tss page 3:", e
+        else:
+            print "invalid form", tssaiform.errors
+        
+    else:
+        #first time webpage is being called, using GET
+        print "not in post - tss page 3"
+        try:
+            #if a tssai exist for tss
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            tssai_old = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            data = {    'tmp_ss': tssai_old.tmp_ss,
+                        'tmp_ai_name': tssai_old.tmp_ai_name,
+                        'tmp_ai_description': tssai_old.tmp_ai_description 
+                    }
+            tssaiform = TempSSAffiliatedInstituteForm(data) #instantiate it with a form, allows user to update
+            print "check if tssaiform is bound:", tssaiform.is_bound
+            print "check if tssaiform is valid: ", tssaiform.is_valid()
+            print tssaiform.errors
+        except ObjectDoesNotExist:
+            tssaiform = TempSSAffiliatedInstituteForm() #unbound form, no associated data, empty form
+
+    return render(request, 'order/tmp-sample-submission-3.html', {
+        'tssid' : tssid,
+        'tssaiform' : tssaiform
         })
 
 def tss_page_1(request, projid=None):
@@ -816,14 +844,6 @@ def tss_page_1(request, projid=None):
         'tssform' : tssform,
         'projid' : projid,
         })
-
-def tss_page_4(request):
-    print "in tss page 4"
-    del request.session['session_id']
-    return render(request, 'order/tmp-sample-submission-4.html', {})
-
-
-
 
 def handle_tss_pages(request, action=None, projid=None, tssid=None):
     print "in handle_tss_pages"

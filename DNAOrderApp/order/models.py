@@ -366,7 +366,6 @@ class TempSampleSubmission(models.Model):
     tmp_sample_submission_name = models.CharField(max_length=100, unique=True)
     tmp_sample_num = models.IntegerField()
     
-
     def __unicode__(self):
         return self.tmp_sample_submission_name
 
@@ -386,6 +385,9 @@ class TempSSAffiliatedInstitute(models.Model):
     tmp_ss =  models.ForeignKey(TempSampleSubmission)
     tmp_ai_name = models.CharField(max_length=100, unique=True)
     tmp_ai_description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.tmp_ai_name
 
 """ MANIFEST UPLOAD """
 

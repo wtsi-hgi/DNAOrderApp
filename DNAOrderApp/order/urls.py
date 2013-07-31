@@ -30,7 +30,7 @@ urlpatterns = patterns('',
     url(r'^tss-page-1/(?P<projid>\d+)?/?', views.tss_page_1, name='tss-page-1'), #sample name and sample num
     url(r'^tss-page-2/(?P<tssid>\d+)?/?$', views.tss_page_2, name='tss-page-2'), #phenotype list
     url(r'^tss-page-3/?(?P<tssid>\d+)?/?$', views.tss_page_3, name='tss-page-3'), #affiliated institute 
-    url(r'^tss-page-4$', views.tss_page_4, name='tss-page-4'), #personnels
+    url(r'^tss-page-4/(?P<tssid>\d+)?/?$', views.tss_page_4, name='tss-page-4'), #personnels
 
     # Collaborator PI page
     url(r'^collab-page$', views.collab_page, name='collab-page'),
