@@ -146,7 +146,7 @@ class UserProject(models.Model):
 #         return self.affiliated_institute_name
 
 class Phenotype(models.Model):
-    phenotype_name = models.CharField(max_length=100, unique=True)
+    phenotype_name = models.CharField(max_length=100)
     phenotype_type = models.ForeignKey(PhenotypeType)
     phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.', blank=True)
     phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
@@ -154,6 +154,9 @@ class Phenotype(models.Model):
 
     def __unicode__(self):
         return self.phenotype_name
+
+    class Meta:
+        unique_together = ('phenotype_name', 'phenotype_type')
 
 class SampleSubmission(models.Model):
 
@@ -370,11 +373,13 @@ class TempSampleSubmission(models.Model):
 
 class TempSSPhenotype(models.Model):
     tmp_ss = models.ForeignKey(TempSampleSubmission)
-    tmp_phenotype_name = models.CharField(max_length=100, unique=True)
+    tmp_phenotype_name = models.CharField(max_length=100)
     tmp_phenotype_type = models.ForeignKey(PhenotypeType)
     tmp_phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.', blank=True)
     tmp_phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
                                         for autism spectrum disorder.', blank=True)  # Not too sure if should be CharField or TextField...should b
+    class Meta:
+        unique_together = ('tmp_ss', 'tmp_phenotype_name', 'tmp_phenotype_type')
 
 
 class TempSSAffiliatedInstitute(models.Model):

@@ -542,7 +542,7 @@ function addTempPhenotype(tssid){
 	console.log("in addtempphenotype");
 	console.log("ID: " + tssid);
 
-	$("#add_a_temp_phenotype_form_"+tssid).ajaxSubmit({
+	$("#add_a_temp_phenotype_form").ajaxSubmit({
 		url: '/order/tss-page-2/'+tssid,
 		type: "POST",
 		resetForm : true,
