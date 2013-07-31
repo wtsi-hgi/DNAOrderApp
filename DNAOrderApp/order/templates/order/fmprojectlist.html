@@ -132,11 +132,14 @@ function backButton(data){
 			break;
 		case "2":
 			console.log("in pheno - need to go back to ss");
-			var projid = $(this).attr("project-id");
-			$("#tmp-sample-submission-modal-body").load('tss-page-1/'+projid);
+			var projid = $this.attr("project-id");
+			console.log(projid);
+			$("#add-sample-submission-modal").load('tss-page-1/'+projid);
+
 			break;
 		case "3":
 			console.log("in ai - goes back to pheno");
+
 			break;
 		case "4":
 			console.log("in personnel - goes back to ai");
@@ -145,36 +148,21 @@ function backButton(data){
 	}
 }
 
-
-
-$(document).ready(function() {
-	$(".collapse").collapse();
-
-	//clicking on the [+] Sample Submission 
-	$('.add-ss-button').click( function(data){
-		data.preventDefault();
-		var projid = $(this).attr("project-id");
-		console.log(projid);
-		$("#tmp-sample-submission-modal-body").load('tss-page-1/'+projid);
-		$('#back-tss-button').attr('style', 'display: none');
-		addAttributeToModalButton('project-id', projid);
-		$('#back-tss-button').attr('project-id', projid);
-	});
-
+//Clicking on a next button
+function nextButton(data){
 	//To Add Temporary Sample Submission - First time from clicking the [+]Add Sample Submission
-	$('#next-tss-button').click( function(data){
-
-		//Save the Tssform
-		var projid = $(this).attr("project-id");
-
-		var page = $(this).parent().siblings()[1].getAttribute("name")
-
-		if (page != 1){
-			console.log("projid" + projid);
-			$('#back-tss-button').removeAttr("style");
+	// $('#next-tss-button').click( function(data){
+		var page = $(data).parent().siblings()[1].getAttribute("name");
+		console.log('before page'+page);
+		if (page == 2){
+			var tssid = $('#add_a_temp_phenotype_form').attr("tssid");
+			console.log('tssid'+tssid);
+			$.get('tss-page-3/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
 		}
-
-		$(".add_a_temp_ss").ajaxSubmit({
+		else{
+				$(".add_a_temp_ss").ajaxSubmit({
 												// url: '/order/add_tmp_ss/'+projid,
 												// url: '/order/handle_tss_pages/'+currpage,
 												type: "POST",
@@ -189,14 +177,57 @@ $(document).ready(function() {
 																			// $('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
 																			// $('input[name=tmp_sample_num]').attr('disabled', 'disabled');
 																			// addAttributeToModalButton('target', tss_pages[0]);
+																			
+																			console.log($(data).filter("#tmp-sample-submission-modal-body").attr("name"));
+																			var page = $(data).filter("#tmp-sample-submission-modal-body").attr("name");
 
+																			if (page != 1){
+																				$('#back-tss-button').removeAttr("style");
+																			}
 												},
 												error : function(data) {
 																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
 												}
-		});
+				});
+		}
 
+		// //Save the Tssform
+		// console.log(data);
+		// // var $this = $(data);
+		// // console.log($this);
+		// var projid = $(data).attr("project-id");
+		// console.log('projid'+projid);
+
+		// console.log($(data).parent().siblings()[1]);
+		// console.log($(data).parent().siblings()[1].getAttribute("name"));
+		// var page = $(data).parent().siblings()[1].getAttribute("name");
+		// console.log('page'+page);
+
+		
+
+		
+
+	// });
+}
+
+
+
+$(document).ready(function() {
+	$(".collapse").collapse();
+
+	//clicking on the [+] Sample Submission 
+	$('.add-ss-button').click( function(data){
+		data.preventDefault();
+		var projid = $(this).attr("project-id");
+		console.log(projid);
+		$.get('tss-page-1/'+projid, function(data){
+			$("#tmp-sample-submission-modal-body").replaceWith(data);
+		});
+		$('#back-tss-button').attr('style', 'display: none');
+		addAttributeToModalButton('project-id', projid);
+		$('#back-tss-button').attr('project-id', projid);
 	});
+
 
 	// To Add Projects
 	$('#add-a-project-button').click( function(data){
@@ -521,9 +552,7 @@ function addTempPhenotype(tssid){
 			console.log("this is addphenotype" + data);
 
 			$('#tmp-sample-submission-modal-body').replaceWith(data);
-			addAttributeToModalButton('target', tss_pages[1]);
-			addAttributeToModalButton('tss', tssid);
-			$('#save-tss-button').attr('disabled', 'disabled');
+			
 			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
 
 		},
@@ -842,7 +871,7 @@ border:solid 1px #c3c3c3;
 			</div>
 			<div class="modal-footer">
 				<button id="back-tss-button" role="button" class="btn pull-left" style="display: none" onclick="backButton(this)">Back</button>
-				<button id="next-tss-button" role="button" class="btn">Next</button>
+				<button id="next-tss-button" role="button" class="btn" onclick="nextButton(this)">Next</button>
 			</div>
 		</div>
 		

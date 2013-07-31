@@ -30,7 +30,7 @@
 
 	<!-- Taken from phenoform -->
 	<div id="add_a_temp_phenotype_panel_{{ssid}}"> 
-		<form class="add_a_temp_ss" method="post" id="add_a_temp_phenotype_form_{{tssid}}" tss="{{tssid}}" action="tss-page-2/{{ tssid }}">
+		<form class="add_a_temp_ss" method="post" id="add_a_temp_phenotype_form" tssid="{{tssid}}" action="tss-page-2/{{ tssid }}">
 			{% csrf_token %}
 			<table id="phenotypeformtable">
 				{{ tssphenoform }}

@@ -677,89 +677,6 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
-
-def tss_page_2(request, tssid=None):
-    print "in tss page 2"
-    if request.method == "POST":
-        tssphenoform = TempSSPhenotypeForm(request.POST)
-
-        if tssphenoform.is_valid():
-            try:
-                tsspheno = tssphenoform.save(commit=False)
-                tsspheno.tmp_ss = TempSampleSubmission(pk=tssid)
-                tsspheno.save()
-
-            except ObjectDoesNotExist:
-                print "TempSampleSubmission does not exist"
-            except Exception as e:
-                print "General exception being thrown: ", e
-        else:
-            print "invalid form"
-    else:
-        #first time webpage is being called
-        print "not in post - tss page 2"
-        tssphenoform = TempSSPhenotypeForm()
-
-    tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
-
-    return render(request, 'order/tmp-sample-submission-2.html', {
-        'tssphenoform': tssphenoform,
-        'tssid' : tssid,
-        'tempphenotypelist_all' : tempphenotypelist_all
-        })
-
-def tss_page_1(request, projid=None):
-    print "in tss page 1"
-    print "this projid", projid
-
-    if request.method == "POST":
-        print "in post?" #Allows user to modify 
-        proj = UserProject.objects.get(pk=projid)
-        instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
-        tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
-        print "tss form?"
-        
-        if tssform.is_valid():
-            try:
-                tss = tssform.save(commit=False)
-                proj = UserProject.objects.get(pk=projid)
-                tss.tmp_project_name = proj
-                tss.save()
-                print "in valid"
-
-                return HttpResponseRedirect(reverse("tss-page-2"))
-            except ObjectDoesNotExist:
-                print "User Project does not exist"
-            except ValueError:
-                print "Invalid tss form"
-            except Exception as e:
-                print "General exception being thrown: ", e
-        else:
-            print "invalid form", tssform.errors
-    else:
-        #first time webpage is being called, using GET
-        print "not in post"
-        try:
-            #if a tss exist for projid = (user, project), UserProject
-            proj = UserProject.objects.get(pk=projid)
-            tss_old = TempSampleSubmission.objects.get(tmp_project_name=proj) #if tss exists
-            data = {    'tmp_project_name' : tss_old.tmp_project_name,
-                        'tmp_sample_submission_name' : tss_old.tmp_sample_submission_name, 
-                        'tmp_sample_num' : tss_old.tmp_sample_num }
-
-            tssform = TempSampleSubmissionForm(data) #instantiate it with a form, allows user to update
-            print "check if tssform is bound:", tssform.is_bound
-            print "check if tssform is valid: ", tssform.is_valid()
-            print tssform.errors
-        except ObjectDoesNotExist:
-            tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
-
-    return render(request, 'order/tmp-sample-submission-1.html', {
-        'tssform' : tssform,
-        'projid' : projid,
-        })
-
-
 def tss_page_3(request, tssid=None):
     print "in tss page 3"
 
@@ -789,6 +706,115 @@ def tss_page_3(request, tssid=None):
         'alert_msg': alert_msg,
         'tssid' : tssid,
         'tssaiform' : tssaiform
+        })
+
+def tss_page_2(request, tssid=None):
+    print "in tss page 2"
+    if request.method == "POST":
+        print "in post"
+        tssphenoform = TempSSPhenotypeForm(request.POST)
+
+        if tssphenoform.is_valid():
+            try:
+                tsspheno = tssphenoform.save(commit=False)
+                tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tsspheno.save()
+                print "saved tsspheno"
+
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+    else:
+        #first time webpage is being called or from a GET method
+        print "not in post - tss page 2"
+        print "tssid", tssid
+        try:
+            #if a tsspheno exist
+            tsspheno_old = TempSSPhenotype.objects.get(pk=tssid)
+            
+            data = {    
+                        'tmp_ss' : tsspheno_old.tmp_ss.id,
+                        'tmp_phenotype_name': tsspheno_old.tmp_phenotype_name,
+                        'tmp_phenotype_type': tsspheno_old.tmp_phenotype_type.id,
+                        'tmp_phenotype_description': tsspheno_old.tmp_phenotype_description,
+                        'tmp_phenotype_definition': tsspheno_old.tmp_phenotype_definition
+                    }
+            tssphenoform = TempSSPhenotypeForm(data)
+            print "check if tssform is bound:", tssphenoform.is_bound
+            print "check if tssform is valid: ", tssphenoform.is_valid()
+            print tssphenoform.errors
+        except ObjectDoesNotExist:
+            if not tssid:
+                print "FAIL - MEANING TEMP SAMPLE SUBMISSION DID NOT SAVE. impossible."
+            #if tsspheno does not exist
+            tssphenoform = TempSSPhenotypeForm()
+            tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+
+
+    tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
+
+    return render(request, 'order/tmp-sample-submission-2.html', {
+        'tssphenoform': tssphenoform,
+        'tssid' : tssid,
+        'tempphenotypelist_all' : tempphenotypelist_all
+        })
+
+def tss_page_1(request, projid=None):
+    print "in tss page 1"
+    print "this projid", projid
+
+    if request.method == "POST":
+        print "in post?" #Allows user to modify 
+        try:
+            proj = UserProject.objects.get(pk=projid)
+            instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
+            tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
+            print "tss form?"
+        except ObjectDoesNotExist:
+            #If TempSampleSubmission does not exist
+            print "tss did not exist yet, creating one"
+            tssform = TempSampleSubmissionForm(request.POST)
+
+        if tssform.is_valid():
+            try:
+                tss = tssform.save(commit=False)
+                proj = UserProject.objects.get(pk=projid)
+                tss.tmp_project_name = proj
+                tss.save()
+                print "in valid", tss.id
+                return HttpResponseRedirect(reverse('tss-page-2', args=[tss.id]))
+            except ObjectDoesNotExist:
+                print "User Project does not exist"
+            except ValueError:
+                print "Invalid tss form"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form", tssform.errors
+    else:
+        #first time webpage is being called, using GET
+        print "not in post"
+        try:
+            #if a tss exist for projid = (user, project), UserProject
+            proj = UserProject.objects.get(pk=projid)
+            tss_old = TempSampleSubmission.objects.get(tmp_project_name=proj) #if tss exists
+            data = {    'tmp_project_name' : tss_old.tmp_project_name,
+                        'tmp_sample_submission_name' : tss_old.tmp_sample_submission_name, 
+                        'tmp_sample_num' : tss_old.tmp_sample_num }
+
+            tssform = TempSampleSubmissionForm(data) #instantiate it with a form, allows user to update
+            print "check if tssform is bound:", tssform.is_bound
+            print "check if tssform is valid: ", tssform.is_valid()
+            print tssform.errors
+        except ObjectDoesNotExist:
+            tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
+
+    return render(request, 'order/tmp-sample-submission-1.html', {
+        'tssform' : tssform,
+        'projid' : projid,
         })
 
 def tss_page_4(request):
