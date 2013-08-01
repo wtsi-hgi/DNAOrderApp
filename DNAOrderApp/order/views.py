@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 
 from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission, TempSSAffiliatedInstituteForm
 from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser, TempSSAffiliatedInstitute
+from DNAOrderApp.order.models import TempSSDNAOrderAppUser, TempSSDNAOrderAppUserForm
 
 from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM, TempSSPhenotype
 from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm, TempSampleSubmissionForm, TempSampleSubmission, TempSSPhenotypeForm
@@ -680,7 +681,11 @@ def handle_phenotype_fmpage(request, action=None, id=None):
 def tss_page_4(request, tssid=None):
     print "in tss page 4"
     # del request.session['session_id']
-    return render(request, 'order/tmp-sample-submission-4.html', {})
+    tssuserform = TempSSDNAOrderAppUserForm()
+
+    return render(request, 'order/tmp-sample-submission-4.html', {
+        'tssuserform' : tssuserform
+        })
 
 def tss_page_2(request, tssid=None):
     print "in tss page 2"
@@ -725,7 +730,6 @@ def tss_page_2(request, tssid=None):
                 print "FAIL - MEANING TEMP SAMPLE SUBMISSION DID NOT SAVE. impossible."
             #if tsspheno does not exist
             tssphenoform = TempSSPhenotypeForm()
-            tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
 
 
     tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)

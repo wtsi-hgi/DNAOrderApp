@@ -127,7 +127,7 @@ class UserProject(models.Model):
     #     ('Complete', 'Complete'),
     # )
 
-    username = models.ForeignKey(User)
+    username = models.ForeignKey(DNAOrderAppUser)
     project_name = models.CharField(max_length=100, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -389,6 +389,12 @@ class TempSSAffiliatedInstitute(models.Model):
     def __unicode__(self):
         return self.tmp_ai_name
 
+class TempSSDNAOrderAppUser(models.Model):
+    tmp_ss = models.ForeignKey(TempSampleSubmission)
+    tmp_dnaorderappuser = models.OneToOneField(DNAOrderAppUser)
+
+
+
 """ MANIFEST UPLOAD """
 
 # Stores the user uploaded files
@@ -500,6 +506,11 @@ class TempSSPhenotypeForm(ModelForm):
 class TempSSAffiliatedInstituteForm(ModelForm):
     class Meta:
         model = TempSSAffiliatedInstitute
+        exclude = ('tmp_ss')
+
+class TempSSDNAOrderAppUserForm(ModelForm):
+    class Meta:
+        model = TempSSDNAOrderAppUser
         exclude = ('tmp_ss')
 
 #For the Admin
