@@ -321,6 +321,45 @@ def handle_user(request, action=None, id=None):
         return HttpResponse("Everything failed! - user")
 
 
+def add_dnaorderappuser(request):
+    print "adding dnaorderappuser"
+    alert_msg = ""
+    dnaorderappuserform = DNAOrderAppUserForm(request.POST)
+
+    if dnaorderappuserform.is_valid():
+        print "is valid"
+        dnaorderappuserform.save()
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a DNA Order App User!</div>"
+    else:
+        print "is not valid"
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No DNA Order App User was added. Invalid Form. </div>'
+
+    dnaorderappuserlist_all = DNAOrderAppUser.objects.all().order_by('date_joined')
+    dnaorderappuserform = DNAOrderAppUserForm()
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/dnaorderappuser-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'dnaorderappuserform': dnaorderappuserform,
+            'dnaorderappuserlist_all': dnaorderappuserlist_all,
+            'alert_msg': alert_msg,
+        })
+
+    return HttpResponse(t.render(c))
+
+
+def handle_dnaorderappuser(request, action=None, id=None):
+    print "in handle dnaorderappuser"
+    if action == "DELETE":
+        print "in delete dnaorderappuser"
+    elif action == "ADD":
+        return add_dnaorderappuser(request)
+    else:
+        return HttpResponse("Everything failed! - dnaorderappuser")
+
+
 def add_affiliated_institute(request):
     print "add affiliated institute"
     aif = AffiliatedInstituteForm(request.POST)
