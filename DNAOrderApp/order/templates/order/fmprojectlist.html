@@ -536,6 +536,24 @@ $(document).ready(function() {
 });
 });
 
+// Add Temporary Contact
+function addTempContact(tssid){
+
+	$("#add_a_temp_contact_form").ajaxSubmit({
+		url : '/order/tss-page-4/'+tssid,
+		type : "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			$('#tmp-sample-submission-modal-body').replaceWith(data);
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
 // Add Temporary Phenotype
 // To Add a Phenotype
 function addTempPhenotype(tssid){
@@ -737,8 +755,8 @@ border:solid 1px #c3c3c3;
 								<tr>
 									<th>Sample Submission</th>
 									<th>Phenotype List</th>
-									<th> Ex-Co: Affiliated Institute </th>
-									<th> Ex-Co: Contact(s) </th>
+									<th> Collab's Affiliated Institute </th>
+									<th> Collab's Contact Info </th>
 									<th> # of Samples </th>
 									<th> Date Created </th>
 									<th> Last Updated </th>

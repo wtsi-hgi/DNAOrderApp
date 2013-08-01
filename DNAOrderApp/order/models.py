@@ -391,7 +391,7 @@ class TempSSAffiliatedInstitute(models.Model):
 
 class TempSSDNAOrderAppUser(models.Model):
     tmp_ss = models.ForeignKey(TempSampleSubmission)
-    tmp_dnaorderappuser = models.OneToOneField(DNAOrderAppUser)
+    tmp_dnaorderappuser = models.ForeignKey(DNAOrderAppUser)
 
 
 

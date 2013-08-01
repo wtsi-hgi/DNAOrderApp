@@ -680,11 +680,41 @@ def handle_phenotype_fmpage(request, action=None, id=None):
 
 def tss_page_4(request, tssid=None):
     print "in tss page 4"
+    # At present we don't know what the external collaborator's authentication system 
+    # is going to be like. So we're ignoring the cases where we need to create the collab's user account.
+    # Only caring about user that exists in the system already.
+
+    if request.method == "POST":
+        tssuserform = TempSSDNAOrderAppUserForm(request.POST)
+
+        if tssuserform.is_valid():
+            try:
+                tssuser = tssuserform.save(commit=False)
+                tssuser.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tssuser.save()
+                print "saved tssuser"
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+    else:
+        #first time webpage is being called or from a GET method
+        print "not in post - tss page 4"
+        tssuserform = TempSSDNAOrderAppUserForm()
+
+    # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tssid)
+    # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__tmp_project_name=tssid)
+    tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+
     # del request.session['session_id']
     tssuserform = TempSSDNAOrderAppUserForm()
 
     return render(request, 'order/tmp-sample-submission-4.html', {
-        'tssuserform' : tssuserform
+        'tssuserform' : tssuserform,
+        'tempuserlist_all' : tempuserlist_all,
+        'tssid' : tssid
         })
 
 def tss_page_2(request, tssid=None):
