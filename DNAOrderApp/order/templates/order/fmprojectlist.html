@@ -161,6 +161,14 @@ function nextButton(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
 			});
 		}
+		else if (page == 4){
+			console.log("inside page 4!");
+			var tssid = $('#add_a_temp_contact_form').attr("tssid");
+			console.log('tssid'+tssid);
+			$.get('tss-page-5/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
+		}
 		else{
 				$(".add_a_temp_ss").ajaxSubmit({
 												// url: '/order/add_tmp_ss/'+projid,
@@ -202,11 +210,6 @@ function nextButton(data){
 		// console.log($(data).parent().siblings()[1].getAttribute("name"));
 		// var page = $(data).parent().siblings()[1].getAttribute("name");
 		// console.log('page'+page);
-
-		
-
-		
-
 	// });
 }
 

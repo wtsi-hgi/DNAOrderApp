@@ -717,6 +717,11 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
+def tss_page_5(request, tssid=None):
+    print "in tss page 5"
+    return render(request, 'order/tmp-sample-submission-5.html', {
+        })
+
 def tss_page_4(request, tssid=None):
     print "in tss page 4"
     # At present we don't know what the external collaborator's authentication system 
