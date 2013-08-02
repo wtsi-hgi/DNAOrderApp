@@ -222,7 +222,12 @@ function finalSubmitButton(data){
 	var tssid = $('#summary-table').attr("value");
 	alert(tssid);
 	$.get('tss-page-5/'+tssid+'/FINAL_SUBMIT', function(data){
-			$("#tmp-sample-submission-modal-body").replaceWith(data);
+			console.log(data);
+			var newDoc = document.open("text/html", "replace");
+			newDoc.write(data);
+			newDoc.close();
+			// $("#tmp-sample-submission-modal-body").replaceWith(data);
+			$('#add-sample-submission-modal').modal('hide');
 		});
 
 }

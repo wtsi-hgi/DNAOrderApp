@@ -759,7 +759,7 @@ def tss_page_5(request, action=None, tssid=None):
         ss.project_name = up
 
         try:
-            ss.sample_submission_name = tss.tmp_sample_submission_name+"10"
+            ss.sample_submission_name = tss.tmp_sample_submission_name
             ss.sample_num = tss.tmp_sample_num
         except IntegrityError as e:
             print "Integrity Error :", e
@@ -789,6 +789,14 @@ def tss_page_5(request, action=None, tssid=None):
         
         ss.save()
         print "Check Sample Submission to see if it is saved - tss page 5"
+        print "Deleting the temporary rows"
+
+        # Deleting all the associated temporary rows
+        tss.delete() 
+        tssphenolist_all.delete()
+        tssai.delete()
+        tssdnaorderappuserlist_all.delete()
+
         return HttpResponseRedirect(reverse("fmprojectlist"))
 
 
