@@ -134,15 +134,31 @@ function backButton(data){
 			console.log("in pheno - need to go back to ss");
 			var projid = $this.attr("project-id");
 			console.log(projid);
-			$("#add-sample-submission-modal").load('tss-page-1/'+projid);
-
+			$.get('tss-page-1/'+projid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				$("#back-tss-button").attr("style", "display: none");
+			})
 			break;
 		case "3":
 			console.log("in ai - goes back to pheno");
-
+			var tssid = $(".add_a_temp_ss").attr("tssid");
+			$.get('tss-page-2/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
 			break;
 		case "4":
 			console.log("in personnel - goes back to ai");
+			var tssid = $(".add_a_temp_ss").attr("tssid");
+			$.get('tss-page-3/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
+			break;
+		case "5":
+			console.log("in summary - goes back to ai");
+			var tssid = $("#summary-table").attr("value");
+			$.get('tss-page-4/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
 			break;
 		default:
 	}
@@ -247,6 +263,8 @@ $(document).ready(function() {
 		$('#back-tss-button').attr('style', 'display: none');
 		addAttributeToModalButton('project-id', projid);
 		$('#back-tss-button').attr('project-id', projid);
+		$('#next-tss-button').removeAttr('style');
+		$('#final-submission-tss-button').attr('style', 'display: none');
 	});
 
 

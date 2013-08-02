@@ -938,6 +938,7 @@ def tss_page_3(request, tssid=None):
                 print "General exception being thrown - tss page 3:", e
         else:
             print "invalid form", tssaiform.errors
+            return HttpResponseRedirect(reverse('tss-page-4', args=[tssid]))
         
     else:
         #first time webpage is being called, using GET
@@ -994,6 +995,7 @@ def tss_page_1(request, projid=None):
                 print "General exception being thrown: ", e
         else:
             print "invalid form", tssform.errors
+            
     else:
         #first time webpage is being called, using GET
         print "not in post"
