@@ -167,6 +167,8 @@ function nextButton(data){
 			console.log('tssid'+tssid);
 			$.get('tss-page-5/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				$('#next-tss-button').attr("style", "display: none");
+				$('#final-submission-tss-button').removeAttr("style");
 			});
 		}
 		else{
@@ -213,6 +215,17 @@ function nextButton(data){
 	// });
 }
 
+
+//Final Submit Button
+function finalSubmitButton(data){
+	alert("FINAL SUBMIT BUTTON!");
+	var tssid = $('#summary-table').attr("value");
+	alert(tssid);
+	$.get('tss-page-5/'+tssid+'/FINAL_SUBMIT', function(data){
+			$("#tmp-sample-submission-modal-body").replaceWith(data);
+		});
+
+}
 
 
 $(document).ready(function() {
@@ -893,6 +906,7 @@ border:solid 1px #c3c3c3;
 			<div class="modal-footer">
 				<button id="back-tss-button" role="button" class="btn pull-left" style="display: none" onclick="backButton(this)">Back</button>
 				<button id="next-tss-button" role="button" class="btn" onclick="nextButton(this)">Next</button>
+				<button id="final-submission-tss-button" role="button" class="btn btn-primary" onclick="finalSubmitButton(this)" style="display: none">Submit</button>
 			</div>
 		</div>
 		

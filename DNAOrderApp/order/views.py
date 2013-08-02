@@ -717,9 +717,96 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
-def tss_page_5(request, tssid=None):
+def tss_page_5(request, action=None, tssid=None):
     print "in tss page 5"
+    print "tssid", tssid
+    if action == 'FINAL_SUBMIT':
+        # Submit everything from temporary database to actual database
+        # Display the new row in the main page with the information
+        print "in post - tss page 5"
+        ss = SampleSubmission()
+
+        # Setting up all the objects needed
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+        tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+
+        print "TYPE TSSAI TMP AI NAME", "ai_name = '" + tssai.tmp_ai_name +"'"
+        try:
+            ai = AffiliatedInstitute.objects.get(ai_name=tssai.tmp_ai_name)
+            print ai 
+        except ObjectDoesNotExist:
+            # Creating the associated affiliated institute object (foreign key)
+            #if affiliated institute does not exist in the database
+            print "in not ai - tss page 5"
+            ai = AffiliatedInstitute()
+            ai.ai_name = tssai.tmp_ai_name 
+            ai.ai_description = tssai.tmp_ai_description
+            ai.save()
+
+        ss.affiliated_institute = ai
+
+        try:
+            up = UserProject.objects.get(project_name=tss.tmp_project_name)
+        except ObjectDoesNotExist:
+            # Foreign key project_name
+            up = UserProject()
+            up.username = DNAOrderAppUser.objects.get(username=request.user)
+            up.project_name = tss.tmp_project_name
+            up.save()
+
+        ss.project_name = up
+
+        try:
+            ss.sample_submission_name = tss.tmp_sample_submission_name+"10"
+            ss.sample_num = tss.tmp_sample_num
+        except IntegrityError as e:
+            print "Integrity Error :", e
+
+        # Need to save before adding to many to many relationships
+        ss.save()
+
+        # Many to Many relationship
+        for tsspheno in tssphenolist_all:
+
+            try: 
+                pheno = Phenotype.objects.get(phenotype_name=tsspheno.tmp_phenotype_name, phenotype_type=tsspheno.tmp_phenotype_type)
+            except ObjectDoesNotExist:
+                pheno = Phenotype()
+                pheno.phenotype_name = tsspheno.tmp_phenotype_name 
+                pheno.phenotype_type = tsspheno.tmp_phenotype_type
+                pheno.phenotype_description = tsspheno.tmp_phenotype_description
+                pheno.phenotype_definition = tsspheno.tmp_phenotype_definition
+                pheno.save()
+            
+            ss.phenotype_list.add(pheno)
+            del pheno
+
+        for tssuser in tssdnaorderappuserlist_all:
+            ss.contact_list.add(tssuser)
+
+        
+        ss.save()
+        print "Check Sample Submission to see if it is saved - tss page 5"
+        return HttpResponseRedirect(reverse("fmprojectlist"))
+
+
+    else:
+        print "in the else - tss page 5"
+        # first time web page is being called or being called by GET method
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+        tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+
+
     return render(request, 'order/tmp-sample-submission-5.html', {
+        'tss' : tss,
+        'tssphenolist_all' : tssphenolist_all,
+        'tssai' : tssai,
+        'tssdnaorderappuserlist_all' : tssdnaorderappuserlist_all,
+        'tssid' : tssid
         })
 
 def tss_page_4(request, tssid=None):
@@ -752,7 +839,6 @@ def tss_page_4(request, tssid=None):
     # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__tmp_project_name=tssid)
     tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
 
-    # del request.session['session_id']
     tssuserform = TempSSDNAOrderAppUserForm()
 
     return render(request, 'order/tmp-sample-submission-4.html', {
