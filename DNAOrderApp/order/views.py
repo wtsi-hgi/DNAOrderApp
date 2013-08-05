@@ -803,10 +803,28 @@ def tss_page_5(request, action=None, tssid=None):
     else:
         print "in the else - tss page 5"
         # first time web page is being called or being called by GET method
-        tss = TempSampleSubmission.objects.get(pk=tssid)
-        tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
-        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
-        tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+        try:
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+            tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+        except ObjectDoesNotExist, ex:
+            # If some forms are incomplete
+            print "Incomplete forms ", ex.message
+            alert_msg = "<div class=\"alert alert-error\"><b>Incomplete Forms!</b> Please go back and complete them.</div>"
+            fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/tmp-sample-submission-4.html')
+            t = Template(fp.read())
+            fp.close()
+            tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+            tssuserform = TempSSDNAOrderAppUserForm()
+            c = Context({
+                            'alert_msg': alert_msg,
+                            'tssid' : tssid,
+                            'tempuserlist_all': tempuserlist_all,
+                            'tssuserform': tssuserform
+            })
+            return HttpResponse(t.render(c))
+            
 
 
     return render(request, 'order/tmp-sample-submission-5.html', {
@@ -995,6 +1013,12 @@ def tss_page_1(request, projid=None):
                 print "General exception being thrown: ", e
         else:
             print "invalid form", tssform.errors
+            alert_msg = "<div class=\"alert alert-error\"><b>Please complete the form.</b></div>"
+            return render(request, 'order/tmp-sample-submission-1.html', {
+                            'tssform' : tssform,
+                            'projid' : projid,
+                            'alert_msg' : alert_msg
+                    })
             
     else:
         #first time webpage is being called, using GET
@@ -1038,65 +1062,50 @@ def handle_tss_pages(request, action=None, projid=None, tssid=None):
 
 
 def add_project_fmpage(request):
-    print "adding a project - inside add project fmproject"
-    alert_msg = ""
-    print "tis is request.POST in add_project:", request.POST
-    userprojectform = UserProjectForm(request.POST)
+    print "adding a project - fmproject"
 
-    if userprojectform.is_valid():
-        userprojectform.save()
-        print "this is request.user", request.user
-
-        print "Check userproject table to see if it has been saved properly."
-        print "Successfully added a project"
-        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>"
-
+    if request.method == "POST":
+        print "in post - fmproject"
+        userprojectform = UserProjectForm(request.POST)
+        if userprojectform.is_valid():
+            userprojectform.save()
+        else:
+            print "invalid form - adding a project, errors :", userprojectform.errors
     else:
-        print "userproject not valid ", userprojectform, " ", userproject
-        print e
-        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No project was added. Invalid Form. </div>'
-
+        print "not in post - adding a project - fmproject"
 
     # Make a dictionary with Project as key, and sample submission as value
     projectlist = get_projectlist(request.user)
-    print "PROJECTLIST:", projectlist
 
-    ss_pheno_dict = {}
     proj_ss_dict = {}
+    ss_pheno_dict = {}
     for project in projectlist:
-        print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
         proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
-        print "proj_ss_dict: ", proj_ss_dict
         ss_pheno_dict.update(get_phenolist_cp(project))
 
     #Phenotype
-    phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+    # phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
 
     #Project
-    userprojectform = UserProjectForm_FM(initial={'username': request.user, 'project_name': "HELLO!"}) #unbound form, no associated data, empty form
+    # userprojectform = UserProjectForm_FM(initial={'username': request.user, 'project_name': "HELLO!"}) #unbound form, no associated data, empty form
 
     # it should return just the updated table
     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/project-table-fmpage.html')
-    print "fp:" ,fp
     t1 = fp.read()
-    print "template", t1
     try:
         t = Template(t1)
+        fp.close()
     except Exception as e:
         print e.message
-    print "after Template"
-    fp.close()
     c = Context({
             'username' : request.user,
-            'myprojectlist' : projectlist,
             'proj_ss_dict' : proj_ss_dict,
-            'phenotypeform' : phenotypeform,
+            # 'phenotypeform' : phenotypeform,
             'ss_pheno_dict' : ss_pheno_dict,
-            'userprojectform' : userprojectform,
-            'alert_msg': alert_msg,
+            # 'userprojectform' : userprojectform,
         })
-    print HttpResponse(t.render(c))
     return HttpResponse(t.render(c))
+
         
 
 def handle_project_fmpage(request, action=None, id=None):

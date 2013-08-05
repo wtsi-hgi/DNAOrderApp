@@ -183,8 +183,10 @@ function nextButton(data){
 			console.log('tssid'+tssid);
 			$.get('tss-page-5/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
-				$('#next-tss-button').attr("style", "display: none");
-				$('#final-submission-tss-button').removeAttr("style");
+				if ($(".alert-error").length == 0){
+					$('#next-tss-button').attr("style", "display: none");
+					$('#final-submission-tss-button').removeAttr("style");
+				}
 			});
 		}
 		else{
@@ -749,7 +751,6 @@ border:solid 1px #c3c3c3;
 				<th> Date Created </th>
 				<th> Last Updated </th>
 				<th> Sample Submissions Status </th>
-				<th> Phenotype list Status </th>
 			</tr>
 			
 			{% for proj, sslist in proj_ss_dict.items %}
@@ -781,9 +782,6 @@ border:solid 1px #c3c3c3;
 					<i class="icon-list-alt"></i> {{ sslist|length }} Sample Submission(s)
 				</td>
 				{% endif %}
-				<td>
-					<i class="icon-warning-sign"></i> Placeholder - displaying number of phenotype lists included
-				</td>
 			</tr>
 			<tr>
 				<td class="more"></td>
@@ -841,44 +839,13 @@ border:solid 1px #c3c3c3;
 													<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
 												</ul>
 											</td>
-											<td>{{ ss.affiliatedinstitute }}</td>
+											<td>{{ ss.affiliatedinstitute|get_affiliated_institute_given_ai_list }}</td>
 											<td></td>
 											<td>{{ ss.sample_num }}</td>
 											<td>{{ ss.date_created }}</td>
 											<td>{{ ss.last_updated }}</td>
 										</tr>
-										{% empty %}
-										<tr>
-											<td></td>
-											<td></td>
-											<td>
-										<!-- <form id="affiliated-institute-form-{{proj.pk}}">
-											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
-
-											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form> -->
-
-										<div class="alert alert-block">
-											<form id="affiliated-institute-form-{{proj.pk}}">
-												{% csrf_token %}
-												{{ proj.pk|create_aiform }}
-												<a href="#" class="save-ai-button pull-right" id="save-ai-button-{{proj.pk}}" type="button" value="{{proj.pk}}">Save</a>
-											</form>
-										</div>
-										</td>
-										<td>
-											<form id="contact-list-form-{{proj.pk}}">
-												<input id="contact-list-input-{{proj.pk}}" type="text" data-provided="typeahead">
-
-												<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-												</ul>
-											</form>
-										</td>
-										<td></td>
-										<td></td>
-										<td></td>
-									</tr>
+										
 									<!-- {{ samplesubmissionform }} -->
 
 									{% endfor %}
