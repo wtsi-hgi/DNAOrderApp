@@ -58,8 +58,8 @@
 							<tr>
 								<th>Sample Submission</th>
 								<th>Phenotype List</th>
-								<th> Afiliated Institute (External Collaborator) </th>
-								<th> External Collaborator Contact </th>
+								<th> SS's Affiliated Institute </th>
+								<th> Collab's Contact Info </th>
 								<th> # of Samples </th>
 								<th> Date Created </th>
 								<th> Last Updated </th>
@@ -105,8 +105,8 @@
 										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
 									</ul>
 								</td>
-								<td>{{ ss.affiliatedinstitute|get_affiliated_institute_given_ai_list }}</td>
-								<td></td>
+								<td>{{ ss.affiliated_institute }}</td>
+								<td>{{ ss_contacts_dict|access:ss.id|safe }}</td>
 								<td>{{ ss.sample_num }}</td>
 								<td>{{ ss.date_created }}</td>
 								<td>{{ ss.last_updated }}</td>

@@ -1142,6 +1142,18 @@ def handle_contact_fmpage(request, action=None, id=None):
         return HttpResponse("Everything failed - handle contact fmpage")
 
 
+def get_contactlist_cp(proj_name):
+    print "in get_contactlist_cp"
+    ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
+    print "ss_list", ss_list
+
+    ss_contacts_dict={}
+    for ss in ss_list:
+        username = [doauser.encode("utf8") for doauser in DNAOrderAppUser.objects.filter(samplesubmission__pk__exact=ss.id).values_list('username', flat=True)]
+        print "username", username
+        ss_contacts_dict[ss] = username
+
+    return ss_contacts_dict
 
 def fm_page(request):
 
@@ -1155,12 +1167,15 @@ def fm_page(request):
     print "PROJECTLIST:", projectlist
 
     ss_pheno_dict = {}
+    ss_contacts_dict = {}
     proj_ss_dict = {}
     for project in projectlist:
         print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
         proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
         print "proj_ss_dict: ", proj_ss_dict
         ss_pheno_dict.update(get_phenolist_cp(project))
+        ss_contacts_dict.update(get_contactlist_cp(project))
+        print "ss_contacts_dict ", ss_contacts_dict
 
     #Phenotype
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
@@ -1171,10 +1186,6 @@ def fm_page(request):
 
     #Contact list
     contact_list = DNAOrderAppUser.objects.all()
-
-    #Affiliated Institute List
-    affiliated_institute_list = AffiliatedInstitute.objects.all()
-    print "this is affiliated_institute list", affiliated_institute_list
 
     #Sample Submission form
     samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
@@ -1232,12 +1243,12 @@ def fm_page(request):
         'username' : request.user,
         'myprojectlist' : projectlist,
         'proj_ss_dict' : proj_ss_dict,
+        'ss_contacts_dict' : ss_contacts_dict,
         'phenotypeform' : phenotypeform,
         'ss_pheno_dict' : ss_pheno_dict,
         'userprojectform' : userprojectform,
         'samplesubmissionform' : samplesubmissionform,
         'contact_list' : contact_list,
-        'affiliated_institute_list' : affiliated_institute_list,
         })
 
 
