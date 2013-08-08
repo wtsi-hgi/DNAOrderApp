@@ -1,0 +1,81 @@
+<div class="modal-body" id="edit-sample-submission-modal-body">
+
+	{% load get_affiliated_institute_list %}
+	{% load get_phenotype_type %}
+	<div id="alert-signs">
+        {{ alert_msg|safe }}
+    </div>
+
+    <form class="edit_ss" id="edit_ss_form" action="edit-ss-fmpage/{{ssid}}/{{tssid}}" method="post" tssid="{{tssid}}" ssid="{{ssid}}">
+    	{% csrf_token %}
+    	<table class="table table-bordered">
+    		<tr>
+    			<td>Sample Submission</td>
+    			<td>
+    				Sample Submission Name : {{ tss.tmp_sample_submission_name }}<br />
+    				Number of Samples : {{ tss.tmp_sample_num }}
+    			</td>
+    			<td><a href="#">Edit</a></td>
+    		</tr>
+    		<tr>
+    			<td>Phenotype List</td>
+    			<td>
+    				<table class="table table-striped table-bordered table-hover" name="edit-phenotype-table" value="{{tssid}}" id ="edit-phenotype-table{{tssid}}">
+    					<tr>
+    						<th> Phenotype Name </th>
+    						<th> Phenotype Type </th>
+    						<th> Phenotype Description </th>
+    						<th> Phenotype Definition </th>
+    					</tr>
+    					{% for p in tssphenolist %}
+    					<tr id="{{p.pk}}">
+    						<td>{{ p.tmp_phenotype_name }}</td>
+    						<td>{{ p.tmp_phenotype_type_id|get_phenotype_type_by_id }}</td>
+    						<td>{{ p.tmp_phenotype_description }}</td>
+    						<td>{{ p.tmp_phenotype_definition }}</td>
+    					</tr>
+    					{% endfor %}
+    				</table>
+    			</td>
+    			<td>Edit</td>
+    		</tr>
+    		<tr>
+    			<td>Affiliated Institute</td>
+    			<td>
+    				{{ tssai.tmp_ai_name }}<br />
+    				{{ tssai.tmp_ai_description }}
+    			</td>
+    			<td>Edit</td>
+    		</tr>
+    		<tr>
+    			<td>Contact List</td>
+    			<td>
+    				<table class="table table-striped table-bordered table-hover" name="temp-contacts-table" value="{{tssid}}" ssid="{{ssid}}" id ="temp-contacts-table{{tssid}}">
+    					<tr>
+    						<th> Username </th>
+    						<th> First Name </th>
+    						<th> Last Name </th>
+    						<th> Email </th>
+    						<th> Affiliated Institute(s) </th>
+    						<th> Last Login </th>
+    						<th> Date Joined </th>
+    					</tr>
+    					{% for u in tssuserlist %}
+    					<tr id="{{u.pk}}">
+    						<td>{{ u.username }}</td>
+    						<td>{{ u.first_name }}</td>
+    						<td>{{ u.last_name }}</td>
+    						<td>{{ u.email }}</td>
+    						<td>{{ u.affiliated_institute|get_all_affiliated_institute_for_tss4|safe }}</td>
+    						<td>{{ u.last_login }}</td>
+    						<td>{{ u.date_joined }}</td>
+    					</tr>
+    					{% endfor %}
+    				</table>
+    			</td>
+    			<td>Edit</td>
+    		</tr>
+    	</table>
+    </form>
+
+</div>

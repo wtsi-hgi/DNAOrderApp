@@ -28,11 +28,20 @@ urlpatterns = patterns('',
 
     # Temp SS page
     url(r'^handle_tss_pages/(?P<action>\w+)/?(?P<projid>\d+)?/?(?P<tssid>\d+)?/?$', views.handle_tss_pages, name="handle_tss_pages"), #next button
-    url(r'^tss-page-1/(?P<projid>\d+)?/?', views.tss_page_1, name='tss-page-1'), #sample name and sample num
+    url(r'^tss-page-1/(?P<projid>\d+)?/?$', views.tss_page_1, name='tss-page-1'), #sample name and sample num
     url(r'^tss-page-2/(?P<tssid>\d+)?/?$', views.tss_page_2, name='tss-page-2'), #phenotype list
     url(r'^tss-page-3/?(?P<tssid>\d+)?/?$', views.tss_page_3, name='tss-page-3'), #affiliated institute 
     url(r'^tss-page-4/(?P<tssid>\d+)?/?$', views.tss_page_4, name='tss-page-4'), #personnels
     url(r'^tss-page-5/(?P<tssid>\d+)/?(?P<action>\w+)?/?$', views.tss_page_5, name='tss-page-5'), #summary
+
+    url(r'^edit-tss-page-1/(?P<ssid>\d+)/(?P<projid>\w+)/?$', views.edit_tss_page_1, name='edit-tss-page-1'), #edit sample name and sample num
+    url(r'^edit-tss-page-2/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_2, name='edit-tss-page-2'), # edit phenotype list
+    url(r'^edit-tss-page-3/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_3, name='edit-tss-page-3'), # edit affiliated institute 
+    url(r'^edit-tss-page-4/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_4, name='edit-tss-page-4'), # edit personnels
+    url(r'^edit-tss-page-5/(?P<ssid>\d+)/(?P<tssid>\d+)/?(?P<action>\w+)?/?$', views.edit_tss_page_5, name='edit-tss-page-5'), # edit summary
+
+    # Edit SS page
+    url(r'^edit-ss-fmpage/(?P<ssid>\d+)/(?P<tssid>\d+)?$', views.edit_ss_fmpage, name='edit-ss-fmpage'), #edit sample name and sample num
 
     # Collaborator PI page
     url(r'^collab-page$', views.collab_page, name='collab-page'),

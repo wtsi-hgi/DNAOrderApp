@@ -44,6 +44,10 @@
 ul.errorlist {
 					display: none;
 }
+#edit-sample-submission-modal{
+	width:80%;
+	margin-left: -40%;
+}
 </style>
 
 <script type="text/javascript">
@@ -168,6 +172,9 @@ function backButton(data){
 function nextButton(data){
 	//To Add Temporary Sample Submission - First time from clicking the [+]Add Sample Submission
 	// $('#next-tss-button').click( function(data){
+	if ($(data).attr('frombutton') == 'add-ss-button'){
+		console.log("inside add-tss-button");
+
 		var page = $(data).parent().siblings()[1].getAttribute("name");
 		console.log('before page'+page);
 		if (page == 2){
@@ -181,7 +188,9 @@ function nextButton(data){
 			console.log("inside page 4!");
 			var tssid = $('#add_a_temp_contact_form').attr("tssid");
 			console.log('tssid'+tssid);
-			$.get('tss-page-5/'+tssid, function(data){
+			var ssid = $('#add_a_temp_contact_form').attr("ssid");
+			console.log('ssid'+ssid);
+			$.get('edit-tss-page-5/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
 				if ($(".alert-error").length == 0){
 					$('#next-tss-button').attr("style", "display: none");
@@ -218,6 +227,65 @@ function nextButton(data){
 												}
 				});
 		}
+	}
+	else if ($(data).attr('frombutton') == 'edit-ss-button'){
+		console.log("inside edit-tss-button");
+
+		var page = $(data).parent().siblings()[1].getAttribute("name");
+		console.log('before page'+page);
+		if (page == 2){
+			var tssid = $('#add_a_temp_phenotype_form').attr("tssid");
+			console.log('tssid'+tssid);
+			var ssid = $('#add_a_temp_phenotype_form').attr("ssid");
+			console.log('ssid'+ssid);
+			$.get('edit-tss-page-3/'+ssid+'/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
+		}
+		else if (page == 4){
+			console.log("inside page 4!");
+			var tssid = $('#add_a_temp_contact_form').attr("tssid");
+			console.log('tssid'+tssid);
+			var ssid = $('#add_a_temp_contact_form').attr("ssid");
+			console.log('ssid'+ssid);
+			$.get('edit-tss-page-5/'+ssid+'/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				if ($(".alert-error").length == 0){
+					$('#next-tss-button').attr("style", "display: none");
+					$('#final-submission-tss-button').removeAttr("style");
+				}
+			});
+		}
+		else{
+				$(".add_a_temp_ss").ajaxSubmit({
+												// url: '/order/add_tmp_ss/'+projid,
+												// url: '/order/handle_tss_pages/'+currpage,
+												type: "POST",
+												resetForm : true,
+												headers : {"X-CSRFToken" : csrftoken},
+												success : function(data) {
+																			console.log("success" + data);
+																			$("#tmp-sample-submission-modal-body").replaceWith(data);
+																			// $("#dynamic-modal-section").replaceWith(data);
+
+																			// $('#next-tss-button').removeAttr('disabled');
+																			// $('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
+																			// $('input[name=tmp_sample_num]').attr('disabled', 'disabled');
+																			// addAttributeToModalButton('target', tss_pages[0]);
+																			
+																			console.log($(data).filter("#tmp-sample-submission-modal-body").attr("name"));
+																			var page = $(data).filter("#tmp-sample-submission-modal-body").attr("name");
+
+																			if (page != 1){
+																				$('#back-tss-button').removeAttr("style");
+																			}
+												},
+												error : function(data) {
+																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+												}
+				});
+		}
+	}
 
 		// //Save the Tssform
 		// console.log(data);
@@ -251,6 +319,26 @@ function finalSubmitButton(data){
 }
 
 
+function saveEditSSName(data){
+	alert("in save edit ssname");
+	// var ssid = $(data).attr("ssid");
+
+	$('#edit_ss_form').ajaxSubmit({
+											// url: '/order/edit-ss-fmpage/'+ssid,
+											type: "POST",
+											resetForm : true,
+											headers : {"X-CSRFToken" : csrftoken},
+											success : function (data) {
+												alert("success!");
+											},
+											error: function(data) {
+												alert("fail!");
+												console.log(data);
+											}
+	});
+}
+
+
 $(document).ready(function() {
 	$(".collapse").collapse();
 
@@ -267,8 +355,41 @@ $(document).ready(function() {
 		$('#back-tss-button').attr('project-id', projid);
 		$('#next-tss-button').removeAttr('style');
 		$('#final-submission-tss-button').attr('style', 'display: none');
+		$('#next-tss-button').attr('frombutton','add-ss-button');
 	});
 
+	//Edit ss button
+	//DEPRECATED
+	// $('.edit-ss-button').click( function(data){
+	// 	console.log("in edit-ss-button");
+	// 	data.preventDefault();
+	// 	var ssid = $(this).attr("ssid");
+	// 	var projid = $(this).attr("project-id");
+	// 	console.log('ssid'+ssid);
+	// 	console.log('projid'+projid);
+	// 	$.get('edit-tss-page-1/'+ssid+"/"+projid, function(data){
+	// 		$("#tmp-sample-submission-modal-body").replaceWith(data);
+	// 	});
+	// 	$('#back-tss-button').attr('style', 'display: none');
+	// 	addAttributeToModalButton('project-id', projid);
+	// 	$('#back-tss-button').attr('project-id', projid);
+	// 	$('#next-tss-button').removeAttr('style');
+	// 	$('#final-submission-tss-button').attr('style', 'display: none');
+	// 	$('#next-tss-button').attr('frombutton','edit-ss-button');
+	// });
+	
+	//Edit ss button
+	$('.edit-ss-button').click( function(data){
+		console.log("in edit-ss-button");
+		data.preventDefault();
+		var ssid = $(this).attr("ssid");
+		console.log("ssid"+ssid);
+		var projid = $(this).attr("project-id");
+		$.get('edit-ss-fmpage/'+ssid, function(data){
+			console.log(data);
+			$("#edit-sample-submission-modal-body").replaceWith(data);
+		});
+	});
 
 	// To Add Projects
 	$('#add-a-project-button').click( function(data){
@@ -577,7 +698,7 @@ $(document).ready(function() {
 });
 });
 
-// Add Temporary Contact
+// Add Temporary Contact - from ADD
 function addTempContact(tssid){
 
 	$("#add_a_temp_contact_form").ajaxSubmit({
@@ -595,7 +716,25 @@ function addTempContact(tssid){
 	return false;
 }
 
-// Add Temporary Phenotype
+// Add Temporary Contact - from EDIT
+function addEditTempContact(ssid,tssid){
+	$("#add_a_temp_contact_form").ajaxSubmit({
+		url : '/order/edit-tss-page-4/'+ssid+'/'+tssid,
+		type : "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			$('#tmp-sample-submission-modal-body').replaceWith(data);
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
+
+// Add Temporary Phenotype - from ADD
 // To Add a Phenotype
 function addTempPhenotype(tssid){
 	console.log("in addtempphenotype");
@@ -623,6 +762,33 @@ function addTempPhenotype(tssid){
 	return false;
 }
 
+// Add Temporary Phenotype - from EDIT
+function addEditTempPhenotype(ssid,tssid){
+	console.log("in addedittempphenotype");
+	console.log("TSSID: " + tssid);
+	console.log("SSID: " + ssid);
+
+	$("#add_a_temp_phenotype_form").ajaxSubmit({
+		url: '/order/edit-tss-page-2/'+ssid+"/"+tssid,
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log("successfully add phenotype");
+			console.log("this is addphenotype" + data);
+
+			$('#tmp-sample-submission-modal-body').replaceWith(data);
+			
+			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+
+		},
+		error : function(data) {
+			console.log("failed to add phenotype");
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
 
 // To Add a Phenotype
 function addPhenotype(ssid){
@@ -800,7 +966,10 @@ border:solid 1px #c3c3c3;
 								</tr>
 								{% for ss in sslist %}
 								<tr>
-									<td>{{ ss.sample_submission_name }}</td>
+									<td>{{ ss.sample_submission_name }}
+										<br />
+										<a href="#" class="edit-ss-button" id="edit-ss-button-{{proj.pk}}" role="button" data-toggle="modal" ssid="{{ss.id}}" project-id="{{proj.pk}}" data-target="#edit-sample-submission-modal">Edit</a>
+									</td>
 									<td id="top3phenolist">
 										<ul>
 											{% for ss_select, phenolist in ss_pheno_dict.items %}
@@ -895,7 +1064,7 @@ border:solid 1px #c3c3c3;
 			</div>
 			<div class="modal-footer">
 				<button id="back-tss-button" role="button" class="btn pull-left" style="display: none" onclick="backButton(this)">Back</button>
-				<button id="next-tss-button" role="button" class="btn" onclick="nextButton(this)">Next</button>
+				<button id="next-tss-button" role="button" class="btn" onclick="nextButton(this)" frombutton="">Next</button>
 				<button id="final-submission-tss-button" role="button" class="btn btn-primary" onclick="finalSubmitButton(this)" style="display: none">Submit</button>
 			</div>
 		</div>
@@ -903,6 +1072,20 @@ border:solid 1px #c3c3c3;
 
 		<!--***************************************** END OF MODAL ************************************************************-->
 
+		<!--*************************************** MODAL FOR EDITING SAMPLE SUBMISSION **************************************-->
+		<div id="edit-sample-submission-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="edit-sample-submission-label" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="edit-sample-submission-label">Editing Sample Submission</h3>
+			</div>
+			<div class="modal-body" id="edit-sample-submission-modal-body">
+			</div>
+			<div class="modal-footer">
+				<button id="save-edit-ss-button" role="button" class="btn pull-right" onclick="saveEditSSName(this)">Save</button>
+			</div>
+		</div>
+
+		<!--******************************************** END OF MODAL ********************************************************-->
 
 	</div>
 </div>
