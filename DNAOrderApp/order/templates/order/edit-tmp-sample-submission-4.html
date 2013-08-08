@@ -1,4 +1,4 @@
-<div class="modal-body" id="tmp-sample-submission-modal-body" name="4">
+<div class="modal-body" id="edit-sample-submission-modal-body" name="4">
 	<h3> Contact List </h3>
 
 	<div id="alert-signs">
@@ -8,8 +8,8 @@
 	<!-- Taken from contacts-table-fmpage -->
 	{% load get_affiliated_institute_list %}
 
-	<div id="temp-contacts-table-container{{tss.pk}}">
-		<table class="table table-striped table-bordered table-hover" name="temp-contacts-table" value="{{tssid}}" ssid="{{ssid}}" id ="temp-contacts-table{{tssid}}" ss-name="{{ ss_name }}">
+	<div id="edit-temp-contacts-table-container{{tss.pk}}">
+		<table class="table table-striped table-bordered table-hover" name="edit-temp-contacts-table" value="{{tssid}}" ssid="{{ssid}}" id ="edit-temp-contacts-table{{tssid}}" ss-name="{{ ss_name }}">
 			<tr>
 				<th> Username </th>
 				<th> First Name </th>
@@ -19,7 +19,7 @@
 				<th> Last Login </th>
 				<th> Date Joined </th>
 			</tr>
-			{% for u in tempuserlist_all %}
+			{% for u in tssuserlist %}
 			<tr id="{{u.pk}}">
 				<td>{{ u.username }}</td>
 				<td>{{ u.first_name }}</td>
@@ -32,13 +32,13 @@
 			{% endfor %}
 		</table>
 	</div>
-	<div id="add_a_temp_contacts_panel">
-	<form class="add_a_temp_ss" method="post" id="add_a_temp_contact_form" tssid="{{tssid}}" ssid="{{ ssid }}" action="tss-page-4/{{ tssid }}">
+	<div id="edit_temp_contacts_panel">
+	<form class="edit_temp_ss_contact" method="post" id="edit_temp_contact_form" tssid="{{tssid}}" ssid="{{ ssid }}" action="tss-page-4/{{ssid}}/{{ tssid }}">
 		{% csrf_token %}
 		<table id="tssuserformtable">
 			{{ tssuserform }}
 		</table>
-		<button id="add-temp-pheno-button" class="btn btn-primary" type="button" onclick="addEditTempContact({{ssid}},{{tssid}})">
+		<button id="edit-temp-pheno-button" class="btn btn-primary" type="button" onclick="addEditTempContact({{ssid}},{{tssid}})">
 			Add a User
 		</button>
 	</form>

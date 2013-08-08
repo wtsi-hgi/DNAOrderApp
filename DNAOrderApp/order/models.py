@@ -393,6 +393,9 @@ class TempSSDNAOrderAppUser(models.Model):
     tmp_ss = models.ForeignKey(TempSampleSubmission)
     tmp_dnaorderappuser = models.ForeignKey(DNAOrderAppUser)
 
+    class Meta:
+        unique_together = ('tmp_ss', 'tmp_dnaorderappuser')
+
 
 
 """ MANIFEST UPLOAD """

@@ -353,6 +353,29 @@ function addEditTempPhenotype(ssid, tssid){
 	return false;
 }
 
+// Add Temporary Contact - from EDIT
+function addEditTempContact(ssid,tssid){
+	$("#edit_temp_contact_form").ajaxSubmit({
+		url : '/order/edit-tss-page-4/'+ssid+'/'+tssid,
+		type : "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			$('#edit-sample-submission-modal-body').replaceWith(data);
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
+function openEditSSContact(ssid, tssid, data){
+	$.get('edit-tss-page-4/'+ssid+'/'+tssid, function(data) {
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+	});
+}
+
 function openEditSSNameNum(ssid, projid, data){
 	var tssid = $(data).attr('tss');
 	$.get('edit-tss-page-1/'+ssid+'/'+projid+'/'+tssid, function(data) {
@@ -372,6 +395,13 @@ function saveEditButton(data){
 	if ($('.edit_temp_ss_pheno').length){
 		var tssid = $('.edit_temp_ss_pheno').attr('tssid');
 		var ssid = $('.edit_temp_ss_pheno').attr('ssid');
+		$.get('edit-ss-fmpage/'+ssid+'/'+tssid, function(data){
+			$("#edit-sample-submission-modal-body").replaceWith(data);
+		});
+	}
+	else if ($('.edit_temp_ss_contact').length){
+		var tssid = $('.edit_temp_ss_contact').attr('tssid');
+		var ssid = $('.edit_temp_ss_contact').attr('ssid');
 		$.get('edit-ss-fmpage/'+ssid+'/'+tssid, function(data){
 			$("#edit-sample-submission-modal-body").replaceWith(data);
 		});
@@ -772,24 +802,6 @@ function addTempContact(tssid){
 	});
 	return false;
 }
-
-// Add Temporary Contact - from EDIT
-function addEditTempContact(ssid,tssid){
-	$("#add_a_temp_contact_form").ajaxSubmit({
-		url : '/order/edit-tss-page-4/'+ssid+'/'+tssid,
-		type : "POST",
-		resetForm : true,
-		headers : {"X-CSRFToken" : csrftoken},
-		success : function(data) {
-			$('#tmp-sample-submission-modal-body').replaceWith(data);
-		},
-		error : function(data) {
-			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
-		}
-	});
-	return false;
-}
-
 
 // Add Temporary Phenotype - from ADD
 // To Add a Phenotype
