@@ -1,0 +1,45 @@
+
+<div class="modal-body" id="edit-sample-submission-modal-body" name="2">
+
+	<div id="alert-signs">
+		{{ alert_msg|safe }}
+	</div>
+
+	<!-- Taken from phenotype-table-fmpage -->
+
+	{% load get_phenotype_type %}
+
+	<div id="edit-temp-phenotype-table-container{{tss.pk}}">
+		<table class="table table-striped table-bordered table-hover" name="edit-temp-phenotype-table" value="{{tssid}}" id ="edit-temp-phenotype-table{{tssid}}" ss-name="{{ ss_name }}">
+			<tr>
+				<th> Phenotype Name </th>
+				<th> Phenotype Type </th>
+				<th> Phenotype Description </th>
+				<th> Phenotype Definition </th>
+			</tr>
+			{% for p in tssphenotypelist_all %}
+			<tr id="{{p.pk}}">
+				<td>{{ p.tmp_phenotype_name }}</td>
+				<td>{{ p.tmp_phenotype_type_id|get_phenotype_type_by_id }}</td>
+				<td>{{ p.tmp_phenotype_description }}</td>
+				<td>{{ p.tmp_phenotype_definition }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+
+	<!-- Taken from phenoform -->
+	<div id="edit_temp_phenotype_panel_{{ssid}}"> 
+		<form class="edit_temp_ss_pheno" method="post" id="edit_temp_phenotype_form" tssid="{{tssid}}" ssid="{{ssid}}" action="edit-tss-page-2/{{ ssid }}/{{ tssid }}">
+			{% csrf_token %}
+			<table id="phenotypeformtable">
+				{{ tssphenoform }}
+			</table>
+			<br />
+			<button id="edit-temp-pheno-button" class="btn btn-primary" type="button" onclick="addEditTempPhenotype({{ssid}},{{tssid}})">
+				Create a Phenotype
+			</button>
+		</form>
+		</div>
+	</div>
+</div>
