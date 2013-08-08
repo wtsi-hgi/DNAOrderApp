@@ -1305,7 +1305,97 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
 
     if request.method == "POST":
         print "in the post - edit_ss_fmpage"
-        pass
+        # Idea is check if there's any changes, if there is, then update Sample Submission
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        print 'tss',tss
+        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+        print 'tssai', tssai
+        tssuserlist = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tss)
+        print 'tssuserlist', tssuserlist
+        tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
+        print 'tssphenolist', tssphenolist
+
+        ss = SampleSubmission.objects.get(pk=ssid)
+        print 'ss', ss
+        print 'ss project name before', ss.project_name
+        ss.project_name = tss.tmp_project_name
+        print 'ss project name after', ss.project_name
+        print 'ss sample submission name before', ss.sample_submission_name
+        ss.sample_submission_name = tss.tmp_sample_submission_name
+        print 'ss sample submission name after', ss.sample_submission_name
+        print 'ss sample num before', ss.sample_num
+        ss.sample_num = tss.tmp_sample_num
+        print 'ss sample num after', ss.sample_num
+        print 'ss ai before', ss.affiliated_institute
+
+        try:
+            ai = AffiliatedInstitute.objects.get(ai_name=tssai.tmp_ai_name)
+        except ObjectDoesNotExist:
+            ai = AffiliatedInstitute()
+            ai.ai_name = tssai.tmp_ai_name
+            ai.ai_description = tssai.tmp_ai_description
+            ai.save()
+
+        ss.affiliated_institute = ai
+        del ai
+        print 'ss ai after', ss.affiliated_institute
+
+        print 'ss contact list before', ss.contact_list
+        # compare contact list
+        newuser_list = list(set(tssuserlist) - set(ss.contact_list.all()))
+
+        for nw in newuser_list:
+            # User exists, because there's no way to create new users at the moment
+            ss.contact_list.add(nw)
+        print 'ss contact list after', ss.contact_list
+
+        # DEPRECATED !!!!!
+        # print 'ss pheno list before', ss.phenotype_list
+        # tplist = [] #list of all the phenotypes associated with this ss in the temporary phenotype table
+        # for tp in tssphenolist:
+        #     p = Phenotype()
+        #     p.phenotype_name = tp.tmp_phenotype_name 
+        #     p.phenotype_type = tp.tmp_phenotype_type
+        #     p.phenotype_description = tp.tmp_phenotype_description
+        #     p.phenotype_definition = tp.tmp_phenotype_definition
+        #     del p
+        # # you can't delete already created phenotypes, so you can only add to it
+        # list(set() - set(ss.phenotype_list.all()))
+        # ss.phenotype_list.add(tssphenolist)
+        # print 'ss pheno list after', ss.phenotype_list
+
+        # You have the phenotype list from the sample submission
+        # you have the tss list from tsspheno
+        # Need to associate sample submission to the new phenotype from tsspheno
+        # somehow make tss comparable to phenotypes, so then to create the new phenotypes and associate it to the present ss.
+        # phenotype is unique by name and type
+        # tempssphenotype is unique by name, ss, type
+        # so compare name and type only
+        psslist = ss.phenotype_list.all().values_list('phenotype_name', 'phenotype_type_id')
+        tptsslist = TempSSPhenotype.objects.all().values_list('tmp_phenotype_name','tmp_phenotype_type')
+        newphenotype_list = list(set(tptsslist)-set(psslist))
+
+        for np in newphenotype_list:
+            try:
+                tempsspheno = TempSSPhenotype.objects.get(tmp_phenotype_name=np[0],tmp_phenotype_type=np[1])
+
+                # Check if these phenotypes exist first, it just might not be associated with the present sample submission
+                pheno = Phenotype.objects.get(phenotype_name=np[0],phenotype_type=np[1])
+                ss.phenotype_list.add(pheno)
+            except TempSSPhenotype.DoesNotExist:
+                print "TempSSPhenotype does not exist!"
+            except Phenotype.DoesNotExist:
+                pheno = Phenotype()
+                pheno.phenotype_name = tempsspheno.tmp_phenotype_name
+                pheno.phenotype_type = tempsspheno.tmp_phenotype_type
+                pheno.phenotype_description = tempsspheno.tmp_phenotype_description
+                pheno.phenotype_definition = tempsspheno.tmp_phenotype_definition
+                ss.phenotype_list.add(pheno)
+                del pheno 
+        
+        ss.save()
+        print 'ss', ss
+        return HttpResponseRedirect(reverse('fmprojectlist'))
     else:
         print "in the else - edit_ss_fmpage"
         # first time being called, GET
@@ -1372,6 +1462,7 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         else:
             print "not 0"
             tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
+            tssid = tss.id
             tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
             tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
             tssuserlist = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tss)
@@ -1381,7 +1472,6 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         'tss' : tss,
         'tssai' : tssai,
         'tssphenolist' : tssphenolist,
-        'phenotypelist' : ss.phenotype_list.all(),
         'tssuserlist' : tssuserlist,
         'ssid' : ssid,
         'tssid' : tssid

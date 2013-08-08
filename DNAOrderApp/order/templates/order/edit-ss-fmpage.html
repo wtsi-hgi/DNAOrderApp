@@ -6,7 +6,7 @@
         {{ alert_msg|safe }}
     </div>
 
-    <form class="edit_ss" id="edit_ss_form" action="edit-ss-fmpage/{{ssid}}/{{tssid}}" method="post" tssid="{{tssid}}" ssid="{{ssid}}">
+    <form class="edit_temp_ss_fmpage" id="edit_ss_form" action="edit-ss-fmpage/{{ssid}}/{{tssid}}" method="post" tssid="{{tssid}}" ssid="{{ssid}}">
     	{% csrf_token %}
     	<table class="table table-bordered">
     		<tr>

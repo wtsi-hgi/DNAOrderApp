@@ -378,7 +378,7 @@ class TempSSPhenotype(models.Model):
     tmp_phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
                                         for autism spectrum disorder.', blank=True)  # Not too sure if should be CharField or TextField...should b
     class Meta:
-        unique_together = ('tmp_ss', 'tmp_phenotype_name', 'tmp_phenotype_type')
+        unique_together = ('tmp_phenotype_name', 'tmp_phenotype_type')
 
 
 class TempSSAffiliatedInstitute(models.Model):

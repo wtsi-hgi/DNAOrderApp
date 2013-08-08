@@ -406,6 +406,32 @@ function saveEditButton(data){
 			$("#edit-sample-submission-modal-body").replaceWith(data);
 		});
 	}
+	else if ($('.edit_temp_ss_fmpage').length){
+		alert("in edit temp ss fmpage");
+		console.log($('.edit_temp_ss_fmpage').length);
+		// $('.edit_temp_ss_fmpage').ajaxSubmit({
+
+		// });
+		// $('#edit-sample-submission-modal').modal('hide');
+
+		$('.edit_temp_ss_fmage').ajaxSubmit({
+												// type: "POST",
+												resetForm : true,
+												headers : {"X-CSRFToken" : csrftoken},
+												success : function (data) {
+													alert("success!");
+													console.log(data);
+													// var newDoc = document.open("text/html", "replace");
+													// newDoc.write(data);
+													// newDoc.close();
+													$('#edit-sample-submission-modal').modal('hide');
+												},
+												error: function(data) {
+													alert("fail!");
+													console.log(data);
+												}
+		});
+	}
 	else{
 		$('.edit_temp_ss').ajaxSubmit({
 											// url: '/order/edit-ss-fmpage/'+ssid,
