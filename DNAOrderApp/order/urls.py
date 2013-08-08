@@ -34,7 +34,7 @@ urlpatterns = patterns('',
     url(r'^tss-page-4/(?P<tssid>\d+)?/?$', views.tss_page_4, name='tss-page-4'), #personnels
     url(r'^tss-page-5/(?P<tssid>\d+)/?(?P<action>\w+)?/?$', views.tss_page_5, name='tss-page-5'), #summary
 
-    url(r'^edit-tss-page-1/(?P<ssid>\d+)/(?P<projid>\w+)/?$', views.edit_tss_page_1, name='edit-tss-page-1'), #edit sample name and sample num
+    url(r'^edit-tss-page-1/(?P<ssid>\d+)/(?P<projid>\w+)/?(?P<tssid>\d+)?$', views.edit_tss_page_1, name='edit-tss-page-1'), #edit sample name and sample num
     url(r'^edit-tss-page-2/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_2, name='edit-tss-page-2'), # edit phenotype list
     url(r'^edit-tss-page-3/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_3, name='edit-tss-page-3'), # edit affiliated institute 
     url(r'^edit-tss-page-4/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_4, name='edit-tss-page-4'), # edit personnels

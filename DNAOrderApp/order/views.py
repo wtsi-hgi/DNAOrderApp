@@ -956,50 +956,6 @@ def tss_page_4(request, tssid=None):
         'tssid' : tssid
         })
 
-def edit_tss_page_2(request, ssid=None, tssid=None):
-    print "in edit tss page 2"
-    if request.method == "POST":
-        print "in the post - edit tss page 2"
-        tssphenoform = TempSSPhenotypeForm(request.POST)
-
-        if tssphenoform.is_valid():
-            try:
-                tsspheno = tssphenoform.save(commit=False)
-                tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
-                tsspheno.save()
-            except ObjectDoesNotExist:
-                print "TempSampleSubmission does not exist"
-            except Exception as e:
-                print "General exception being thrown: ", e
-        else:
-            print "invalid form"
-    else:
-        #first time webpage is being called or from a GET method
-        # Creating temp phenotypes from existing sample submission's phenotype list
-        print "not in post - edit tss page 2"
-        ss = SampleSubmission.objects.get(pk=ssid)
-        tss = TempSampleSubmission.objects.get(pk=tssid)
-        
-        if not TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid):
-            for pheno in ss.phenotype_list.all():
-                tsspheno = TempSSPhenotype()
-                tsspheno.tmp_ss = tss 
-                tsspheno.tmp_phenotype_name = pheno.phenotype_name
-                tsspheno.tmp_phenotype_type = pheno.phenotype_type
-                tsspheno.tmp_phenotype_description = pheno.phenotype_description
-                tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
-                tsspheno.save()
-                del tsspheno
-
-    tssphenoform = TempSSPhenotypeForm()
-    tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
-
-    return render(request, 'order/edit-tmp-sample-submission-2.html', {
-        'tssphenoform': tssphenoform,
-        'tssid' : tssid,
-        'ssid' : ssid,
-        'tempphenotypelist_all' : tempphenotypelist_all
-        })
 
 def tss_page_2(request, tssid=None):
     print "in tss page 2"
@@ -1052,52 +1008,6 @@ def tss_page_2(request, tssid=None):
         'tssphenoform': tssphenoform,
         'tssid' : tssid,
         'tempphenotypelist_all' : tempphenotypelist_all
-        })
-
-
-def edit_tss_page_3(request, ssid=None, tssid=None):
-    print "in edit tss page 3"
-
-    if request.method == "POST":
-        print "in the post - edit tss page 3"
-        try:
-            #if tssai exists already and just want to update
-            tss = TempSampleSubmission.objects.get(pk=tssid)
-            instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
-            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
-        except ObjectDoesNotExist:
-            tssaiform = TempSSAffiliatedInstituteForm(request.POST)
-
-        if tssaiform.is_valid():
-            try:
-                tssai = tssaiform.save(commit=False)
-                tss = TempSampleSubmission.objects.get(pk=tssid)
-                tssai.tmp_ss = tss
-                tssai.save()
-                return HttpResponseRedirect(reverse('edit-tss-page-4', kwargs={'ssid':ssid, 'tssid': tss.id}))
-            except ObjectDoesNotExist:
-                print "TempSampleSubmission does not exist"
-            except Exception as e:
-                print "General exception being thrown - edit tss page 3: ", e
-        else:
-            # If the form is invalid ie. missing fields, invalid inputs - should generate an alert message 
-            # and stay on the form
-            print "invalid form", tssaiform.errors
-    else:
-        #first time webpage is being called, using GET
-        print "not in post - edit tss page 3"
-        ss = SampleSubmission.objects.get(pk=ssid)
-        tss = TempSampleSubmission.objects.get(pk=tssid)
-        data = {   
-                    'tmp_ss' : tss,
-                    'tmp_ai_name' : ss.affiliated_institute.ai_name, 
-                    'tmp_ai_description' : ss.affiliated_institute.ai_description
-        }
-        tssaiform = TempSSAffiliatedInstituteForm(data)
-    return render(request, 'order/edit-tmp-sample-submission-3.html', {
-        'tssid' : tssid,
-        'ssid' : ssid,
-        'tssaiform' : tssaiform
         })
 
 def tss_page_3(request, tssid=None):
@@ -1155,7 +1065,108 @@ def tss_page_3(request, tssid=None):
         'tssaiform' : tssaiform
         })
 
-def edit_tss_page_1(request, projid=None, ssid=None):
+def edit_tss_page_3(request, ssid=None, tssid=None):
+    print "in edit tss page 3"
+
+    if request.method == "POST":
+        print "in the post - edit tss page 3"
+        try:
+            #if tssai exists already and just want to update
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
+        except ObjectDoesNotExist:
+            tssaiform = TempSSAffiliatedInstituteForm(request.POST)
+
+        if tssaiform.is_valid():
+            try:
+                tssai = tssaiform.save(commit=False)
+                tss = TempSampleSubmission.objects.get(pk=tssid)
+                tssai.tmp_ss = tss
+                tssai.save()
+                return HttpResponseRedirect(reverse('edit-tss-page-4', kwargs={'ssid':ssid, 'tssid': tss.id}))
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown - edit tss page 3: ", e
+        else:
+            # If the form is invalid ie. missing fields, invalid inputs - should generate an alert message 
+            # and stay on the form
+            print "invalid form", tssaiform.errors
+    else:
+        #first time webpage is being called, using GET
+        print "not in post - edit tss page 3"
+        ss = SampleSubmission.objects.get(pk=ssid)
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        data = {   
+                    'tmp_ss' : tss,
+                    'tmp_ai_name' : ss.affiliated_institute.ai_name, 
+                    'tmp_ai_description' : ss.affiliated_institute.ai_description
+        }
+        tssaiform = TempSSAffiliatedInstituteForm(data)
+    return render(request, 'order/edit-tmp-sample-submission-3.html', {
+        'tssid' : tssid,
+        'ssid' : ssid,
+        'tssaiform' : tssaiform
+        })
+
+def edit_tss_page_2(request, ssid=None, tssid=None):
+    print "in edit tss page 2"
+    if request.method == "POST":
+        print "in the post - edit tss page 2"
+        tssphenoform = TempSSPhenotypeForm(request.POST)
+
+        if tssphenoform.is_valid():
+            try:
+                print "in try"
+                tsspheno = tssphenoform.save(commit=False)
+                tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tsspheno.save()
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+    else:
+        #first time webpage is being called or from a GET method
+        # Creating temp phenotypes from existing sample submission's phenotype list
+        print "not in post - edit tss page 2"
+    try:
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        tssphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+    except ObjectDoesNotExist:
+        print "TempSampleSubmission does not exist!"
+    
+    tssphenoform = TempSSPhenotypeForm()
+
+    # DEPRECATED!!!!!
+    #     ss = SampleSubmission.objects.get(pk=ssid)
+    #     tss = TempSampleSubmission.objects.get(pk=tssid)
+        
+    #     if not TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid):
+    #         for pheno in ss.phenotype_list.all():
+    #             tsspheno = TempSSPhenotype()
+    #             tsspheno.tmp_ss = tss 
+    #             tsspheno.tmp_phenotype_name = pheno.phenotype_name
+    #             tsspheno.tmp_phenotype_type = pheno.phenotype_type
+    #             tsspheno.tmp_phenotype_description = pheno.phenotype_description
+    #             tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
+    #             tsspheno.save()
+    #             del tsspheno
+
+    # tssphenoform = TempSSPhenotypeForm()
+    # tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
+
+    return render(request, 'order/edit-tmp-sample-submission-2.html', {
+        'tssphenoform': tssphenoform,
+        'tssid' : tssid,
+        'ssid' : ssid,
+        'tssphenotypelist_all' : tssphenotypelist_all
+        })
+
+
+def edit_tss_page_1(request, projid=None, ssid=None, tssid=None):
     # The idea is, using the sample temp format to change the existing sample submission.
     # I only need projid, not for samplesubmission but because TempSampleSubmissionForm needs it. 
     # After this point, I don't need it anymore. I only need ssid and tssid
@@ -1180,7 +1191,7 @@ def edit_tss_page_1(request, projid=None, ssid=None):
                 proj = UserProject.objects.get(pk=projid)
                 tss.tmp_project_name = proj 
                 tss.save()
-                return HttpResponseRedirect(reverse('edit-tss-page-2', kwargs={'ssid':ssid, 'tssid':tss.id}))
+                return HttpResponseRedirect(reverse('edit-ss-fmpage', kwargs={'ssid':ssid, 'tssid':tss.id}))
             except ObjectDoesNotExist:
                 print "User Project does not exist"
             except ValueError:
@@ -1191,17 +1202,29 @@ def edit_tss_page_1(request, projid=None, ssid=None):
             print "invalid form", tssform.errors 
     else:
         print "in the else edit tss page 1"
-        ss = SampleSubmission.objects.get(pk=ssid)
-        data = {    'tmp_project_name' : ss.project_name,
-                    'tmp_sample_submission_name' : ss.sample_submission_name,
-                    'tmp_sample_num' : ss.sample_num
-        }
+        # Using try-except as an 'if-else' format. It's not best practice, will change if time permits.
+        try:
+            print "in the else - try"
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            print tss
+            data = {    'tmp_project_name' : tss.tmp_project_name,
+                        'tmp_sample_submission_name' : tss.tmp_sample_submission_name,
+                        'tmp_sample_num' : tss.tmp_sample_num
+            }
+        except ObjectDoesNotExist:
+            print "object does not exist"
+            ss = SampleSubmission.objects.get(pk=ssid)
+            data = {    'tmp_project_name' : ss.project_name,
+                        'tmp_sample_submission_name' : ss.sample_submission_name,
+                        'tmp_sample_num' : ss.sample_num
+            }
         tssform = TempSampleSubmissionForm(data)
 
     return render(request, 'order/edit-tmp-sample-submission-1.html', {
         'tssform' : tssform,
         'projid' : projid,
-        'ssid' : ssid
+        'ssid' : ssid,
+        'tssid' : tssid
     })
 
 def tss_page_1(request, projid=None):

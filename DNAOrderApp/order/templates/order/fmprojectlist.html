@@ -319,23 +319,80 @@ function finalSubmitButton(data){
 }
 
 
-function saveEditSSName(data){
-	alert("in save edit ssname");
-	// var ssid = $(data).attr("ssid");
+function openEditSSPhenotype(ssid, tssid, data){
+	$.get('edit-tss-page-2/'+ssid+'/'+tssid, function(data){
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+	});
+}
 
-	$('#edit_ss_form').ajaxSubmit({
+// Add Temporary Phenotype - from EDIT
+function addEditTempPhenotype(ssid, tssid){
+	console.log("in addedittempphenotype");
+	console.log("TSSID: " + tssid);
+	console.log("SSID: " + ssid);
+
+	$("#edit_temp_phenotype_form").ajaxSubmit({
+		url: '/order/edit-tss-page-2/'+ssid+"/"+tssid,
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log("successfully add phenotype");
+			console.log("this is addphenotype" + data);
+
+			$('#edit-sample-submission-modal-body').replaceWith(data);
+			
+			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+
+		},
+		error : function(data) {
+			console.log("failed to add phenotype");
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
+function openEditSSNameNum(ssid, projid, data){
+	var tssid = $(data).attr('tss');
+	$.get('edit-tss-page-1/'+ssid+'/'+projid+'/'+tssid, function(data) {
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+	});
+}
+
+function openEditSSAI(ssid, tssid, data){
+	$.get('edit-tss-page-3/'+ssid+'/'+tssid, function(data){
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+	});
+}
+
+function saveEditButton(data){
+	alert("in save edit ssname");
+
+	if ($('.edit_temp_ss_pheno').length){
+		var tssid = $('.edit_temp_ss_pheno').attr('tssid');
+		var ssid = $('.edit_temp_ss_pheno').attr('ssid');
+		$.get('edit-ss-fmpage/'+ssid+'/'+tssid, function(data){
+			$("#edit-sample-submission-modal-body").replaceWith(data);
+		});
+	}
+	else{
+		$('.edit_temp_ss').ajaxSubmit({
 											// url: '/order/edit-ss-fmpage/'+ssid,
 											type: "POST",
 											resetForm : true,
 											headers : {"X-CSRFToken" : csrftoken},
 											success : function (data) {
 												alert("success!");
+												console.log(data);
+												$("#edit-sample-submission-modal-body").replaceWith(data);
 											},
 											error: function(data) {
 												alert("fail!");
 												console.log(data);
 											}
-	});
+		});
+	}
 }
 
 
@@ -762,34 +819,6 @@ function addTempPhenotype(tssid){
 	return false;
 }
 
-// Add Temporary Phenotype - from EDIT
-function addEditTempPhenotype(ssid,tssid){
-	console.log("in addedittempphenotype");
-	console.log("TSSID: " + tssid);
-	console.log("SSID: " + ssid);
-
-	$("#add_a_temp_phenotype_form").ajaxSubmit({
-		url: '/order/edit-tss-page-2/'+ssid+"/"+tssid,
-		type: "POST",
-		resetForm : true,
-		headers : {"X-CSRFToken" : csrftoken},
-		success : function(data) {
-			console.log("successfully add phenotype");
-			console.log("this is addphenotype" + data);
-
-			$('#tmp-sample-submission-modal-body').replaceWith(data);
-			
-			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
-
-		},
-		error : function(data) {
-			console.log("failed to add phenotype");
-			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
-		}
-	});
-	return false;
-}
-
 // To Add a Phenotype
 function addPhenotype(ssid){
 	console.log("in addphenotype");
@@ -1081,7 +1110,7 @@ border:solid 1px #c3c3c3;
 			<div class="modal-body" id="edit-sample-submission-modal-body">
 			</div>
 			<div class="modal-footer">
-				<button id="save-edit-ss-button" role="button" class="btn pull-right" onclick="saveEditSSName(this)">Save</button>
+				<button id="save-edit-ss-button" role="button" class="btn pull-right" onclick="saveEditButton(this)">Save</button>
 			</div>
 		</div>
 

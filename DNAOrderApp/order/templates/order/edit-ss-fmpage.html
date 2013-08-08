@@ -15,7 +15,9 @@
     				Sample Submission Name : {{ tss.tmp_sample_submission_name }}<br />
     				Number of Samples : {{ tss.tmp_sample_num }}
     			</td>
-    			<td><a href="#">Edit</a></td>
+    			<td>
+    				<a href="#" class="edit-ss-button" id="edit-ss-buttton-modal" tss="{{tssid}}" onclick="openEditSSNameNum({{ssid}},{{tss.tmp_project_name.id}}, this)">Edit</a>
+    			</td>
     		</tr>
     		<tr>
     			<td>Phenotype List</td>
@@ -37,7 +39,7 @@
     					{% endfor %}
     				</table>
     			</td>
-    			<td>Edit</td>
+    			<td><a href="#" class="edit-ss-button" id="edit-ss-pheno-button-modal" tss="{{tssid}}" onclick="openEditSSPhenotype({{ssid}},{{tssid}},this)">Edit</a></td>
     		</tr>
     		<tr>
     			<td>Affiliated Institute</td>
@@ -45,7 +47,7 @@
     				{{ tssai.tmp_ai_name }}<br />
     				{{ tssai.tmp_ai_description }}
     			</td>
-    			<td>Edit</td>
+    			<td><a href="#" class="edit-ss-button" id="edit-ss-ai-button-modal" tss="{{tssid}}" onclick="openEditSSAI({{ssid}},{{tssid}}, this)">Edit</a></td>
     		</tr>
     		<tr>
     			<td>Contact List</td>
