@@ -972,23 +972,21 @@ def tss_page_3(request, tssid=None):
 
     if request.method == "POST":
         print "in post - tss page 3"
-        try:
-            #if tssai exists already and just want to update
-            tss = TempSampleSubmission.objects.get(pk=tssid)
-            print 'request.post', request.POST, ' ', request.POST['tmp_ai_name']
-
-            try:
-                instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
-            except TempSSAffiliatedInstitute.DoesNotExist:
-                print "tssai does not exist with tss"
-                instance = TempSSAffiliatedInstitute.objects.get(tmp_ai_name=request.POST['tmp_ai_name'])
-            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
-            print "tssaiform? "
-        except TempSSAffiliatedInstiute.DoesNotExist:
-            #If tssai does not exist
-            print "tssai does not exist with tmp_ai_name"
+        
+        #if tssai exists already and just want to update
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        print 'request.post', request.POST, ' ', request.POST['tmp_ai_name']
+        print "hi",TempSSAffiliatedInstitute.objects.filter(tmp_ss=tss)
+        print "hello",TempSSAffiliatedInstitute.objects.filter(tmp_ai_name=request.POST['tmp_ai_name'])
+        instance = TempSSAffiliatedInstitute.objects.filter(tmp_ss=tss) or TempSSAffiliatedInstitute.objects.filter(tmp_ai_name=request.POST['tmp_ai_name'])
+        if not instance:
+            print "hello"
             tssaiform = TempSSAffiliatedInstituteForm(request.POST)
-
+        else:
+            print "in else"
+            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
+        print "tssaiform? "
+        
         if tssaiform.is_valid():
             try:
                 tssai = tssaiform.save(commit=False)
@@ -1462,8 +1460,10 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                 tssphenolist = []
                 for pheno in ss.phenotype_list.all():
                     try:
+                        print "in try tsspheno"
                         tsspheno = TempSSPhenotype.objects.get(tmp_ss=tss, tmp_phenotype_name=pheno.phenotype_name, tmp_phenotype_type=pheno.phenotype_type)
                     except ObjectDoesNotExist:
+                        print "in tsspheno doesnotexist"
                         tsspheno = TempSSPhenotype()
                         tsspheno.tmp_ss = tss 
                         tsspheno.tmp_phenotype_name = pheno.phenotype_name
@@ -1474,25 +1474,31 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                     tssphenolist.append(tsspheno)
                     # tssphenoformlist.append(TempSSPhenotypeForm(instance=tsspheno))
                     del tsspheno
+                print "tsspheno after"
 
                 # instantiate tempssaffiliatedinstitute so to create a filled form 
                 try:
+                    print "in try tssai"
                     tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
                 except ObjectDoesNotExist:
+                    print "in tssai does not exist"
                     tssai = TempSSAffiliatedInstitute()
                     tssai.tmp_ss = tss 
                     tssai.tmp_ai_name = ss.affiliated_institute.ai_name
                     tssai.tmp_ai_description = ss.affiliated_institute.ai_description
                     tssai.save()
-                tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
+                # tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
+                print "after tssai"
 
                 # instantitate tempssdnaorderappuser so to create a filled form
                 # tssuserformlist = []
                 tssuserlist = []
                 for user in ss.contact_list.all():
                     try:
+                        print "in tssdoauser in try"
                         tssdoauser = TempSSDNAOrderAppUser.objects.get(tmp_ss=tss, tmp_dnaorderappuser=user)
                     except ObjectDoesNotExist:
+                        print "in tssodauser does not exist"
                         tssdoauser = TempSSDNAOrderAppUser()
                         tssdoauser.tmp_ss = tss 
                         tssdoauser.tmp_dnaorderappuser = user
@@ -1500,6 +1506,7 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                     tssuserlist.append(tssdoauser.tmp_dnaorderappuser)
                     # tssuserformlist.append(TempSSDNAOrderAppUserForm(instance=tssdoauser))
                     del tssdoauser
+                print "after tssusrlist"
         else:
             print "not 0"
             tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
