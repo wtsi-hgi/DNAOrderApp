@@ -1301,10 +1301,12 @@ def tss_page_1(request, projid=None):
         })
 
 
+@transaction.commit_on_success
 def edit_ss_fmpage(request, ssid=None, tssid=None):
 
     if request.method == "POST":
         print "in the post - edit_ss_fmpage"
+
         # Idea is check if there's any changes, if there is, then update Sample Submission
         tss = TempSampleSubmission.objects.get(pk=tssid)
         print 'tss',tss
@@ -1372,27 +1374,38 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         # tempssphenotype is unique by name, ss, type
         # so compare name and type only
         psslist = ss.phenotype_list.all().values_list('phenotype_name', 'phenotype_type_id')
+        print "after psslist"
         tptsslist = TempSSPhenotype.objects.filter(tmp_ss=tss).values_list('tmp_phenotype_name','tmp_phenotype_type')
+        print "after tptsslist"
         newphenotype_list = list(set(tptsslist)-set(psslist))
+        print "made a remaining list ", newphenotype_list
 
         for np in newphenotype_list:
             try:
+                print "before temppsspheno"
                 tempsspheno = TempSSPhenotype.objects.get(tmp_phenotype_name=np[0],tmp_phenotype_type=np[1])
+                print "After tempsspheno"
 
                 # Check if these phenotypes exist first, it just might not be associated with the present sample submission
                 pheno = Phenotype.objects.get(phenotype_name=np[0],phenotype_type=np[1])
+                print "after pheno is made"
                 ss.phenotype_list.add(pheno)
+                print "add to ss phenotype list"
             except TempSSPhenotype.DoesNotExist:
                 print "TempSSPhenotype does not exist!"
             except Phenotype.DoesNotExist:
+                print "in phenotype does not exist"
                 pheno = Phenotype()
                 pheno.phenotype_name = tempsspheno.tmp_phenotype_name
                 pheno.phenotype_type = tempsspheno.tmp_phenotype_type
                 pheno.phenotype_description = tempsspheno.tmp_phenotype_description
                 pheno.phenotype_definition = tempsspheno.tmp_phenotype_definition
+                pheno.save()
                 ss.phenotype_list.add(pheno)
+                print "add ss.phenotypelist"
                 del pheno 
         
+        print "before saving ss"
         ss.save()
 
         print "tssai before"
@@ -1413,25 +1426,33 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         print "in the else - edit_ss_fmpage"
         # first time being called, GET
         ss = SampleSubmission.objects.get(pk=ssid)
+        print "ss", ss
 
-        if TempSampleSubmission.objects.filter(tmp_project_name=ss.project_name).count() == 0:
+        # I'm using filter and count here because I didn't want to use get, which causes an ObjectDoesNotExist
+        if TempSampleSubmission.objects.filter(tmp_sample_submission_name=ss.sample_submission_name).count() == 0:
             print "tempss when 0"
             with transaction.commit_on_success():
                 # instantiating temp sample submission so to create a filled form
-                try: 
-                    tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
-                except ObjectDoesNotExist:
-                    tss = TempSampleSubmission()
-                    tss.tmp_project_name = ss.project_name
-                    tss.tmp_sample_submission_name = ss.sample_submission_name
-                    tss.tmp_sample_num = ss.sample_num
-                    tss.save()
+                # try: 
+                #     tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
+                # except ObjectDoesNotExist:
+                print "before tss"
+                tss = TempSampleSubmission()
+                print "after tss"
+                tss.tmp_project_name = ss.project_name
+                print "after project name", ss.project_name, " and ", tss.tmp_project_name
+                tss.tmp_sample_submission_name = ss.sample_submission_name
+                print "after tssname"
+                tss.tmp_sample_num = ss.sample_num
+                print "after tss num"
+                print tss
+                tss.save()
+                print "saving !!!! "
                 tssid = tss.id
                 print "tssid", tssid
-                tssform = TempSampleSubmissionForm(instance=tss)
 
                 # instantitate tempssphenotype so to create a filled form for each phenotype
-                tssphenoformlist = []
+                # tssphenoformlist = []
                 tssphenolist = []
                 for pheno in ss.phenotype_list.all():
                     try:
@@ -1445,7 +1466,7 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                         tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
                         tsspheno.save()
                     tssphenolist.append(tsspheno)
-                    tssphenoformlist.append(TempSSPhenotypeForm(instance=tsspheno))
+                    # tssphenoformlist.append(TempSSPhenotypeForm(instance=tsspheno))
                     del tsspheno
 
                 # instantiate tempssaffiliatedinstitute so to create a filled form 
@@ -1460,7 +1481,7 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                 tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
 
                 # instantitate tempssdnaorderappuser so to create a filled form
-                tssuserformlist = []
+                # tssuserformlist = []
                 tssuserlist = []
                 for user in ss.contact_list.all():
                     try:
@@ -1471,11 +1492,11 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                         tssdoauser.tmp_dnaorderappuser = user
                         tssdoauser.save()
                     tssuserlist.append(tssdoauser.tmp_dnaorderappuser)
-                    tssuserformlist.append(TempSSDNAOrderAppUserForm(instance=tssdoauser))
+                    # tssuserformlist.append(TempSSDNAOrderAppUserForm(instance=tssdoauser))
                     del tssdoauser
         else:
             print "not 0"
-            tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
+            tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
             tssid = tss.id
             tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
             tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
