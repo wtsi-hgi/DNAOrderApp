@@ -410,16 +410,16 @@ function saveEditButton(data){
 		alert("in edit temp ss fmpage");
 		console.log($('.edit_temp_ss_fmpage').length);
 
-		$('.edit_temp_ss_fmage').ajaxSubmit({
+		$('.edit_temp_ss_fmpage').ajaxSubmit({
 												type: "POST",
 												resetForm : true,
 												headers : {"X-CSRFToken" : csrftoken},
 												success : function (data) {
 													alert("success!");
 													console.log(data);
-													// var newDoc = document.open("text/html", "replace");
-													// newDoc.write(data);
-													// newDoc.close();
+													var newDoc = document.open("text/html", "replace");
+													newDoc.write(data);
+													newDoc.close();
 													$('#edit-sample-submission-modal').modal('hide');
 												},
 												error: function(data) {
