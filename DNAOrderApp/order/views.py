@@ -975,12 +975,18 @@ def tss_page_3(request, tssid=None):
         try:
             #if tssai exists already and just want to update
             tss = TempSampleSubmission.objects.get(pk=tssid)
-            instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            print 'request.post', request.POST, ' ', request.POST['tmp_ai_name']
+
+            try:
+                instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            except TempSSAffiliatedInstitute.DoesNotExist:
+                print "tssai does not exist with tss"
+                instance = TempSSAffiliatedInstitute.objects.get(tmp_ai_name=request.POST['tmp_ai_name'])
             tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
             print "tssaiform? "
-        except ObjectDoesNotExist:
+        except TempSSAffiliatedInstiute.DoesNotExist:
             #If tssai does not exist
-            print "tssai does not exist"
+            print "tssai does not exist with tmp_ai_name"
             tssaiform = TempSSAffiliatedInstituteForm(request.POST)
 
         if tssaiform.is_valid():
