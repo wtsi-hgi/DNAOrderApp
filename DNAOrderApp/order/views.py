@@ -1372,7 +1372,7 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         # tempssphenotype is unique by name, ss, type
         # so compare name and type only
         psslist = ss.phenotype_list.all().values_list('phenotype_name', 'phenotype_type_id')
-        tptsslist = TempSSPhenotype.objects.all().values_list('tmp_phenotype_name','tmp_phenotype_type')
+        tptsslist = TempSSPhenotype.objects.filter(tmp_ss=tss).values_list('tmp_phenotype_name','tmp_phenotype_type')
         newphenotype_list = list(set(tptsslist)-set(psslist))
 
         for np in newphenotype_list:
@@ -1394,7 +1394,20 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                 del pheno 
         
         ss.save()
-        print 'ss', ss
+
+        print "tssai before"
+        tssai.delete()
+        print "tssai after"
+        print "tss phenolist before"
+        tssphenolist.delete()
+        print "tss phenolist after"
+        print "tssdnaorderappuser before"
+        TempSSDNAOrderAppUser.objects.filter(tmp_ss=tss).delete()
+        print "tssdnaorderappuser after"
+        print "tss before"
+        tss.delete()
+        print "tss after"
+        
         return HttpResponseRedirect(reverse('fmprojectlist'))
     else:
         print "in the else - edit_ss_fmpage"
