@@ -190,7 +190,7 @@ function nextButton(data){
 			console.log('tssid'+tssid);
 			var ssid = $('#add_a_temp_contact_form').attr("ssid");
 			console.log('ssid'+ssid);
-			$.get('edit-tss-page-5/'+tssid, function(data){
+			$.get('tss-page-5/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
 				if ($(".alert-error").length == 0){
 					$('#next-tss-button').attr("style", "display: none");

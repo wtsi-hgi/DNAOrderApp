@@ -883,6 +883,7 @@ def tss_page_4(request, tssid=None):
     # Only caring about user that exists in the system already.
 
     if request.method == "POST":
+        print "in post - tss page 4"
         tssuserform = TempSSDNAOrderAppUserForm(request.POST)
 
         if tssuserform.is_valid():
@@ -904,7 +905,6 @@ def tss_page_4(request, tssid=None):
     # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tssid)
     # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__tmp_project_name=tssid)
     tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
-
     tssuserform = TempSSDNAOrderAppUserForm()
 
     return render(request, 'order/tmp-sample-submission-4.html', {
