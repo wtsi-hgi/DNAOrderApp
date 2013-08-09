@@ -409,13 +409,9 @@ function saveEditButton(data){
 	else if ($('.edit_temp_ss_fmpage').length){
 		alert("in edit temp ss fmpage");
 		console.log($('.edit_temp_ss_fmpage').length);
-		// $('.edit_temp_ss_fmpage').ajaxSubmit({
-
-		// });
-		// $('#edit-sample-submission-modal').modal('hide');
 
 		$('.edit_temp_ss_fmage').ajaxSubmit({
-												// type: "POST",
+												type: "POST",
 												resetForm : true,
 												headers : {"X-CSRFToken" : csrftoken},
 												success : function (data) {

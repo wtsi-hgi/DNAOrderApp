@@ -16,7 +16,7 @@ from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteFor
 from DNAOrderApp.order.forms import DocumentForm
 
 from django.contrib import messages
-from django.db import IntegrityError, DatabaseError
+from django.db import IntegrityError, DatabaseError, transaction
 from django.core.exceptions import ObjectDoesNotExist
 import base64
 from django.template import Template, Context, RequestContext
@@ -1403,62 +1403,63 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
 
         if TempSampleSubmission.objects.filter(tmp_project_name=ss.project_name).count() == 0:
             print "tempss when 0"
-            # instantiating temp sample submission so to create a filled form
-            try: 
-                tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
-            except ObjectDoesNotExist:
-                tss = TempSampleSubmission()
-                tss.tmp_project_name = ss.project_name
-                tss.tmp_sample_submission_name = ss.sample_submission_name
-                tss.tmp_sample_num = ss.sample_num
-                tss.save()
-            tssid = tss.id
-            print "tssid", tssid
-            tssform = TempSampleSubmissionForm(instance=tss)
-
-            # instantitate tempssphenotype so to create a filled form for each phenotype
-            tssphenoformlist = []
-            tssphenolist = []
-            for pheno in ss.phenotype_list.all():
-                try:
-                    tsspheno = TempSSPhenotype.objects.get(tmp_ss=tss, tmp_phenotype_name=pheno.phenotype_name, tmp_phenotype_type=pheno.phenotype_type)
+            with transaction.commit_on_success():
+                # instantiating temp sample submission so to create a filled form
+                try: 
+                    tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
                 except ObjectDoesNotExist:
-                    tsspheno = TempSSPhenotype()
-                    tsspheno.tmp_ss = tss 
-                    tsspheno.tmp_phenotype_name = pheno.phenotype_name
-                    tsspheno.tmp_phenotype_type = pheno.phenotype_type
-                    tsspheno.tmp_phenotype_description = pheno.phenotype_description
-                    tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
-                    tsspheno.save()
-                tssphenolist.append(tsspheno)
-                tssphenoformlist.append(TempSSPhenotypeForm(instance=tsspheno))
-                del tsspheno
+                    tss = TempSampleSubmission()
+                    tss.tmp_project_name = ss.project_name
+                    tss.tmp_sample_submission_name = ss.sample_submission_name
+                    tss.tmp_sample_num = ss.sample_num
+                    tss.save()
+                tssid = tss.id
+                print "tssid", tssid
+                tssform = TempSampleSubmissionForm(instance=tss)
 
-            # instantiate tempssaffiliatedinstitute so to create a filled form 
-            try:
-                tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
-            except ObjectDoesNotExist:
-                tssai = TempSSAffiliatedInstitute()
-                tssai.tmp_ss = tss 
-                tssai.tmp_ai_name = ss.affiliated_institute.ai_name
-                tssai.tmp_ai_description = ss.affiliated_institute.ai_description
-                tssai.save()
-            tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
+                # instantitate tempssphenotype so to create a filled form for each phenotype
+                tssphenoformlist = []
+                tssphenolist = []
+                for pheno in ss.phenotype_list.all():
+                    try:
+                        tsspheno = TempSSPhenotype.objects.get(tmp_ss=tss, tmp_phenotype_name=pheno.phenotype_name, tmp_phenotype_type=pheno.phenotype_type)
+                    except ObjectDoesNotExist:
+                        tsspheno = TempSSPhenotype()
+                        tsspheno.tmp_ss = tss 
+                        tsspheno.tmp_phenotype_name = pheno.phenotype_name
+                        tsspheno.tmp_phenotype_type = pheno.phenotype_type
+                        tsspheno.tmp_phenotype_description = pheno.phenotype_description
+                        tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
+                        tsspheno.save()
+                    tssphenolist.append(tsspheno)
+                    tssphenoformlist.append(TempSSPhenotypeForm(instance=tsspheno))
+                    del tsspheno
 
-            # instantitate tempssdnaorderappuser so to create a filled form
-            tssuserformlist = []
-            tssuserlist = []
-            for user in ss.contact_list.all():
+                # instantiate tempssaffiliatedinstitute so to create a filled form 
                 try:
-                    tssdoauser = TempSSDNAOrderAppUser.objects.get(tmp_ss=tss, tmp_dnaorderappuser=user)
+                    tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
                 except ObjectDoesNotExist:
-                    tssdoauser = TempSSDNAOrderAppUser()
-                    tssdoauser.tmp_ss = tss 
-                    tssdoauser.tmp_dnaorderappuser = user
-                    tssdoauser.save()
-                tssuserlist.append(tssdoauser.tmp_dnaorderappuser)
-                tssuserformlist.append(TempSSDNAOrderAppUserForm(instance=tssdoauser))
-                del tssdoauser
+                    tssai = TempSSAffiliatedInstitute()
+                    tssai.tmp_ss = tss 
+                    tssai.tmp_ai_name = ss.affiliated_institute.ai_name
+                    tssai.tmp_ai_description = ss.affiliated_institute.ai_description
+                    tssai.save()
+                tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
+
+                # instantitate tempssdnaorderappuser so to create a filled form
+                tssuserformlist = []
+                tssuserlist = []
+                for user in ss.contact_list.all():
+                    try:
+                        tssdoauser = TempSSDNAOrderAppUser.objects.get(tmp_ss=tss, tmp_dnaorderappuser=user)
+                    except ObjectDoesNotExist:
+                        tssdoauser = TempSSDNAOrderAppUser()
+                        tssdoauser.tmp_ss = tss 
+                        tssdoauser.tmp_dnaorderappuser = user
+                        tssdoauser.save()
+                    tssuserlist.append(tssdoauser.tmp_dnaorderappuser)
+                    tssuserformlist.append(TempSSDNAOrderAppUserForm(instance=tssdoauser))
+                    del tssdoauser
         else:
             print "not 0"
             tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
