@@ -1372,21 +1372,6 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
             ss.contact_list.add(nw)
         print 'ss contact list after', ss.contact_list
 
-        # DEPRECATED !!!!!
-        # print 'ss pheno list before', ss.phenotype_list
-        # tplist = [] #list of all the phenotypes associated with this ss in the temporary phenotype table
-        # for tp in tssphenolist:
-        #     p = Phenotype()
-        #     p.phenotype_name = tp.tmp_phenotype_name 
-        #     p.phenotype_type = tp.tmp_phenotype_type
-        #     p.phenotype_description = tp.tmp_phenotype_description
-        #     p.phenotype_definition = tp.tmp_phenotype_definition
-        #     del p
-        # # you can't delete already created phenotypes, so you can only add to it
-        # list(set() - set(ss.phenotype_list.all()))
-        # ss.phenotype_list.add(tssphenolist)
-        # print 'ss pheno list after', ss.phenotype_list
-
         # You have the phenotype list from the sample submission
         # you have the tss list from tsspheno
         # Need to associate sample submission to the new phenotype from tsspheno
@@ -1453,13 +1438,8 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         if TempSampleSubmission.objects.filter(pk=tssid).count() == 0:
             # No Temp Sample Submission made for this sample submission yet. So create all the 
             # associated temporary tables for it.
-        # if TempSampleSubmission.objects.filter(tmp_sample_submission_name=ss.sample_submission_name).count() == 0:
             print "tempss when 0"
             with transaction.commit_on_success():
-                # instantiating temp sample submission so to create a filled form
-                # try: 
-                #     tss = TempSampleSubmission.objects.get(tmp_project_name=ss.project_name)
-                # except ObjectDoesNotExist:
                 print "before tss"
                 tss = TempSampleSubmission()
                 print "after tss"
@@ -1475,8 +1455,7 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                 tssid = tss.id
                 print "tssid", tssid
 
-                # instantitate tempssphenotype so to create a filled form for each phenotype
-                # tssphenoformlist = []
+                # instantiate tsspheno
                 tssphenolist = []
                 for pheno in ss.phenotype_list.all():
                     try:
@@ -1492,11 +1471,10 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                         tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
                         tsspheno.save()
                     tssphenolist.append(tsspheno)
-                    # tssphenoformlist.append(TempSSPhenotypeForm(instance=tsspheno))
                     del tsspheno
                 print "tsspheno after"
 
-                # instantiate tempssaffiliatedinstitute so to create a filled form 
+                # instantiate tempssaffiliatedinstitute 
                 try:
                     print "in try tssai"
                     tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
@@ -1507,11 +1485,9 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                     tssai.tmp_ai_name = ss.affiliated_institute.ai_name
                     tssai.tmp_ai_description = ss.affiliated_institute.ai_description
                     tssai.save()
-                # tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
                 print "after tssai"
 
                 # instantitate tempssdnaorderappuser so to create a filled form
-                # tssuserformlist = []
                 tssuserlist = []
                 for user in ss.contact_list.all():
                     try:
@@ -1524,20 +1500,17 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                         tssdoauser.tmp_dnaorderappuser = user
                         tssdoauser.save()
                     tssuserlist.append(tssdoauser.tmp_dnaorderappuser)
-                    # tssuserformlist.append(TempSSDNAOrderAppUserForm(instance=tssdoauser))
                     del tssdoauser
                 print "after tssusrlist"
         else:
             print "not 0"
             tss = TempSampleSubmission.objects.get(pk=tssid)
-            # tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
             tssid = tss.id
             tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
             tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
             tssuserlist = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tss)
 
     return render(request, 'order/edit-ss-fmpage.html', {
-        # 'tssform' : tssform,
         'tss' : tss,
         'tssai' : tssai,
         'tssphenolist' : tssphenolist,
