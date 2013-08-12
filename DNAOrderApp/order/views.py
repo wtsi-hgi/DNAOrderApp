@@ -1440,20 +1440,26 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
             # associated temporary tables for it.
             print "tempss when 0"
             with transaction.commit_on_success():
-                print "before tss"
-                tss = TempSampleSubmission()
-                print "after tss"
-                tss.tmp_project_name = ss.project_name
-                print "after project name", ss.project_name, " and ", tss.tmp_project_name
-                tss.tmp_sample_submission_name = ss.sample_submission_name
-                print "after tssname"
-                tss.tmp_sample_num = ss.sample_num
-                print "after tss num"
-                print tss
-                tss.save()
-                print "saving !!!! "
-                tssid = tss.id
-                print "tssid", tssid
+                try:
+                    # Some reason fmpage refreshes and 'Edit' is clicked, no tssid is provided in that scenario
+                    # But its temporary sample submission has already been created.
+                    tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
+                    tssid = tss.id
+                except ObjectDoesNotExist:
+                    print "before tss"
+                    tss = TempSampleSubmission()
+                    print "after tss"
+                    tss.tmp_project_name = ss.project_name
+                    print "after project name", ss.project_name, " and ", tss.tmp_project_name
+                    tss.tmp_sample_submission_name = ss.sample_submission_name
+                    print "after tssname"
+                    tss.tmp_sample_num = ss.sample_num
+                    print "after tss num"
+                    print tss
+                    tss.save()
+                    print "saving !!!! "
+                    tssid = tss.id
+                    print "tssid", tssid
 
                 # instantiate tsspheno
                 tssphenolist = []
