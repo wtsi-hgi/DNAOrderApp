@@ -984,7 +984,7 @@ def tss_page_3(request, tssid=None):
             tssaiform = TempSSAffiliatedInstituteForm(request.POST)
         else:
             print "in else"
-            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
+            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance[0])
         print "tssaiform? "
         
         if tssaiform.is_valid():
@@ -1191,22 +1191,33 @@ def edit_tss_page_1(request, projid=None, ssid=None, tssid=None):
 
     if request.method == "POST":
         print "in post - edit tss page 1"
+        print 'tssid ', tssid
+        print 'ssid ', ssid
+        print 'projid ', projid
         # this creates a new TempSampleSubmission and allows user to modify the TempSampleSubmission
         try:
-            proj = UserProject.objects.get(pk=projid)
-            instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
+            print "in try - edit tss page 1"
+            # proj = UserProject.objects.get(pk=projid)
+            # instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
+            instance = TempSampleSubmission.objects.get(pk=tssid)
+            print 'instance', instance
             tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
+            print "after tssform request instance - edit tss page 1"
         except ObjectDoesNotExist:
+            print "object does not exist - edit tss page 1"
             #if TempSampleSubmission does not exist...or project does not exist
             # using try-except statements as an 'if else' format is not the best practice, will change if time permits.
             tssform = TempSampleSubmissionForm(request.POST)
 
         if tssform.is_valid():
             try:
+                print "in is valid"
                 tss = tssform.save(commit=False)
                 proj = UserProject.objects.get(pk=projid)
                 tss.tmp_project_name = proj 
                 tss.save()
+                print "it's saved! ", tss
+                print "ssid", ssid, "tssid ", tss.id
                 return HttpResponseRedirect(reverse('edit-ss-fmpage', kwargs={'ssid':ssid, 'tssid':tss.id}))
             except ObjectDoesNotExist:
                 print "User Project does not exist"
@@ -1235,6 +1246,10 @@ def edit_tss_page_1(request, projid=None, ssid=None, tssid=None):
                         'tmp_sample_num' : ss.sample_num
             }
         tssform = TempSampleSubmissionForm(data)
+        print 'tssid ', tssid
+        print 'ssid ', ssid
+        print 'projid ', projid
+        print 'tssform ', tssform
 
     return render(request, 'order/edit-tmp-sample-submission-1.html', {
         'tssform' : tssform,
@@ -1307,6 +1322,8 @@ def tss_page_1(request, projid=None):
 
 @transaction.commit_on_success
 def edit_ss_fmpage(request, ssid=None, tssid=None):
+    print 'in edit ss fmpage'
+    print 'ssid', ssid, 'tssid', tssid
 
     if request.method == "POST":
         print "in the post - edit_ss_fmpage"
@@ -1433,7 +1450,10 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
         print "ss", ss
 
         # I'm using filter and count here because I didn't want to use get, which causes an ObjectDoesNotExist
-        if TempSampleSubmission.objects.filter(tmp_sample_submission_name=ss.sample_submission_name).count() == 0:
+        if TempSampleSubmission.objects.filter(pk=tssid).count() == 0:
+            # No Temp Sample Submission made for this sample submission yet. So create all the 
+            # associated temporary tables for it.
+        # if TempSampleSubmission.objects.filter(tmp_sample_submission_name=ss.sample_submission_name).count() == 0:
             print "tempss when 0"
             with transaction.commit_on_success():
                 # instantiating temp sample submission so to create a filled form
@@ -1509,7 +1529,8 @@ def edit_ss_fmpage(request, ssid=None, tssid=None):
                 print "after tssusrlist"
         else:
             print "not 0"
-            tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            # tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
             tssid = tss.id
             tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
             tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)

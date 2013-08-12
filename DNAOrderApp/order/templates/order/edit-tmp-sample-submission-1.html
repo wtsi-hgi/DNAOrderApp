@@ -1,6 +1,6 @@
 <div class="modal-body" id="edit-sample-submission-modal-body" name="1">
 	<!--THIS IS AFTER FIRST PRESSING ADD SAMPLE SUBMISSION BUTTON -->
-	<form class="edit_temp_ss" method="post" id="edit_ss_form" tss="{{tssid}}" action="edit-tss-page-1/{{ ssid }}/{{ projid }}">
+	<form class="edit_temp_ss" id="edit_ss_form" tss="{{tssid}}" action="edit-tss-page-1/{{ ssid }}/{{ projid }}/{{ tssid }}">
 		{% csrf_token %}
 		<table>
 			{{ tssform }}
