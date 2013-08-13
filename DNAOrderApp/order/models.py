@@ -365,6 +365,7 @@ class TempSampleSubmission(models.Model):
     tmp_project_name = models.ForeignKey(UserProject)
     tmp_sample_submission_name = models.CharField(max_length=100, unique=True)
     tmp_sample_num = models.IntegerField()
+    tmp_add_flag = models.BooleanField() # True if add, False if edit
     
     def __unicode__(self):
         return self.tmp_sample_submission_name
@@ -502,7 +503,7 @@ class TempSampleSubmissionForm(ModelForm):
         self.fields['tmp_sample_num'].label = "Temporary Sample Number"
     class Meta:
         model = TempSampleSubmission
-        exclude = ('tmp_project_name',)
+        exclude = ('tmp_project_name', 'tmp_add_flag')
 
 class TempSSPhenotypeForm(ModelForm):
     class Meta:

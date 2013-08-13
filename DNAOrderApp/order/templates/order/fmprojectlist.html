@@ -137,8 +137,9 @@ function backButton(data){
 		case "2":
 			console.log("in pheno - need to go back to ss");
 			var projid = $this.attr("project-id");
+			var tssid = $(".add_a_temp_ss").attr("tssid");
 			console.log(projid);
-			$.get('tss-page-1/'+projid, function(data){
+			$.get('tss-page-1/'+projid+'/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
 				$("#back-tss-button").attr("style", "display: none");
 			})
@@ -146,6 +147,7 @@ function backButton(data){
 		case "3":
 			console.log("in ai - goes back to pheno");
 			var tssid = $(".add_a_temp_ss").attr("tssid");
+			console.log("tssid "+ tssid);
 			$.get('tss-page-2/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
 			});
@@ -162,6 +164,8 @@ function backButton(data){
 			var tssid = $("#summary-table").attr("value");
 			$.get('tss-page-4/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				$("#final-submission-tss-button").attr("style", "display: none");
+				$('#next-tss-button').removeAttr("style");
 			});
 			break;
 		default:
@@ -458,6 +462,7 @@ $(document).ready(function() {
 		console.log(projid);
 		$.get('tss-page-1/'+projid, function(data){
 			$("#tmp-sample-submission-modal-body").replaceWith(data);
+			console.log("add ss button"+data);
 		});
 		$('#back-tss-button').attr('style', 'display: none');
 		addAttributeToModalButton('project-id', projid);

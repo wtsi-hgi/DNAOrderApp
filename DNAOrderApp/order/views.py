@@ -1260,7 +1260,7 @@ def edit_tss_page_1(request, projid=None, ssid=None, tssid=None):
 
 def tss_page_1(request, projid=None):
     print "in tss page 1"
-    print "this projid", projid
+    print "this projid ", projid
 
     if request.method == "POST":
         print "in post?" #Allows user to modify 
@@ -1279,6 +1279,7 @@ def tss_page_1(request, projid=None):
                 tss = tssform.save(commit=False)
                 proj = UserProject.objects.get(pk=projid)
                 tss.tmp_project_name = proj
+                tss.tmp_add_flag = True
                 tss.save()
                 print "in valid", tss.id
                 return HttpResponseRedirect(reverse('tss-page-2', args=[tss.id]))
@@ -1297,26 +1298,40 @@ def tss_page_1(request, projid=None):
                             'alert_msg' : alert_msg
                     })
     else:
-        #first time webpage is being called, using GET
         print "not in post"
+
         try:
-            #if a tss exist for projid = (user, project), UserProject
+            # if Temporary sample submission already exists already
             proj = UserProject.objects.get(pk=projid)
-            tss_old = TempSampleSubmission.objects.get(tmp_project_name=proj) #if tss exists
-            data = {    'tmp_project_name' : tss_old.tmp_project_name,
-                        'tmp_sample_submission_name' : tss_old.tmp_sample_submission_name, 
-                        'tmp_sample_num' : tss_old.tmp_sample_num }
-
-            tssform = TempSampleSubmissionForm(data) #instantiate it with a form, allows user to update
-            print "check if tssform is bound:", tssform.is_bound
-            print "check if tssform is valid: ", tssform.is_valid()
-            print tssform.errors
+            tss = TempSampleSubmission.objects.get(tmp_project_name=proj, tmp_add_flag=True)
+            tssid = tss.id
+            tssform = TempSampleSubmissionForm(instance=tss)
         except ObjectDoesNotExist:
-            tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
+            # else create a temporary sample submission, with the known project
+            # first time webpage is being called, using GET
+            tssform = TempSampleSubmissionForm()
 
+        # if TempSampleSubmission.objects.filter(pk=tssid).count() == 0:
+        #     # if no temporary sample submission exists, create one.
+        # else:
+        #     try:
+        #         #if a tss exist for projid = (user, project), UserProject
+        #         proj = UserProject.objects.get(pk=projid)
+        #         tss_old = TempSampleSubmission.objects.get(tmp_project_name=proj) #if tss exists
+        #         data = {    'tmp_project_name' : tss_old.tmp_project_name,
+        #                     'tmp_sample_submission_name' : tss_old.tmp_sample_submission_name, 
+        #                     'tmp_sample_num' : tss_old.tmp_sample_num }
+
+        #         tssform = TempSampleSubmissionForm(data) #instantiate it with a form, allows user to update
+        #         print "check if tssform is bound:", tssform.is_bound
+        #         print "check if tssform is valid: ", tssform.is_valid()
+        #         print tssform.errors
+        #     except ObjectDoesNotExist:
+        #         tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
     return render(request, 'order/tmp-sample-submission-1.html', {
         'tssform' : tssform,
         'projid' : projid,
+        'tssid' : tssid
         })
 
 
