@@ -47,9 +47,6 @@
 					/*width: %;*/
 					padding: 300px;
 }
-ul.errorlist {
-					display: none;
-}
 #edit-sample-submission-modal{
 	width:80%;
 	margin-left: -40%;
@@ -119,7 +116,7 @@ function backButton(data){
 			var projid = $this.attr("project-id");
 			var tssid = $(".add_a_temp_ss").attr("tssid");
 			console.log(projid);
-			$.get('tss-page-1/'+projid+'/'+tssid, function(data){
+			$.get('tss-page-1/'+projid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
 				$("#back-tss-button").attr("style", "display: none");
 			})
@@ -246,6 +243,7 @@ function nextButton(data){
 																			});
 												},
 												error : function(data) {
+																			$("#tmp-sample-submission-modal-body").replaceWith(data);
 																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
 												}
 				});

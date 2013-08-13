@@ -1001,8 +1001,6 @@ def tss_page_3(request, tssid=None):
                 print "General exception being thrown - tss page 3:", e
         else:
             print "invalid form", tssaiform.errors
-            return HttpResponseRedirect(reverse('tss-page-4', args=[tssid]))
-        
     else:
         #first time webpage is being called, using GET
         print "not in post - tss page 3"
@@ -1136,25 +1134,25 @@ def edit_tss_page_2(request, ssid=None, tssid=None):
                 tsspheno = tssphenoform.save(commit=False)
                 tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
                 tsspheno.save()
+                tssphenoform = TempSSPhenotypeForm()
             except ObjectDoesNotExist:
                 print "TempSampleSubmission does not exist"
             except Exception as e:
                 print "General exception being thrown: ", e
         else:
             print "invalid form"
+            # shows the error messages
     else:
         #first time webpage is being called or from a GET method
         # Creating temp phenotypes from existing sample submission's phenotype list
         print "not in post - edit tss page 2"
-        pass
+        tssphenoform = TempSSPhenotypeForm()
 
     try:
         tss = TempSampleSubmission.objects.get(pk=tssid)
         tssphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
     except ObjectDoesNotExist:
         print "TempSampleSubmission does not exist!"
-    
-    tssphenoform = TempSSPhenotypeForm()
 
     # DEPRECATED!!!!!
     #     ss = SampleSubmission.objects.get(pk=ssid)
@@ -1266,7 +1264,7 @@ def tss_page_1(request, projid=None):
         print "in post?" #Allows user to modify 
         try:
             proj = UserProject.objects.get(pk=projid)
-            instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
+            instance = TempSampleSubmission.objects.get(tmp_project_name=proj, tmp_add_flag=True)
             tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
             print "tss form?"
         except ObjectDoesNotExist:
@@ -1290,8 +1288,11 @@ def tss_page_1(request, projid=None):
             except Exception as e:
                 print "General exception being thrown: ", e
         else:
-            print "invalid form", tssform.errors
-            alert_msg = "<div class=\"alert alert-error\"><b>Please complete the form.</b></div>"
+            print "invalid form"
+            # alert_msg="<div class=\"alert alert-error\"><b>", type(tssform['tmp_sample_submission_name'].errors), \
+                    # tssform['tmp_sample_num'].errors, "</b></div>"
+            alert_msg=""
+            # print "alert_msg", alert_msg
             return render(request, 'order/tmp-sample-submission-1.html', {
                             'tssform' : tssform,
                             'projid' : projid,

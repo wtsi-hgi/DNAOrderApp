@@ -387,7 +387,7 @@ class TempSSPhenotype(models.Model):
 # I want that each tmp_ss can have the same AffiliatedInstitute, so I removed the unique attribute in tmp_ai_name
 class TempSSAffiliatedInstitute(models.Model):
     tmp_ss =  models.ForeignKey(TempSampleSubmission)
-    tmp_ai_name = models.CharField(max_length=100)
+    tmp_ai_name = models.CharField(max_length=100, blank=False)
     tmp_ai_description = models.TextField(blank=True)
 
     def __unicode__(self):
