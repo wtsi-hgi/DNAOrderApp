@@ -1310,6 +1310,7 @@ def tss_page_1(request, projid=None):
             # else create a temporary sample submission, with the known project
             # first time webpage is being called, using GET
             tssform = TempSampleSubmissionForm()
+            tssid = None
 
         # if TempSampleSubmission.objects.filter(pk=tssid).count() == 0:
         #     # if no temporary sample submission exists, create one.
@@ -1677,6 +1678,7 @@ def fm_page(request):
 
     #Phenotype
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+    phenolist = Phenotype.objects.all() #for autocomplete
 
     #Project
     print "this is request.user", request.user
@@ -1687,6 +1689,9 @@ def fm_page(request):
 
     #Sample Submission form
     samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
+
+    #Affiliated Institute
+    affiliatedinstitutelist = AffiliatedInstitute.objects.all() #for autocomplete
 
 
 
@@ -1747,6 +1752,8 @@ def fm_page(request):
         'userprojectform' : userprojectform,
         'samplesubmissionform' : samplesubmissionform,
         'contact_list' : contact_list,
+        'phenolist' : phenolist,
+        'affiliatedinstitutelist' : affiliatedinstitutelist
         })
 
 

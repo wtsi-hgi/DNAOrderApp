@@ -19,6 +19,12 @@
 <!-- <script src="{{ STATIC_URL }}twitter-bootstrap-typeahead/js/bootstrap-typeahead.js" rel="text/javascript" media="screen"></script> -->
 <!-- https://github.com/tcrosen/twitter-bootstrap-typeahead -->
 
+<!-- JQUERY AUTOCOMPLETE PLUGIN -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+
 
 <style>
 #phenocompo{
@@ -67,32 +73,6 @@ function getCookie(name) {
     return cookieValue;
 }
 var csrftoken = getCookie('csrftoken');
-
-// function refreshPhenotypeList() {
-//   $("#current-list").empty();
-//   for(i=0; i< source.length; i++)
-//     $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-// }
-
-console.log({{ contact_list|get_all_contacts|safe }});
-var contact_list_source = {{ contact_list|get_all_contacts|safe }};
-// Refresh Contact List
-function refreshContactList(projid){
-	$("#current-contact-list-"+projid).empty();
-	for(i=0; i<contact_list_source.length; i++){
-		$("#current-contact-list-"+projid).append("<li><a href=\"#\">" + contact_list_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-	}
-}
-
-//Refresh Affiliated Institute List
-//DEPRECATED: THERE IS NO MULTIPLE AFFILIATED INSTITUTES ASSOCIATED TO SAMPLE SUBMISSION ANYMORE. JUST ONE. SINCE IT IS BY FOREIGN KEY NOT M2M.
-var affiliated_institute_source = {{ affiliated_institute_list|get_all_affiliated_institute|safe }};
-console.log(affiliated_institute_source);
-// function refreshAffiliatedInstituteList(projid){
-// 	$("#current-affiliated-institute-list-"+projid).empty();
-// 	for(i=0; i<affiliated_institute_source.length; i++)
-// 		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-// }
 
 //Adding attribute and value to the Next Button in Modal
 function addAttributeToModalButton(attribute, value){
@@ -150,6 +130,15 @@ function backButton(data){
 			console.log("tssid "+ tssid);
 			$.get('tss-page-2/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				var phenotypeTags2 = {{ phenolist|get_all_phenotypes|safe }};
+
+				$("#id_tmp_phenotype_name").autocomplete({
+					source: phenotypeTags2,
+					open: function(){
+						$(this).autocomplete('widget').css('z-index', 99999999999);
+						return false;
+					}
+				});
 			});
 			break;
 		case "4":
@@ -157,6 +146,16 @@ function backButton(data){
 			var tssid = $(".add_a_temp_ss").attr("tssid");
 			$.get('tss-page-3/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				//Affiliated Institute
+				var affiliatedInstituteTags = {{ affiliatedinstitutelist|get_all_affiliated_institute|safe }};
+
+				$("#id_tmp_ai_name").autocomplete({
+					source: affiliatedInstituteTags,
+					open: function(){
+						$(this).autocomplete('widget').css('z-index', 9999999999);
+						return false;
+					}
+				});
 			});
 			break;
 		case "5":
@@ -186,7 +185,18 @@ function nextButton(data){
 			console.log('tssid'+tssid);
 			$.get('tss-page-3/'+tssid, function(data){
 				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				//Affiliated Institute
+				var affiliatedInstituteTags = {{ affiliatedinstitutelist|get_all_affiliated_institute|safe }};
+
+				$("#id_tmp_ai_name").autocomplete({
+					source: affiliatedInstituteTags,
+					open: function(){
+						$(this).autocomplete('widget').css('z-index', 9999999999);
+						return false;
+					}
+				});
 			});
+
 		}
 		else if (page == 4){
 			console.log("inside page 4!");
@@ -225,6 +235,15 @@ function nextButton(data){
 																			if (page != 1){
 																				$('#back-tss-button').removeAttr("style");
 																			}
+																			var phenotypeTags2 = {{ phenolist|get_all_phenotypes|safe }};
+
+																			$("#id_tmp_phenotype_name").autocomplete({
+																				source: phenotypeTags2,
+																				open: function(){
+																					$(this).autocomplete('widget').css('z-index', 99999999999);
+																					return false;
+																				}
+																			});
 												},
 												error : function(data) {
 																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
@@ -322,10 +341,19 @@ function finalSubmitButton(data){
 
 }
 
-
 function openEditSSPhenotype(ssid, tssid, data){
 	$.get('edit-tss-page-2/'+ssid+'/'+tssid, function(data){
 		$("#edit-sample-submission-modal-body").replaceWith(data);
+
+		var phenotypeTags = {{ phenolist|get_all_phenotypes|safe }};
+
+		$("#id_tmp_phenotype_name").autocomplete({
+			source: phenotypeTags,
+			open: function(){
+				$(this).autocomplete('widget').css('z-index', 99999999999);
+				return false;
+			}
+		});
 	});
 }
 
@@ -390,6 +418,17 @@ function openEditSSNameNum(ssid, projid, data){
 function openEditSSAI(ssid, tssid, data){
 	$.get('edit-tss-page-3/'+ssid+'/'+tssid, function(data){
 		$("#edit-sample-submission-modal-body").replaceWith(data);
+
+		//Affiliated Institute
+		var affiliatedInstituteTags = {{ affiliatedinstitutelist|get_all_affiliated_institute|safe }};
+
+		$("#id_tmp_ai_name").autocomplete({
+			source: affiliatedInstituteTags,
+			open: function(){
+				$(this).autocomplete('widget').css('z-index', 9999999999);
+				return false;
+			}
+		});
 	});
 }
 
@@ -454,6 +493,36 @@ function saveEditButton(data){
 
 $(document).ready(function() {
 	$(".collapse").collapse();
+
+/////////////////////////////////
+
+// function refreshPhenotypeList() {
+//   $("#current-list").empty();
+//   for(i=0; i< source.length; i++)
+//     $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+// }
+
+console.log({{ contact_list|get_all_contacts|safe }});
+var contact_list_source = {{ contact_list|get_all_contacts|safe }};
+// Refresh Contact List
+function refreshContactList(projid){
+	$("#current-contact-list-"+projid).empty();
+	for(i=0; i<contact_list_source.length; i++){
+		$("#current-contact-list-"+projid).append("<li><a href=\"#\">" + contact_list_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+	}
+}
+
+//Refresh Affiliated Institute List
+//DEPRECATED: THERE IS NO MULTIPLE AFFILIATED INSTITUTES ASSOCIATED TO SAMPLE SUBMISSION ANYMORE. JUST ONE. SINCE IT IS BY FOREIGN KEY NOT M2M.
+var affiliated_institute_source = {{ affiliated_institute_list|get_all_affiliated_institute|safe }};
+console.log(affiliated_institute_source);
+// function refreshAffiliatedInstituteList(projid){
+// 	$("#current-affiliated-institute-list-"+projid).empty();
+// 	for(i=0; i<affiliated_institute_source.length; i++)
+// 		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+// }
+
+////////////////////////////////
 
 	//clicking on the [+] Sample Submission 
 	$('.add-ss-button').click( function(data){
@@ -602,9 +671,22 @@ $(document).ready(function() {
 																}).done( function(data){
 																	console.log("in ajax done"+ data);
 																	$("#popover-footer").replaceWith('<div class="modal-footer" id="popover-footer">'+data+'</div>');
+
+																	var phenotypeTags1 = {{ phenolist|get_all_phenotypes|safe }};
+
+																	$("#id_phenotype_name").autocomplete({
+																		source: phenotypeTags1,
+																		open: function(){
+																			$(this).autocomplete('widget').css('z-index', 99999999999);
+																			return false;
+																		}
+																	});
+
 																});
 
 																$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> Ajax didn't fail!</div>");
+
+																
 
 															}
 		});
