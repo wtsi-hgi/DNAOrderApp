@@ -27,6 +27,9 @@ urlpatterns = patterns('',
     url(r'^/?order/', include('DNAOrderApp.order.urls')),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+
+urlpatterns += staticfiles_urlpatterns()
+
 # Django does not serve MEDIA_ROOT by default, that would be dangerous in production
 # environment. But in development stage, we could cut short. Pay attention to the 
 # last line. That line enables Django to serve files from MEDIA_URL. This works only in developement stage.

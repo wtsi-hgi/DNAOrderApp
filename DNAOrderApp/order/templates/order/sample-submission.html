@@ -1,14 +1,15 @@
 {% extends "base_template.html" %} 
 {% load render_table from django_tables2 %}
+{% load staticfiles %}
 
 {% block title %}Sample Submission{% endblock title %}
 
 
 {% block extra_css_js %}
-<link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
-<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
-<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
-<link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+<link href="{% static "bootstrap-modal/css/bootstrap-modal.css" %}" rel="stylesheet" media="screen">
+<link href="{% static "bootstrap-modal/js/bootstrap-modalmanager.js" %}" rel="text/javascript" media="screen">
+<link href="{% static "bootstrap-modal/js/bootstrap-modal.js" %}" rel="text/javascript" media="screen">
+<link rel="stylesheet" href="{% static "django_tables2/themes/paleblue/css/screen.css" %}" />
 
 
 <script type="text/javascript">
