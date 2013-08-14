@@ -32,10 +32,12 @@ class DNAOrderAppUserAuthenticationBackend(ModelBackend):
 		print "modulo: " , modulo
 
 		dict = { 
-					2: "==",
-					3: "="
-				}
-
+			0: "",
+			1: "",
+			2: "==",
+			3: "="
+			}
+		
 		new_pw = password + dict[modulo]
 		return new_pw
 
