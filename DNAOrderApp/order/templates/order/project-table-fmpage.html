@@ -1,5 +1,6 @@
 {% load replace %}
 {% load get_phenotype_type %}
+{% load get_affiliated_institute_list %}
 
 <div class="container" id="project-section">
 	<!--****************** PROJECT TABLE REPLACEMENT! ***********************-->
@@ -17,7 +18,6 @@
 			<th> Date Created </th>
 			<th> Last Updated </th>
 			<th> Sample Submissions Status </th>
-			<th> Phenotype list Status </th>
 		</tr>
 		{% for proj, sslist in proj_ss_dict.items %}
 		<tr class="GroupA">
@@ -48,23 +48,18 @@
 				<i class="icon-list-alt"></i> {{ sslist|length }} Sample Submission(s)
 			</td>
 			{% endif %}
-			<td>
-				<i class="icon-warning-sign"></i> Placeholder - displaying number of phenotype lists included
-			</td>
 		</tr>
 		<tr>
 			<td class="more"></td>
 			<td colspan="5" class="more">
 				<div class="accordion-body in collapse" id="{{ proj.project_name|replace }}">
 					<div class="accordion-inner" style="border:none">
-						<a href="#" type="button" class="pull-right"> [+] Add Sample Submission </a>
-								</a>
 						<table class="table table-bordered" style="border:solid 1px">
 							<tr>
 								<th>Sample Submission</th>
 								<th>Phenotype List</th>
-								<th> Afiliated Institute (External Collaborator) </th>
-								<th> External Collaborator Contact </th>
+								<th> SS's Affiliated Institute </th>
+								<th> Collab's Contact Info </th>
 								<th> # of Samples </th>
 								<th> Date Created </th>
 								<th> Last Updated </th>
@@ -110,37 +105,21 @@
 										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
 									</ul>
 								</td>
-								<td>{{ ss.affiliatedinstitute }}</td>
-								<td></td>
+								<td>{{ ss.affiliated_institute }}</td>
+								<td>{{ ss_contacts_dict|access:ss.id|safe }}</td>
 								<td>{{ ss.sample_num }}</td>
 								<td>{{ ss.date_created }}</td>
 								<td>{{ ss.last_updated }}</td>
 							</tr>
-							{% empty %}
-								<tr>
-									<td></td>
-									<td></td>
-									<td>
-										<form action="#" id="dnaorderappuser-form-{{proj.pk}}">
-											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
-											
-											<ol id="current-affiliated-institute-list-{{proj.pk}}">
-											</ol>
-										</td>
-										<td>
-											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
-
-											<ol id="current-contact-list-{{proj.pk}}">
-											</ol>
-										</form>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-								<!-- {{ samplesubmissionform }} -->
-								{% endfor %}
+							
+							<!-- {{ samplesubmissionform }} -->
+							{% endfor %}
 						</table>
+
+						<button id="add-ss-button-{{proj.pk}}" role="button" class="add-ss-button pull-right" data-toggle="modal" project-id="{{proj.pk}}" data-target="#add-sample-submission-modal"> [+] Add Sample Submission </button>
+
+						<br />
+						<br />
 					</div>
 				</div>
 			</td>

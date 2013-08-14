@@ -14,15 +14,45 @@ urlpatterns = patterns('',
     url(r'^api/handle_project_fmpage/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_project_fmpage, name='handle_project_fmpage'),
     url(r'^api/handle_sample_submission/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_sample_submission, name='handle_sample_submission'),
     url(r'^api/handle_user/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_user, name='handle_user'),
+    url(r'^api/handle_dnaorderappuser/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_dnaorderappuser, name='handle_dnaorderappuser'),
     url(r'^api/handle_phenotype/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_phenotype, name='handle_phenotype'),
     url(r'^api/handle_phenotype_fmpage/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_phenotype_fmpage, name='handle_phenotype_fmpage'),
     url(r'^render_phenoform/?(?P<id>\d+)?/?$', views.render_phenoform, name='render_phenoform'),
+    url(r'^api/handle_contact_fmpage/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_contact_fmpage, name='handle_contact_fmpage'),
+    url(r'^api/handle_ai_fmpage/(?P<action>\w+)/?(?P<id>\d+)?/?', views.handle_ai_fmpage, name='handle_ai_fmpage'),
+
+    url(r'^api/handle_affiliated_institute/(?P<action>\w+)/?', views.handle_affiliated_institute, name='handle_affiliated_institute'),
     # url(r'^get_top3phenolist/(?P<ss>[\w ]+)/?$', views.get_top3phenolist, name='get_top3phenolist'),
     # url(r'^admin-page$', views.admin_page, name='admin-page'),
     # url(r'^admin-page/(?P<table>[^/]+)/(?P<pkid>\d+)/$', views.admin_page, name='admin-page-table-pkid'),
-    
+
+    # Temp SS page
+    url(r'^handle_tss_pages/(?P<action>\w+)/?(?P<projid>\d+)?/?(?P<tssid>\d+)?/?$', views.handle_tss_pages, name="handle_tss_pages"), #next button
+    url(r'^tss-page-1/(?P<projid>\d+)?/?$', views.tss_page_1, name='tss-page-1'), #sample name and sample num
+    url(r'^tss-page-2/(?P<tssid>\d+)?/?$', views.tss_page_2, name='tss-page-2'), #phenotype list
+    url(r'^tss-page-3/?(?P<tssid>\d+)?/?$', views.tss_page_3, name='tss-page-3'), #affiliated institute 
+    url(r'^tss-page-4/(?P<tssid>\d+)?/?$', views.tss_page_4, name='tss-page-4'), #personnels
+    url(r'^tss-page-5/(?P<tssid>\d+)?/?(?P<action>\w+)?/?$', views.tss_page_5, name='tss-page-5'), #summary
+
+    url(r'^edit-tss-page-1/(?P<ssid>\d+)/(?P<projid>\w+)/?(?P<tssid>\d+)?$', views.edit_tss_page_1, name='edit-tss-page-1'), #edit sample name and sample num
+    url(r'^edit-tss-page-2/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_2, name='edit-tss-page-2'), # edit phenotype list
+    url(r'^edit-tss-page-3/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_3, name='edit-tss-page-3'), # edit affiliated institute 
+    url(r'^edit-tss-page-4/(?P<ssid>\d+)/(?P<tssid>\d+)/?$', views.edit_tss_page_4, name='edit-tss-page-4'), # edit personnels
+    url(r'^edit-tss-page-5/(?P<ssid>\d+)/(?P<tssid>\d+)/?(?P<action>\w+)?/?$', views.edit_tss_page_5, name='edit-tss-page-5'), # edit summary
+
+    # Edit SS page
+    url(r'^edit-ss-fmpage/(?P<ssid>\d+)/(?P<tssid>\d+)?$', views.edit_ss_fmpage, name='edit-ss-fmpage'), #edit sample name and sample num
+
     # Collaborator PI page
     url(r'^collab-page$', views.collab_page, name='collab-page'),
+    url(r'^collab-page/set-request-sent/(?P<ssid>\d+)/?$', views.set_request_sent_ss, name="set-request-sent"),
+
+    # Well-filling pages
+    url(r'^well-filling-1$', views.well_filling_1, name='well-filling-1'), # choose way of well filling
+    url(r'^well-filling-2$', views.well_filling_2, name='well-filling-2'), # choose order of well filling
+    url(r'^well-filling-2-customize$', views.well_filling_2_customize, name='well-filling-2-customize'), # customize order of well filling
+    url(r'^well-filling-3-manual$', views.well_filling_3_manual, name='well-filling-3-manual'), # well filling procedure - manual
+    url(r'^well-filling-3-robot$', views.well_filling_3_robot, name='well-filling-3-robot'), # well filling procedure - robot
 
     # Lab Technician page
     url(r'^lab-tech-page$', views.lab_tech_page, name='lab-tech-page'),
@@ -54,7 +84,7 @@ url(r'^preview$', views.preview, name='preview'),
 url(r'^test$', views.test, name='base_template'),
 url(r'^pheno-list$', views.pheno_list, name='pheno-list' ),
 url(r'^welcome-collaborator$', views.welcome_collab, name='welcome-collab'),
-url(r'^96plate.html$', views._96plate, name='96plate'),
+url(r'^96plate.html$', views._96plate, name='96plate'), #GONE
 
 
 # BOOTSTRAP TUTORIAL

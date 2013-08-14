@@ -1,0 +1,47 @@
+<div class="modal-body" id="tmp-sample-submission-modal-body" name="4">
+	<h3> Contact List </h3>
+
+	<div id="alert-signs">
+		{{ alert_msg|safe }}
+	</div>
+
+	<!-- Taken from contacts-table-fmpage -->
+	{% load get_affiliated_institute_list %}
+
+	<div id="temp-contacts-table-container{{tss.pk}}">
+		<table class="table table-striped table-bordered table-hover" name="temp-contacts-table" value="{{tssid}}" id ="temp-contacts-table{{tssid}}" ss-name="{{ ss_name }}">
+			<tr>
+				<th> Username </th>
+				<th> First Name </th>
+				<th> Last Name </th>
+				<th> Email </th>
+				<th> Affiliated Institute(s) </th>
+				<th> Last Login </th>
+				<th> Date Joined </th>
+			</tr>
+			{% for u in tempuserlist_all %}
+			<tr id="{{u.pk}}">
+				<td>{{ u.username }}</td>
+				<td>{{ u.first_name }}</td>
+				<td>{{ u.last_name }}</td>
+				<td>{{ u.email }}</td>
+				<td>{{ u.affiliated_institute|get_all_affiliated_institute_for_tss4|safe }}</td>
+				<td>{{ u.last_login }}</td>
+				<td>{{ u.date_joined }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+	<div id="add_a_temp_contacts_panel">
+	<form class="add_a_temp_ss" method="post" id="add_a_temp_contact_form" tssid="{{tssid}}" action="tss-page-4/{{ tssid }}">
+		{% csrf_token %}
+		<table id="tssuserformtable">
+			{{ tssuserform }}
+		</table>
+		<button id="add-temp-pheno-button" class="btn btn-primary" type="button" onclick="addTempContact({{tssid}})">
+			Add a User
+		</button>
+	</form>
+	</div>
+
+</div>

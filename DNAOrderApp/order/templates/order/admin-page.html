@@ -31,6 +31,22 @@ var csrftoken = getCookie('csrftoken');
 $().ready(function() {
 	alert("Dom is now ready - this is admin-page-2");
 
+	// To Add Affiliated Institute
+	$("#add_a_affiliated_institute_form").ajaxForm({
+		url: '/order/api/handle_affiliated_institute/ADD/',
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log(data);
+			$('table#ai-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an affiliated institute!</div>");
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+
 	// To Add Projects
 	$("#add_a_project_form").ajaxForm({
 		url: '/order/api/handle_project/ADD/',
@@ -99,6 +115,22 @@ $().ready(function() {
 		}
 	});
 	alert("done loading phenotype form");
+
+	// To Add DNAOrderApp User
+	$("#add_a_dnaorderappuser_form").ajaxForm({
+		url : '/order/api/handle_dnaorderappuser/ADD/',
+		type : 'POST',
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			$('table#dnaorderappuser-table').replaceWith(data);
+			$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a dna order app user!</div>");
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	alert("done loading dnaorderappuser form");
 
 });
 
@@ -449,13 +481,91 @@ h3 {
 	</div>
 </div>
 
+<div class="container" id="affiliated-institute-section">
 
-<h3> EXAMPLE OF THE DNA ORDER APP USER FORM</h3>
-<table>
-{{ dnaorderappuserform }}
-</table>
+	Check database to see if it's ai's been added.
+	<h3> All Affiliated Institute </h3>
+	<table class="table table-hover" id="ai-table">
+		<tr>
+			<th> Affiliated Institute Name </th>
+			<th> Affiliated Institute Description </th>
+		</tr>
+		{% for u in ailist_all %}
+		<tr id="{{u.pk}}">
+			<td>{{ u.ai_name }}</td>
+			<td>{{ u.ai_description }}</td>
+		</tr>
+		{% endfor %}
+	</table>
 
 
+	<div id="add_affiliated_institute_panel">
+		<h3> Add An Affiliated Institute </h3>
+		<form class="add_affiliated_institute" method="post" id="add_a_affiliated_institute_form">
+			{% csrf_token %}
+			<table>
+				{{ aif }}
+			</table>
+			<br />
+			<button id="add-ai" class="btn btn-primary" type="submit">Create An Affiliated Institute</button>
+		</form>
+	</div>
+</div>
 
+<div class="container" id="dnaorderappuser-section">
+
+	<h3> EXAMPLE OF THE DNA ORDER APP USER FORM</h3>
+
+	<table class="table table-hover" id="dnaorderappuser-table">
+		<tr>
+			<th> Username </th>
+			<th> First name </th>
+			<th> Last Name </th>
+			<th> Email </th>
+			<th> Password </th>
+			<th> Affiliated Institute </th>
+			<th> Date Joined </th>
+			<th> Is staff? </th>
+			<th> Is active? </th>
+			<th> Is superuser? </th>
+			<th> Last Login </th>
+			<th> Delete? </th>
+		</tr>
+		{% for u in dnaorderappuserlist_all %}
+		<tr id="{{u.pk}}">
+			<td>{{ u.username }}</td>
+			<td>{{ u.first_name }}</td>
+			<td>{{ u.last_name }}</td>
+			<td>{{ u.email }}</td>
+			<td>{{ u.password }}</td>
+			<td>{{ u.affiliated_institute }}</td>
+			<td>{{ u.date_joined }}</td>
+			<td>{{ u.is_staff }}</td>
+			<td>{{ u.is_active }}</td>
+			<td>{{ u.is_superuser }}</td>
+			<td>{{ u.last_login }}</td>
+			<td> 
+				<a id="delete-dnaorderappuser{{u.pk}}" name="DEL_DNAORDERAPPUSER" class="btn delete" value="{{u.pk}}" onclick="deleteDNAOrderAppUser(this)"><i class="icon-remove"></i></a>
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+	<div id="add_dnaorderappuser_panel">
+		<form class="add_dnaorderappuser" method="post" id="add_a_dnaorderappuser_form">
+			{% csrf_token %}
+			<table>
+				{{ dnaorderappuserform }}
+			</table>
+			<br />
+			<button id="add-dnaorderapp" class="btn btn-primary" type="submit">Create a DNA Order App user</button>
+		</form>
+	</div>
+</div>
+<!-- <div class="container">
+	<h3> TRYING OUT FORMSETS </h3>
+	{{ PhenotypeFormSet }}
+
+</div> -->
 
 {% endblock content %}

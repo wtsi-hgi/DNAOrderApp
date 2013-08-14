@@ -1,18 +1,30 @@
 {% extends "base_template.html" %} 
-{% load render_table from django_tables2 %}
 {% load replace %}
 {% load get_phenotype_type %}
 {% load get_contact_list %}
 {% load get_affiliated_institute_list %}
+{% load create_formset_list %}
+{% load create_aiform %}
 
 {% block title %}Project List{% endblock title %}
 
 
 {% block extra_css_js %}
+
 <link href="{{ STATIC_URL_PREFIX }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
 <link href="{{ STATIC_URL_PREFIX }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
 <link href="{{ STATIC_URL_PREFIX }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
-<link rel="stylesheet" href="{{ STATIC_URL_PREFIX }}django_tables2/themes/paleblue/css/screen.css" />
+<!--<link rel="stylesheet" href="{{ STATIC_URL_PREFIX }}django_tables2/themes/paleblue/css/screen.css" />-->
+
+<script src="{{ STATIC_URL_PREFIX }}jquery.watermark-3.1.4/jquery.watermark.js" rel="text/javascript" media="screen"></script>
+<!--https://code.google.com/p/jquery-watermark/-->
+<!-- <script src="{{ STATIC_URL_PREFIX }}twitter-bootstrap-typeahead/js/bootstrap-typeahead.js" rel="text/javascript" media="screen"></script> -->
+<!-- https://github.com/tcrosen/twitter-bootstrap-typeahead -->
+
+<!-- JQUERY AUTOCOMPLETE PLUGIN -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 
 
 <style>
@@ -32,9 +44,13 @@
 }
 
 #phenotypeformtable{
-	max-width: 500px;
-	width: %;
-	padding: 300px;
+					max-width: 500px;
+					/*width: %;*/
+					padding: 300px;
+}
+#edit-sample-submission-modal{
+	width:80%;
+	margin-left: -40%;
 }
 </style>
 
@@ -56,32 +72,490 @@ function getCookie(name) {
 }
 var csrftoken = getCookie('csrftoken');
 
-// function refreshPhenotypeList() {
-//   $("#current-list").empty();
-//   for(i=0; i< source.length; i++)
-//     $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-// }
-
-console.log({{ contact_list|get_all_contacts|safe }});
-var contact_list_source = {{ contact_list|get_all_contacts|safe }};
-// Refresh Contact List
-function refreshContactList(projid){
-	$("#current-contact-list-"+projid).empty();
-	for(i=0; i<contact_list_source.length; i++)
-		$("#current-contact-list-"+projid).append("<li><a href=\"#\">" + contact_list_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+//Adding attribute and value to the Next Button in Modal
+function addAttributeToModalButton(attribute, value){
+	$("#next-tss-button").attr(attribute, value);
+	return false;
 }
 
-//Refresh Affiliated Institute List
-var affiliated_institute_source = {{ affiliated_institute_list|get_all_affiliated_institute|safe }};
-console.log(affiliated_institute_source);
-function refreshAffiliatedInstituteList(projid){
-	$("#current-affiliated-institute-list-"+projid).empty();
-	for(i=0; i<affiliated_institute_source.length; i++)
-		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
+//Save Temporary Affiliated Institute
+function saveTempAI(tssid){
+	// To Add Affiliated Institute
+	console.log("in save temp ai");
+	$('.save-tmp-ai-button').click( function(data){
+		console.log(data);
+		console.log(this);
+		$("#tmp-affiliated-institute-form-"+tssid).ajaxSubmit({
+						url: '/order/tss-page-3/'+tssid,
+						type: "POST",
+						resetForm: true,
+						headers: {"X-CSRFToken" : csrftoken},
+						success : function(data) {
+							console.log('this is data:' + data);
+							$('#tmp-sample-submission-modal-body').replaceWith(data);
+						},
+						error: function(data) {
+							alert("FAILED!");
+						}
+		});
+
+	});
 }
+
+//Clicking a back button gets you back to the previous page
+function backButton(data){
+	var $this = $(data);
+	console.log($this);
+	console.log($this.parent().siblings()[1].getAttribute("name"));
+
+	switch ($this.parent().siblings()[1].getAttribute("name")){
+		case "1":
+			console.log("in ss - goes back to nowhere");
+			break;
+		case "2":
+			console.log("in pheno - need to go back to ss");
+			var projid = $this.attr("project-id");
+			var tssid = $(".add_a_temp_ss").attr("tssid");
+			console.log(projid);
+			$.get('tss-page-1/'+projid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				$("#back-tss-button").attr("style", "display: none");
+			})
+			break;
+		case "3":
+			console.log("in ai - goes back to pheno");
+			var tssid = $(".add_a_temp_ss").attr("tssid");
+			console.log("tssid "+ tssid);
+			$.get('tss-page-2/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				var phenotypeTags2 = {{ phenolist|get_all_phenotypes|safe }};
+
+				$("#id_tmp_phenotype_name").autocomplete({
+					source: phenotypeTags2,
+					open: function(){
+						$(this).autocomplete('widget').css('z-index', 99999999999);
+						return false;
+					}
+				});
+			});
+			break;
+		case "4":
+			console.log("in personnel - goes back to ai");
+			var tssid = $(".add_a_temp_ss").attr("tssid");
+			$.get('tss-page-3/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				//Affiliated Institute
+				var affiliatedInstituteTags = {{ affiliatedinstitutelist|get_all_affiliated_institute|safe }};
+
+				$("#id_tmp_ai_name").autocomplete({
+					source: affiliatedInstituteTags,
+					open: function(){
+						$(this).autocomplete('widget').css('z-index', 9999999999);
+						return false;
+					}
+				});
+			});
+			break;
+		case "5":
+			console.log("in summary - goes back to ai");
+			var tssid = $("#summary-table").attr("value");
+			$.get('tss-page-4/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				$("#final-submission-tss-button").attr("style", "display: none");
+				$('#next-tss-button').removeAttr("style");
+			});
+			break;
+		default:
+	}
+}
+
+//Clicking on a next button
+function nextButton(data){
+	//To Add Temporary Sample Submission - First time from clicking the [+]Add Sample Submission
+	// $('#next-tss-button').click( function(data){
+	if ($(data).attr('frombutton') == 'add-ss-button'){
+		console.log("inside add-tss-button");
+
+		var page = $(data).parent().siblings()[1].getAttribute("name");
+		console.log('before page'+page);
+		if (page == 2){
+			var tssid = $('#add_a_temp_phenotype_form').attr("tssid");
+			console.log('tssid'+tssid);
+			$.get('tss-page-3/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				//Affiliated Institute
+				var affiliatedInstituteTags = {{ affiliatedinstitutelist|get_all_affiliated_institute|safe }};
+
+				$("#id_tmp_ai_name").autocomplete({
+					source: affiliatedInstituteTags,
+					open: function(){
+						$(this).autocomplete('widget').css('z-index', 9999999999);
+						return false;
+					}
+				});
+			});
+
+		}
+		else if (page == 4){
+			console.log("inside page 4!");
+			var tssid = $('#add_a_temp_contact_form').attr("tssid");
+			console.log('tssid'+tssid);
+			var ssid = $('#add_a_temp_contact_form').attr("ssid");
+			console.log('ssid'+ssid);
+			$.get('tss-page-5/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				if ($(".alert-error").length == 0){
+					$('#next-tss-button').attr("style", "display: none");
+					$('#final-submission-tss-button').removeAttr("style");
+				}
+			});
+		}
+		else{
+				$(".add_a_temp_ss").ajaxSubmit({
+												// url: '/order/add_tmp_ss/'+projid,
+												// url: '/order/handle_tss_pages/'+currpage,
+												type: "POST",
+												resetForm : true,
+												headers : {"X-CSRFToken" : csrftoken},
+												success : function(data) {
+																			console.log("success" + data);
+																			$("#tmp-sample-submission-modal-body").replaceWith(data);
+																			// $("#dynamic-modal-section").replaceWith(data);
+
+																			// $('#next-tss-button').removeAttr('disabled');
+																			// $('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
+																			// $('input[name=tmp_sample_num]').attr('disabled', 'disabled');
+																			// addAttributeToModalButton('target', tss_pages[0]);
+																			
+																			console.log($(data).filter("#tmp-sample-submission-modal-body").attr("name"));
+																			var page = $(data).filter("#tmp-sample-submission-modal-body").attr("name");
+
+																			if (page != 1){
+																				$('#back-tss-button').removeAttr("style");
+																			}
+																			var phenotypeTags2 = {{ phenolist|get_all_phenotypes|safe }};
+
+																			$("#id_tmp_phenotype_name").autocomplete({
+																				source: phenotypeTags2,
+																				open: function(){
+																					$(this).autocomplete('widget').css('z-index', 99999999999);
+																					return false;
+																				}
+																			});
+												},
+												error : function(data) {
+																			$("#tmp-sample-submission-modal-body").replaceWith(data);
+																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+												}
+				});
+		}
+	}
+	else if ($(data).attr('frombutton') == 'edit-ss-button'){
+		console.log("inside edit-tss-button");
+
+		var page = $(data).parent().siblings()[1].getAttribute("name");
+		console.log('before page'+page);
+		if (page == 2){
+			var tssid = $('#add_a_temp_phenotype_form').attr("tssid");
+			console.log('tssid'+tssid);
+			var ssid = $('#add_a_temp_phenotype_form').attr("ssid");
+			console.log('ssid'+ssid);
+			$.get('edit-tss-page-3/'+ssid+'/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+			});
+		}
+		else if (page == 4){
+			console.log("inside page 4!");
+			var tssid = $('#add_a_temp_contact_form').attr("tssid");
+			console.log('tssid'+tssid);
+			var ssid = $('#add_a_temp_contact_form').attr("ssid");
+			console.log('ssid'+ssid);
+			$.get('edit-tss-page-5/'+ssid+'/'+tssid, function(data){
+				$("#tmp-sample-submission-modal-body").replaceWith(data);
+				if ($(".alert-error").length == 0){
+					$('#next-tss-button').attr("style", "display: none");
+					$('#final-submission-tss-button').removeAttr("style");
+				}
+			});
+		}
+		else{
+				$(".add_a_temp_ss").ajaxSubmit({
+												// url: '/order/add_tmp_ss/'+projid,
+												// url: '/order/handle_tss_pages/'+currpage,
+												type: "POST",
+												resetForm : true,
+												headers : {"X-CSRFToken" : csrftoken},
+												success : function(data) {
+																			console.log("success" + data);
+																			$("#tmp-sample-submission-modal-body").replaceWith(data);
+																			// $("#dynamic-modal-section").replaceWith(data);
+
+																			// $('#next-tss-button').removeAttr('disabled');
+																			// $('input[name=tmp_sample_submission_name]').attr('disabled', 'disabled');
+																			// $('input[name=tmp_sample_num]').attr('disabled', 'disabled');
+																			// addAttributeToModalButton('target', tss_pages[0]);
+																			
+																			console.log($(data).filter("#tmp-sample-submission-modal-body").attr("name"));
+																			var page = $(data).filter("#tmp-sample-submission-modal-body").attr("name");
+
+																			if (page != 1){
+																				$('#back-tss-button').removeAttr("style");
+																			}
+												},
+												error : function(data) {
+																			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+												}
+				});
+		}
+	}
+
+		// //Save the Tssform
+		// console.log(data);
+		// // var $this = $(data);
+		// // console.log($this);
+		// var projid = $(data).attr("project-id");
+		// console.log('projid'+projid);
+
+		// console.log($(data).parent().siblings()[1]);
+		// console.log($(data).parent().siblings()[1].getAttribute("name"));
+		// var page = $(data).parent().siblings()[1].getAttribute("name");
+		// console.log('page'+page);
+	// });
+}
+
+
+//Final Submit Button
+function finalSubmitButton(data){
+	alert("FINAL SUBMIT BUTTON!");
+	var tssid = $('#summary-table').attr("value");
+	alert(tssid);
+	$.get('tss-page-5/'+tssid+'/FINAL_SUBMIT', function(data){
+			console.log(data);
+			var newDoc = document.open("text/html", "replace");
+			newDoc.write(data);
+			newDoc.close();
+			// $("#tmp-sample-submission-modal-body").replaceWith(data);
+			$('#add-sample-submission-modal').modal('hide');
+		});
+
+}
+
+function openEditSSPhenotype(ssid, tssid, data){
+	$.get('edit-tss-page-2/'+ssid+'/'+tssid, function(data){
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+
+		var phenotypeTags = {{ phenolist|get_all_phenotypes|safe }};
+
+		$("#id_tmp_phenotype_name").autocomplete({
+			source: phenotypeTags,
+			open: function(){
+				$(this).autocomplete('widget').css('z-index', 99999999999);
+				return false;
+			}
+		});
+	});
+}
+
+// Add Temporary Phenotype - from EDIT
+function addEditTempPhenotype(ssid, tssid){
+	console.log("in addedittempphenotype");
+	console.log("TSSID: " + tssid);
+	console.log("SSID: " + ssid);
+
+	$("#edit_temp_phenotype_form").ajaxSubmit({
+		url: '/order/edit-tss-page-2/'+ssid+"/"+tssid,
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log("successfully add phenotype");
+			console.log("this is addphenotype" + data);
+
+			$('#edit-sample-submission-modal-body').replaceWith(data);
+			
+			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+
+		},
+		error : function(data) {
+			console.log("failed to add phenotype");
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
+// Add Temporary Contact - from EDIT
+function addEditTempContact(ssid,tssid){
+	$("#edit_temp_contact_form").ajaxSubmit({
+		url : '/order/edit-tss-page-4/'+ssid+'/'+tssid,
+		type : "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			$('#edit-sample-submission-modal-body').replaceWith(data);
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
+function openEditSSContact(ssid, tssid, data){
+	$.get('edit-tss-page-4/'+ssid+'/'+tssid, function(data) {
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+	});
+}
+
+function openEditSSNameNum(ssid, projid, data){
+	var tssid = $(data).attr('tss');
+	$.get('edit-tss-page-1/'+ssid+'/'+projid+'/'+tssid, function(data) {
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+	});
+}
+
+function openEditSSAI(ssid, tssid, data){
+	$.get('edit-tss-page-3/'+ssid+'/'+tssid, function(data){
+		$("#edit-sample-submission-modal-body").replaceWith(data);
+
+		//Affiliated Institute
+		var affiliatedInstituteTags = {{ affiliatedinstitutelist|get_all_affiliated_institute|safe }};
+
+		$("#id_tmp_ai_name").autocomplete({
+			source: affiliatedInstituteTags,
+			open: function(){
+				$(this).autocomplete('widget').css('z-index', 9999999999);
+				return false;
+			}
+		});
+	});
+}
+
+function saveEditButton(data){
+	alert("in save edit ssname");
+
+	if ($('.edit_temp_ss_pheno').length){
+		var tssid = $('.edit_temp_ss_pheno').attr('tssid');
+		var ssid = $('.edit_temp_ss_pheno').attr('ssid');
+		$.get('edit-ss-fmpage/'+ssid+'/'+tssid, function(data){
+			$("#edit-sample-submission-modal-body").replaceWith(data);
+		});
+	}
+	else if ($('.edit_temp_ss_contact').length){
+		var tssid = $('.edit_temp_ss_contact').attr('tssid');
+		var ssid = $('.edit_temp_ss_contact').attr('ssid');
+		$.get('edit-ss-fmpage/'+ssid+'/'+tssid, function(data){
+			$("#edit-sample-submission-modal-body").replaceWith(data);
+		});
+	}
+	else if ($('.edit_temp_ss_fmpage').length){
+		alert("in edit temp ss fmpage");
+		console.log($('.edit_temp_ss_fmpage').length);
+
+		$('.edit_temp_ss_fmpage').ajaxSubmit({
+												type: "POST",
+												resetForm : true,
+												headers : {"X-CSRFToken" : csrftoken},
+												success : function (data) {
+													alert("success!");
+													console.log(data);
+													var newDoc = document.open("text/html", "replace");
+													newDoc.write(data);
+													newDoc.close();
+													$('#edit-sample-submission-modal').modal('hide');
+												},
+												error: function(data) {
+													alert("fail!");
+													console.log(data);
+												}
+		});
+	}
+	else{
+		$('.edit_temp_ss').ajaxSubmit({
+											// url: '/order/edit-ss-fmpage/'+ssid,
+											type: "POST",
+											resetForm : true,
+											headers : {"X-CSRFToken" : csrftoken},
+											success : function (data) {
+												alert("success!");
+												console.log(data);
+												$("#edit-sample-submission-modal-body").replaceWith(data);
+											},
+											error: function(data) {
+												alert("fail!");
+												console.log(data);
+											}
+		});
+	}
+}
+
 
 $(document).ready(function() {
 	$(".collapse").collapse();
+
+	//clicking on Send Request button
+	$('.send-request-button').click( function(data){
+		data.preventDefault();
+		var ssid = $(this).attr("value");
+		$.get('collab-page/set-request-sent/'+ssid, function(data){
+			var newDoc = document.open("text/html", "replace");
+			newDoc.write(data);
+			newDoc.close();
+		})
+		.fail(function(){
+			$("#request-sent-tag-"+ssid).html("<span id=\"warning-tag-"+ssid+" class=\"label label-warning\"><i class=\"icon-repeat\"></i> Please Try Again.</span>");
+		});
+	});
+
+	//clicking on the [+] Sample Submission 
+	$('.add-ss-button').click( function(data){
+		data.preventDefault();
+		var projid = $(this).attr("project-id");
+		console.log(projid);
+		$.get('tss-page-1/'+projid, function(data){
+			$("#tmp-sample-submission-modal-body").replaceWith(data);
+			console.log("add ss button"+data);
+		});
+		$('#back-tss-button').attr('style', 'display: none');
+		addAttributeToModalButton('project-id', projid);
+		$('#back-tss-button').attr('project-id', projid);
+		$('#next-tss-button').removeAttr('style');
+		$('#final-submission-tss-button').attr('style', 'display: none');
+		$('#next-tss-button').attr('frombutton','add-ss-button');
+	});
+
+	//Edit ss button
+	//DEPRECATED
+	// $('.edit-ss-button').click( function(data){
+	// 	console.log("in edit-ss-button");
+	// 	data.preventDefault();
+	// 	var ssid = $(this).attr("ssid");
+	// 	var projid = $(this).attr("project-id");
+	// 	console.log('ssid'+ssid);
+	// 	console.log('projid'+projid);
+	// 	$.get('edit-tss-page-1/'+ssid+"/"+projid, function(data){
+	// 		$("#tmp-sample-submission-modal-body").replaceWith(data);
+	// 	});
+	// 	$('#back-tss-button').attr('style', 'display: none');
+	// 	addAttributeToModalButton('project-id', projid);
+	// 	$('#back-tss-button').attr('project-id', projid);
+	// 	$('#next-tss-button').removeAttr('style');
+	// 	$('#final-submission-tss-button').attr('style', 'display: none');
+	// 	$('#next-tss-button').attr('frombutton','edit-ss-button');
+	// });
+	
+	//Edit ss button
+	$('.edit-ss-button').click( function(data){
+		console.log("in edit-ss-button");
+		data.preventDefault();
+		var ssid = $(this).attr("ssid");
+		console.log("ssid"+ssid);
+		var projid = $(this).attr("project-id");
+		$.get('edit-ss-fmpage/'+ssid, function(data){
+			console.log(data);
+			$("#edit-sample-submission-modal-body").replaceWith(data);
+		});
+	});
 
 	// To Add Projects
 	$('#add-a-project-button').click( function(data){
@@ -103,7 +577,50 @@ $(document).ready(function() {
 												}
 		});
 	});
-	
+
+	// To Add Affiliated Institute
+	$('.save-ai-button').click( function(data){
+		console.log(data);
+		console.log(this);
+		var projid = $(this).attr("value");
+		$("#affiliated-institute-form-"+projid).ajaxSubmit({
+						url: '/order/api/handle_ai_fmpage/ADD/',
+						type: "POST",
+						resetForm: true,
+						headers: {"X-CSRFToken" : csrftoken},
+						success : function(data) {
+							console.log('this is data:' + data);
+							$('#affiliated-institute-form-'+projid).replaceWith(data);
+						},
+						error: function(data) {
+							alert("FAILED!");
+						}
+		});
+
+	});
+
+	//To Add Contactlist 
+	$('.save-contact-button').click( function(data){
+		console.log(data);
+		console.log(this);
+		var projid = $(this).attr("value");
+
+		//loop through the list of emails, pass it via url. without submitting any forms.
+		$.
+
+		$("#contact-list-form-"+projid).ajaxSubmit({
+						url: '/order/api/handle_contact_fmpage/ADD/',
+						type: "POST",
+						resetForm: true,
+						headers: {"X-CSRFToken" : csrftoken},
+						success : function(data) {
+							alert("SUCCESS");
+						},
+						error: function(data) {
+							alert("FAILED!")
+						}
+		});
+	});
 
 	// To add a callback function to popover
 	var pt = $.fn.popover.Constructor.prototype.show;
@@ -114,6 +631,7 @@ $(document).ready(function() {
 		}
 	}
 
+	// Attach popover with each "See More" link
 	$("table[name='phenotype-table']").each(function(){
 		console.log($(this).attr("value"));
 
@@ -136,13 +654,57 @@ $(document).ready(function() {
 																}).done( function(data){
 																	console.log("in ajax done"+ data);
 																	$("#popover-footer").replaceWith('<div class="modal-footer" id="popover-footer">'+data+'</div>');
+
+																	var phenotypeTags1 = {{ phenolist|get_all_phenotypes|safe }};
+
+																	$("#id_phenotype_name").autocomplete({
+																		source: phenotypeTags1,
+																		open: function(){
+																			$(this).autocomplete('widget').css('z-index', 99999999999);
+																			return false;
+																		}
+																	});
+
 																});
 
 																$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> Ajax didn't fail!</div>");
 
+																
+
 															}
 		});
-		
+	});
+
+	// Attach popover with each "[+] Add Phenotypes" link
+	$("table[name='empty-phenotype-table']").each(function(){
+		console.log("inside empty phenotype table");
+		console.log($(this).attr("value"));
+
+		var projid = $(this).attr("value");
+
+		$("#trigger-empty-phenolist-popover"+projid).popover({
+																html: true,
+																trigger: 'click',
+																placement: 'right',
+																content: function (ele) {
+																	return '<div id="phenotype-table-container{{proj.pk}}">'+$("#empty-phenotype-table-container"+projid).html()+'</div>'; 
+																},
+																title: "New Sample Submission / Phenotype List",
+																template: '<div class="popover" id="phenolist-popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div><div class="modal-footer" id="popover-footer"></div></div>',
+																callback: function() {
+																	console.log("this is ssid " + ssid);
+
+																	$.ajax({
+																		url: '/order/render_phenoform/'+ssid,
+																	}).done( function(data){
+																		console.log("in ajax done"+ data);
+																		$("#popover-footer").replaceWith('<div class="modal-footer" id="popover-footer">'+data+'</div>');
+																	});
+
+																	$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> Ajax didn't fail!</div>");
+																}
+
+		});
 
 	});
 
@@ -150,13 +712,23 @@ $(document).ready(function() {
 	//Clicking outside popover to close popover; only one popover is open at a time
 	$(':not(#example)').on('click', function (e) {
 		$('.trigger-phenolist-popover').each(function () {
-        //the 'is' for buttons that trigger popups
-        //the 'has' for icons and other elements within a button that triggers a popup
-        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-        	$(this).popover('hide');
-        	return;
-        }
-    });
+	        //the 'is' for buttons that trigger popups
+	        //the 'has' for icons and other elements within a button that triggers a popup
+	        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+	        	$(this).popover('hide');
+	        	
+	        	return;
+	        }
+    	});
+
+    	$('.trigger-empty-phenolist-popover').each(function () {
+	        //the 'is' for buttons that trigger popups
+	        //the 'has' for icons and other elements within a button that triggers a popup
+	        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+	        	$(this).popover('hide');
+	        	return;
+	        }
+    	});
 	});
 
 	//Changing Modal size dynamically
@@ -193,76 +765,53 @@ $(document).ready(function() {
 									'border': 'solid',
 	});
 
-	//For each project section
-	$("tr[name='project-section']").each(function(){
-		var projid = $(this).attr("value");
-		console.log(projid);
-
-		//Contact List
-		$('#contact-list-input-'+projid).typeahead({
-			source : contact_list_source,
-			items: 16
-		});
-
-		$('#contact-list-form-'+projid).submit(function(e) {
-
-    		e.preventDefault(); // don't submit the form
-
-    		var txt = $('#contact-list-input-'+projid).val(); // get the current item
-    		console.log(txt);
-    		$('#contact-list-input-'+projid).val(""); // clean the input
-    		contact_list_source.push(txt); // add it to the source
-
-
-    	// AJAX SUBMIT to add contact into dnaorderuser
-  //   	$("#contact-list-form-"+projid).ajaxSubmit({
-		// 										url: '/order/api/handle_contact_fmpage/ADD/'+txt,
-		// 										type: "POST",
-		// 										resetForm : true,
-		// 										headers : {"X-CSRFToken" : csrftoken},
-		// 										success : function(data) {
-		// 																	console.log('test' + data);
-		// 																	$('#project-section').replaceWith(data);
-		// 																	$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
-		// 																	$(".collapse").collapse();
-		// 										},
-		// 										error : function(data) {
-		// 																	$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
-		// 										}
-		// });
-
-			refreshContactList(projid);
-    		// refreshPhenotypeList(); // refresh the list
-
-    	});
-
-		refreshContactList(projid);
-	// refreshPhenotypeList();
-
-	//Affiliated Institute
-		$('#affiliated-institute-input-'+projid).typeahead({
-			source : affiliated_institute_source,
-			items: 16
-		});
-
-		$('#affiliated-institute-form-'+projid).submit(function(e) {
-
-    		e.preventDefault(); // don't submit the form
-
-    		var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
-    		console.log(txt);
-    		$('#affiliated-institute-input-'+projid).val(""); // clean the input
-    		affiliated_institute_source.push(txt); // add it to the source
-    		refreshAffiliatedInstituteList(projid);
-
-    	});
-
-			refreshAffiliatedInstituteList(projid);
-	});
-
-	
 });
 
+// Add Temporary Contact - from ADD
+function addTempContact(tssid){
+
+	$("#add_a_temp_contact_form").ajaxSubmit({
+		url : '/order/tss-page-4/'+tssid,
+		type : "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			$('#tmp-sample-submission-modal-body').replaceWith(data);
+		},
+		error : function(data) {
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
+
+// Add Temporary Phenotype - from ADD
+// To Add a Phenotype
+function addTempPhenotype(tssid){
+	console.log("in addtempphenotype");
+	console.log("ID: " + tssid);
+
+	$("#add_a_temp_phenotype_form").ajaxSubmit({
+		url: '/order/tss-page-2/'+tssid,
+		type: "POST",
+		resetForm : true,
+		headers : {"X-CSRFToken" : csrftoken},
+		success : function(data) {
+			console.log("successfully add phenotype");
+			console.log("this is addphenotype" + data);
+
+			$('#tmp-sample-submission-modal-body').replaceWith(data);
+			
+			// $('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a Phenotype!</div>");
+
+		},
+		error : function(data) {
+			console.log("failed to add phenotype");
+			$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
+		}
+	});
+	return false;
+}
 
 // To Add a Phenotype
 function addPhenotype(ssid){
@@ -310,6 +859,7 @@ function deletePhenotype(elt) {
 
 	return false;
 }
+
 
 // function getPhenotypeList(elt){
 // 	console.log("getpheno!")
@@ -390,8 +940,8 @@ border:solid 1px #c3c3c3;
 				<th> Date Created </th>
 				<th> Last Updated </th>
 				<th> Sample Submissions Status </th>
-				<th> Phenotype list Status </th>
 			</tr>
+			
 			{% for proj, sslist in proj_ss_dict.items %}
 			<tr class="Project-{{proj.pk}}" name="project-section" value="{{proj.pk}}">
 				<td>
@@ -414,16 +964,13 @@ border:solid 1px #c3c3c3;
 				</td>
 				{% if sslist|length == 0 %}
 				<td>
-					<span class="label label-warning"><i class="icon-warning-sign"></i> No Sample Submissions</span>
+					<span class="label label-info"><i class="icon-warning-sign"></i> No Sample Submissions</span>
 				</td>
 				{% else %}
 				<td>
 					<i class="icon-list-alt"></i> {{ sslist|length }} Sample Submission(s)
 				</td>
 				{% endif %}
-				<td>
-					<i class="icon-warning-sign"></i> Placeholder - displaying number of phenotype lists included
-				</td>
 			</tr>
 			<tr>
 				<td class="more"></td>
@@ -434,129 +981,98 @@ border:solid 1px #c3c3c3;
 								<tr>
 									<th>Sample Submission</th>
 									<th>Phenotype List</th>
-									<th> Ex-Co: Affiliated Institute </th>
-									<th> Ex-Co: Contact(s) </th>
+									<th> SS's Affiliated Institute </th>
+									<th> Collab's Contact Info </th>
 									<th> # of Samples </th>
 									<th> Date Created </th>
 									<th> Last Updated </th>
+									<th> Request Sent On </th>
+									<th> Send Request </th>
 								</tr>
 								{% for ss in sslist %}
 								<tr>
-									<td>{{ ss.sample_submission_name }}</td>
+									<td>{{ ss.sample_submission_name }}
+										<br />
+										<a href="#" class="edit-ss-button" id="edit-ss-button-{{proj.pk}}" role="button" data-toggle="modal" ssid="{{ss.id}}" project-id="{{proj.pk}}" data-target="#edit-sample-submission-modal">Edit</a>
+									</td>
 									<td id="top3phenolist">
 										<ul>
-										{% for ss_select, phenolist in ss_pheno_dict.items %}
+											{% for ss_select, phenolist in ss_pheno_dict.items %}
 											{% if ss_select == ss %}
-												<b>{{ss_select}}</b>
-												{% for pheno in phenolist|slice:":3" %}
-													<li>{{ pheno }}</li>
-												{% endfor %}
-												<!-- To SEE THE FULL LIST UNCOMMENT THIS -->
+											<b>{{ss_select}}</b>
+											{% for pheno in phenolist|slice:":3" %}
+											<li>{{ pheno }}</li>
+											{% endfor %}
+											<!-- To SEE THE FULL LIST UNCOMMENT THIS -->
 												<!-- {% for pheno in phenolist %}
 													<li>{{ pheno }}</li>
-												{% endfor %} -->
-												<!-- UNCOMMENT UP TO HERE -->
-												<div style="display:none" id="phenotype-table-container{{ss.pk}}">
-													<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
-														<tr>
-															<th> Phenotype Name </th>
-															<th> Phenotype Type </th>
-															<th> Phenotype Description </th>
-															<th> Phenotype Definition </th>
-														</tr>
-														{% for p in phenolist %}
-														<tr id="{{p.pk}}">
-															<td>{{ p.phenotype_name }}</td>
-															<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
-															<td>{{ p.phenotype_description }}</td>
-															<td>{{ p.phenotype_definition }}</td>
-														</tr>
-														{% endfor %}
-													</table> 
-												</div>
+													{% endfor %} -->
+													<!-- UNCOMMENT UP TO HERE -->
+													<div style="display:none" id="phenotype-table-container{{ss.pk}}">
+														<table class="table table-striped table-bordered table-hover" name="phenotype-table" value="{{ss.pk}}" id ="phenotype-table{{ss.pk}}" ss-name="{{ ss.sample_submission_name }}">
+															<tr>
+																<th> Phenotype Name </th>
+																<th> Phenotype Type </th>
+																<th> Phenotype Description </th>
+																<th> Phenotype Definition </th>
+															</tr>
+															{% for p in phenolist %}
+															<tr id="{{p.pk}}">
+																<td>{{ p.phenotype_name }}</td>
+																<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
+																<td>{{ p.phenotype_description }}</td>
+																<td>{{ p.phenotype_definition }}</td>
+															</tr>
+															{% endfor %}
+														</table> 
+													</div>
 
-											{% endif %}
-										{% endfor %}
+													{% endif %}
+													{% endfor %}
+
+													<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
+												</ul>
+											</td>
+											<td>{{ ss.affiliated_institute }}</td>
+											<td>{{ ss_contacts_dict|access:ss.id|safe }}</td>
+											<td>{{ ss.sample_num }}</td>
+											<td>{{ ss.date_created }}</td>
+											<td>{{ ss.last_updated }}</td>
+											<td>{{ ss.date_request_sent }}</td>
+											<td>
+												{% if ss.request_sent %}
+													<button class="send-request-button" id="send-request-button-{{ss.pk}}" value="{{ss.pk}}" disabled>Send Request</button>
+													<br />
+													<span id="success-tag-{{ss.pk}}" class="label label-success"><i class="icon-ok"></i> Successfully sent</span>
+
+												{% else %}
+													<button class="send-request-button" id="send-request-button-{{ss.pk}}" value="{{ss.pk}}">Send Request</button>
+													<br />
+												{% endif %}
+												<div id="request-sent-tag-{{ss.pk}}"></div>
+											</td>
+										</tr>
 										
-										<a href="#" class="trigger-phenolist-popover pull-right" data-toggle="modal" value="{{ss.pk}}" id="trigger-phenolist-popover{{ss.pk}}" rel="popover" data-container="body">>>See More</a>
-										</ul>
-									</td>
-									<td>{{ ss.affiliatedinstitute }}</td>
-									<td></td>
-									<td>{{ ss.sample_num }}</td>
-									<td>{{ ss.date_created }}</td>
-									<td>{{ ss.last_updated }}</td>
-								</tr>
-								{% if forloop.last %}
-								<tr>
-									<td></td>
-									<td></td>
-									<td>
-										<form id="affiliated-institute-form-{{proj.pk}}">
-											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
+									<!-- {{ samplesubmissionform }} -->
 
-											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td>
-										<form id="contact-list-form-{{proj.pk}}">
-											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
-
-											<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-								{% endif %}
-								{% empty %}
-								
-								<tr>
-									<td></td>
-									<td></td>
-									<td>
-										<form id="affiliated-institute-form-{{proj.pk}}">
-											<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead">
-
-											<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td>
-										<form id="contact-list-form-{{proj.pk}}">
-											<input id="contact-list-input-{{proj.pk}}" type="text" data-provide="typeahead">
-
-											<ul id="current-contact-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
-											</ul>
-										</form>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-								<!-- {{ samplesubmissionform }} -->
-
-								{% endfor %}
+									{% endfor %}
 
 
-							</table>
-							<a href="#" type="button" class="pull-right"> [+] Save Sample Submission </a>
-							<br />
-							<br />
+								</table>
+								<button id="add-ss-button-{{proj.pk}}" role="button" class="add-ss-button pull-right" data-toggle="modal" project-id="{{proj.pk}}" data-target="#add-sample-submission-modal"> [+] Add Sample Submission </button>
+
+								<br />
+								<br />
+							</div>
 						</div>
-					</div>
-				</td>
-			</tr>
-			{% endfor %}
-		</table>
-	</div>
-	<!--**************************** END OF PROJECT TABLE **************************************-->
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<!--**************************** END OF PROJECT TABLE **************************************-->
 
-	<!--****************** ADD A PROJECT FORM ***********************-->
+		<!--****************** ADD A PROJECT FORM ***********************-->
 		<!-- Note: This interface for adding a Project is just for development purposes; in reality, I will get a list of projects that is
 		associated with the specific user. But I should still be able to associate External Collaborators with the Projects. -->
 		<div id="add_a_project_panel"> 
@@ -575,8 +1091,44 @@ border:solid 1px #c3c3c3;
 		<hr />
 		<br />
 		<br />
+
+		<!--*********************************** MODAL FOR ADDING SAMPLE SUBMISSION ********************************************-->
+		<div id="add-sample-submission-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="add-sample-submission-label" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="add-sample-submission-label">Add Sample Submission</h3>
+			</div>
+			<div class="modal-body" id="tmp-sample-submission-modal-body">
+			</div>
+			<div class="modal-footer">
+				<button id="back-tss-button" role="button" class="btn pull-left" style="display: none" onclick="backButton(this)">Back</button>
+				<button id="next-tss-button" role="button" class="btn" onclick="nextButton(this)" frombutton="">Next</button>
+				<button id="final-submission-tss-button" role="button" class="btn btn-primary" onclick="finalSubmitButton(this)" style="display: none">Submit</button>
+			</div>
+		</div>
+		
+
+		<!--***************************************** END OF MODAL ************************************************************-->
+
+		<!--*************************************** MODAL FOR EDITING SAMPLE SUBMISSION **************************************-->
+		<div id="edit-sample-submission-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="edit-sample-submission-label" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="edit-sample-submission-label">Editing Sample Submission</h3>
+			</div>
+			<div class="modal-body" id="edit-sample-submission-modal-body">
+			</div>
+			<div class="modal-footer">
+				<button id="save-edit-ss-button" role="button" class="btn pull-right" onclick="saveEditButton(this)">Save</button>
+			</div>
+		</div>
+
+		<!--******************************************** END OF MODAL ********************************************************-->
+
 	</div>
 </div>
+
+
 
 
 
@@ -856,3 +1408,10 @@ border:solid 1px #c3c3c3;
 </div> -->
 
 <!--*************************** END OF BIG BOX PHENOTYPE MODAL ************************-->
+
+												<!-- <form id="affiliated-institute-form-{{proj.pk}}">
+													<input id="affiliated-institute-input-{{proj.pk}}" type="text" data-provide="typeahead" autocomplete="off">
+
+													<ul id="current-affiliated-institute-list-{{proj.pk}}" class="nav nav-pills nav-stacked">
+													</ul>
+												</form> -->

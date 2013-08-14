@@ -127,7 +127,7 @@ class UserProject(models.Model):
     #     ('Complete', 'Complete'),
     # )
 
-    username = models.ForeignKey(User)
+    username = models.ForeignKey(DNAOrderAppUser)
     project_name = models.CharField(max_length=100, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -146,7 +146,7 @@ class UserProject(models.Model):
 #         return self.affiliated_institute_name
 
 class Phenotype(models.Model):
-    phenotype_name = models.CharField(max_length=100, unique=True)
+    phenotype_name = models.CharField(max_length=100)
     phenotype_type = models.ForeignKey(PhenotypeType)
     phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.', blank=True)
     phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
@@ -154,6 +154,9 @@ class Phenotype(models.Model):
 
     def __unicode__(self):
         return self.phenotype_name
+
+    class Meta:
+        unique_together = ('phenotype_name', 'phenotype_type')
 
 class SampleSubmission(models.Model):
 
@@ -172,6 +175,8 @@ class SampleSubmission(models.Model):
     # order_status = models.CharField(max_length=100, choices=STATUS, default='Incomplete Phenotype List')
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+    date_request_sent = models.DateTimeField(null=True)
+    request_sent = models.BooleanField()
 
     def __unicode__(self):
         return self.sample_submission_name
@@ -225,7 +230,13 @@ class DatePhenotypeValue(models.Model):
     def __unicode__(self):
         return u'%s' % self.phenotype_value
 
-"""ADDED AFTER THE MANIFEST WAS SHOWN TO JAMES"""
+"""SAMPLE CHARACTERISTICS"""
+
+class Unit(models.Model):
+    unit_name = models.CharField(max_length=100, unique=True)
+
+    def __unicode__(self):
+        return self.unit_name
 
 class PlatformType(models.Model):
     platform_type = models.CharField(max_length=100, unique=True)
@@ -296,7 +307,7 @@ class AffectionStatusSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.SmallIntegerField()
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
@@ -308,7 +319,7 @@ class QualitativeSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.CharField(max_length=200)
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -319,7 +330,7 @@ class QuantitativeSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DecimalField(max_digits=10, decimal_places=2)
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -330,7 +341,7 @@ class DateSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DateField()
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -357,6 +368,48 @@ class BulkUpload(models.Model):
     pass   
 
 
+""" TEMP MODELS FOR SAMPLE SUBMISSIONS """
+class TempSampleSubmission(models.Model):
+    tmp_project_name = models.ForeignKey(UserProject)
+    tmp_sample_submission_name = models.CharField(max_length=100, unique=True)
+    tmp_sample_num = models.IntegerField()
+    tmp_add_flag = models.BooleanField() # True if add, False if edit
+    
+    def __unicode__(self):
+        return self.tmp_sample_submission_name
+
+
+class TempSSPhenotype(models.Model):
+    tmp_ss = models.ForeignKey(TempSampleSubmission)
+    tmp_phenotype_name = models.CharField(max_length=100)
+    tmp_phenotype_type = models.ForeignKey(PhenotypeType)
+    tmp_phenotype_description = models.TextField(help_text='i.e. methodologies taken in determining the phenotype etc.', blank=True)
+    tmp_phenotype_definition = models.TextField(help_text='i.e. DSM-IV - diagnostic and statistical manual of mental disorders, diagnostic criteria \
+                                        for autism spectrum disorder.', blank=True)  # Not too sure if should be CharField or TextField...should b
+    class Meta:
+        # reason being is that each temp sample submission could be associated with the same phenotype
+        # i.e. (tssid 1, pheno A, type 1) and (tssid 2, pheno A, type 1) are valid. 
+        unique_together = ('tmp_ss', 'tmp_phenotype_name', 'tmp_phenotype_type')
+
+
+# I want that each tmp_ss can have the same AffiliatedInstitute, so I removed the unique attribute in tmp_ai_name
+class TempSSAffiliatedInstitute(models.Model):
+    tmp_ss =  models.ForeignKey(TempSampleSubmission)
+    tmp_ai_name = models.CharField(max_length=100, blank=False)
+    tmp_ai_description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.tmp_ai_name
+
+class TempSSDNAOrderAppUser(models.Model):
+    tmp_ss = models.ForeignKey(TempSampleSubmission)
+    tmp_dnaorderappuser = models.ForeignKey(DNAOrderAppUser)
+
+    class Meta:
+        unique_together = ('tmp_ss', 'tmp_dnaorderappuser')
+
+
+
 """ MANIFEST UPLOAD """
 
 # Stores the user uploaded files
@@ -372,11 +425,59 @@ class Display(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
-class Unit(models.Model):
-    unit_name = models.CharField(max_length=100, unique=True)
 
-from django.forms import ModelForm
+
+
+
+""" FORMS """
+
+from django.forms import ModelForm, TextInput, Textarea
 from django import forms
+from django.forms.util import ErrorList
+import re
+
+class AffiliatedInstituteForm(forms.ModelForm):
+
+    # def __init__(self, projid=None, *args, **kwargs):
+    #     super(AffiliatedInstituteForm, self).__init__(*args, **kwargs)
+    #     self.fields['ai_name'].widget.attrs['id'] = self.add_prefix(field_name)
+    #     self.fields['ai_name'].widget.attrs['name'] = self.add_prefix(field_name)
+
+    # # From BaseForm
+    # def add_prefix(self, field_name):
+    #     print "inside Affiliated Institute"
+    #     print self.prefix
+    #     print field_name
+    #     # does not have id, so it is name
+    #     if not re.findall('id{1,}', field_name):
+    #         print "this is name attribute"
+    #         prefix = ""
+    #         print prefix and field_name or field_name
+    #         return prefix and field_name or field_name
+    #     else:
+    #         print 'self.prefix', self.prefix
+    #         print "field_name", field_name
+    #         print self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
+    #         return self.prefix and ('%s-%s' % (self.prefix, field_name)) or field_name
+
+        
+
+    class Meta:
+        model = AffiliatedInstitute
+        widgets = {
+            'ai_name' : TextInput(attrs={
+                        'class':'affiliated-institute-title-input', 
+                        'data-provided' : 'typeahead',
+                        'placeholder' : 'Insert Affiliated Institute...',
+                        'autocomplete' : 'off'
+        }),
+            'ai_description' : Textarea(attrs={
+                        'class' : 'affiliated-institute-description-input',
+                        'data-provided' : 'typeahead',
+                        'placeholder' : 'Insert description...',
+                        'autocomplete' : 'off'
+        }),
+        }
 
 class UserForm(ModelForm):
     class Meta:
@@ -396,15 +497,36 @@ class PhenotypeForm(ModelForm):
             'phenotype_definition' : forms.Textarea(attrs={'rows':2, 'cols':15})
         }
 
-from django.forms import CheckboxInput
-
 class SampleSubmissionForm(ModelForm):
     class Meta:
         model = SampleSubmission
-        # exclude = ['phenotype_list']
-        widgets = {
-            'sample_submission_name': CheckboxInput,
-        }
+        exclude = ['date_request_sent', 'request_sent']
+        # exclude = ['affiliated_institute', 'contact_list', 'phenotype_list', 'project_name']
+
+class TempSampleSubmissionForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(TempSampleSubmissionForm, self).__init__(*args, **kwargs)
+        self.fields['tmp_sample_submission_name'].label = "Temporary Sample Submission Name"
+        self.fields['tmp_sample_num'].label = "Temporary Sample Number"
+    class Meta:
+        model = TempSampleSubmission
+        exclude = ('tmp_project_name', 'tmp_add_flag')
+
+class TempSSPhenotypeForm(ModelForm):
+    class Meta:
+        model = TempSSPhenotype
+        exclude = ('tmp_ss')
+
+class TempSSAffiliatedInstituteForm(ModelForm):
+    class Meta:
+        model = TempSSAffiliatedInstitute
+        exclude = ('tmp_ss')
+
+class TempSSDNAOrderAppUserForm(ModelForm):
+    class Meta:
+        model = TempSSDNAOrderAppUser
+        exclude = ('tmp_ss')
 
 #For the Admin
 class UserProjectForm(ModelForm):

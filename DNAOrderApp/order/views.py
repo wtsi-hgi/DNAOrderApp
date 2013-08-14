@@ -7,19 +7,24 @@ from django.core.files import File
 from django.contrib.auth import login, authenticate, get_user
 from django.contrib.auth.models import User
 
-from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission
-from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser
+from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype, SampleSubmission, TempSSAffiliatedInstituteForm
+from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser, TempSSAffiliatedInstitute
+from DNAOrderApp.order.models import TempSSDNAOrderAppUser, TempSSDNAOrderAppUserForm
 
-from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM
-from DNAOrderApp.order.models import DNAOrderAppUserForm
+# Lab Tech
+from DNAOrderApp.order.models import SampleFeature, SampleFeatureType, Sample
+
+from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM, TempSSPhenotype
+from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm, TempSampleSubmissionForm, TempSampleSubmission, TempSSPhenotypeForm
 from DNAOrderApp.order.forms import DocumentForm
 
 from django.contrib import messages
-from django.db import IntegrityError, DatabaseError
+from django.db import IntegrityError, DatabaseError, transaction
+from django.core.exceptions import ObjectDoesNotExist
 import base64
 from django.template import Template, Context, RequestContext
 
-import csv, string, re
+import csv, string, re, datetime
 
 formfile = ""
 
@@ -319,6 +324,78 @@ def handle_user(request, action=None, id=None):
         return HttpResponse("Everything failed! - user")
 
 
+def add_dnaorderappuser(request):
+    print "adding dnaorderappuser"
+    alert_msg = ""
+    dnaorderappuserform = DNAOrderAppUserForm(request.POST)
+
+    if dnaorderappuserform.is_valid():
+        print "is valid"
+        dnaorderappuserform.save()
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a DNA Order App User!</div>"
+    else:
+        print "is not valid"
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No DNA Order App User was added. Invalid Form. </div>'
+
+    dnaorderappuserlist_all = DNAOrderAppUser.objects.all().order_by('date_joined')
+    dnaorderappuserform = DNAOrderAppUserForm()
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/dnaorderappuser-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'dnaorderappuserform': dnaorderappuserform,
+            'dnaorderappuserlist_all': dnaorderappuserlist_all,
+            'alert_msg': alert_msg,
+        })
+
+    return HttpResponse(t.render(c))
+
+
+def handle_dnaorderappuser(request, action=None, id=None):
+    print "in handle dnaorderappuser"
+    if action == "DELETE":
+        print "in delete dnaorderappuser"
+    elif action == "ADD":
+        return add_dnaorderappuser(request)
+    else:
+        return HttpResponse("Everything failed! - dnaorderappuser")
+
+
+def add_affiliated_institute(request):
+    print "add affiliated institute"
+    aif = AffiliatedInstituteForm(request.POST)
+
+    if aif.is_valid():
+        aif.save()
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
+    else:
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
+
+    ailist_all = AffiliatedInstitute.objects.all().order_by('ai_name')
+    aif = AffiliatedInstituteForm()
+
+    # it should return just the updated table
+    fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-table.html')
+    t = Template(fp.read())
+    fp.close()
+    c = Context({
+            'aif': aif,
+            'ailist_all': ailist_all,
+            'alert_msg': alert_msg,
+        })
+
+    return HttpResponse(t.render(c))
+
+
+def handle_affiliated_institute(request, action=None):
+    print "affiliated institute"
+    if action == "ADD":
+        return add_affiliated_institute(request)
+    else:
+        return HttpResponse("Everything failed! - affiliated institute")
+
 # RENDER THE ADMIN PAGE
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.forms import PasswordResetForm, UserChangeForm, UserCreationForm, SetPasswordForm
@@ -352,13 +429,106 @@ def admin_page(request, table=None, pkid=None):
         p1 = PhenotypeType(phenotype_type="AffectionStatus")
         p2 = PhenotypeType(phenotype_type="Qualitative")
         p3 = PhenotypeType(phenotype_type="Quantitative")
+        p4 = PhenotypeType(phenotype_type="Date")
 
         p1.save()
         p2.save()
         p3.save()
+        p4.save()
+
+    if not SampleFeatureType.objects.all():
+        sft1 = SampleFeatureType(sample_feature_type="Boolean")
+        sft2 = SampleFeatureType(sample_feature_type="Qualitative")
+        sft3 = SampleFeatureType(sample_feature_type="Quantitative")
+        sft4 = SampleFeatureType(sample_feature_type="Date")
+
+        sft1.save()
+        sft2.save()
+        sft3.save()
+        sft4.save()
+
+    # initial data (not using fixtures) - standard sample characteristics
+    samplefeaturelist_quant = [     "Sample Plate ID",
+                                    "Sanger Sample ID",
+                                    "Volume (ul)",
+                                    "Concentration (ng/ul)",
+                                    "Sample Accession Number (optional)"
+    ]
+
+    samplefeaturelist_qual = [
+                                    "Supplier Sample Name",
+                                    "DNA Source (i.e. Blood)",
+                                    "DNA Extraction Method",
+                                    "Purification method",
+                                    "Concentration determined by",
+                                    "DNA Storage Conditions",
+                                    "Public Name",
+                                    "Sample Description",
+                                    "Sample Visibility",
+                                    "Sample Type"
+    ]
+
+    samplefeaturelist_bool = [      "Is Sample a Control",
+                                    "Is Re-submitted sample?",
+                                    "Sample purified?"
+    ]
+
+    samplefeaturelist_date = [      "Date of Sample Collection (mm/yy or yyyy only)",
+                                    "Date of DNA Extraction (mm/yy or yyyy only)"
+    ]
+
+    if not SampleFeature.objects.all():
+        for sf in samplefeaturelist_quant:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Quantitative")
+            s.save()
+
+        for sf in samplefeaturelist_qual:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Qualitative")
+            s.save()
+
+        for sf in samplefeaturelist_bool:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Boolean")
+            s.save()
+
+        for sf in samplefeaturelist_date:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Date")
+            s.save()
 
 
     ucf = UserCreationForm()
+    aif = AffiliatedInstituteForm()
+
+    ailist_all = AffiliatedInstitute.objects.all().order_by('ai_name')
+
+    # EXPERIMENTING FORMSETS 
+    # from django.forms.formsets import formset_factory
+    # PhenotypeFormSet = formset_factory(PhenotypeForm, extra=2)
+    # formset = PhenotypeFormSet(initial=[
+    #     {'phenotype_name': 'Monkeys',
+    #     'phenotype_description': 'hello world',
+    #     }
+    # ])
+
+    # print "this is formset", formset
+
+    # EXPERIMENTING MODEL FORMSETS
+    # from django.forms.models import modelformset_factory
+    # PhenotypeFormSet = modelformset_factory(Phenotype, can_delete=True)
+
+    # formset = PhenotypeFormSet(queryset=Phenotype.objects.none())
+    # print "this is phenotypeformset ", formset
+
+
+    # EXPERIMENTING WITH INLINE FORMSETS
+   
 
     return render(request, 'order/admin-page.html', {
             'userprojectform': userprojectform,
@@ -370,6 +540,9 @@ def admin_page(request, table=None, pkid=None):
             'phenotypeform': phenotypeform,
             'phenotypelist_all':phenotypelist_all,
             'dnaorderappuserform' : dnaorderappuserform,
+            'aif' : aif,
+            'ailist_all' : ailist_all,
+            # 'PhenotypeFormSet' : formset,
 
             'ucf': ucf,
            
@@ -489,6 +662,63 @@ def get_projectlist(user):
 
 #     return HttpResponse(t.render(c))
 
+def handle_ai_fmpage(request, action=None, id=None):
+    print "in handle_ai_fmpage"
+    if action == "DELETE":
+        print "deleting an AI"
+        if id != None:
+            return delete_ai_fmpage(id)
+    elif action == "ADD":
+        return add_ai_fmpage(request)
+    else:
+        return HttpResponse("Everything failed! - phenotype")
+
+
+def add_ai_fmpage(request):
+    '''
+    When you see the AI displayed on the label, this hasn't been associated with 
+    the sample submission yet. To be associated you need to create the entire 
+    sample submission first. Clicking the save button will only save the existence
+    of this affiliated institute.
+    '''
+    print "inside add_ai_fmpage"
+    alert_msg = ""
+    print "this is request.POST in ai", request.POST
+    aiform = AffiliatedInstituteForm(request.POST)
+
+    if aiform.is_valid():
+        print "in if"
+        ai = aiform.save()
+        print 'this is ai', ai.ai_name, ai.ai_description
+        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added an Affiliated Institute!</div>"
+        ai_name = ai.ai_name
+        ai_description = ai.ai_description
+
+        fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-label-fmpage.html')
+        t = Template(fp.read())
+        fp.close()
+        c = Context({
+            'alert_msg': alert_msg,
+            'ai_name' : ai_name,
+            'ai_description': ai_description
+        })
+
+    else:
+        print "in else"
+        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No Affiliated Institute was added. Invalid Form. </div>'
+        aiform = AffiliatedInstituteForm()
+
+        fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/ai-label-fmpage.html')
+        t = Template(fp.read())
+        fp.close()
+        c = Context({
+            'alert_msg': alert_msg,
+            'aiform' : aiform
+        })
+
+    return HttpResponse(t.render(c))
+
+
 def get_phenolist_cp(proj_name):
     ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
     
@@ -558,66 +788,895 @@ def handle_phenotype_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - phenotype")
 
-def add_project_fmpage(request):
-    print "adding a project - inside add project fmproject"
-    alert_msg = ""
-    print "tis is request.POST in add_project:", request.POST
-    userprojectform = UserProjectForm(request.POST)
 
-    if userprojectform.is_valid():
-        userprojectform.save()
-        print "this is request.user", request.user
+def edit_tss_page_5(request, action=None, tssid=None, ssid=None):
+    print "in edit tss page 5"
+    if action == 'FINAL_SUBMIT':
+        print "in final submit"
+    else:
+        print "in the else - edit tss page 5"
+        # First time webpage is called using GET
+        try:
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+            tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+        except ObjectDoesNotExist:
+            # If some forms are incomplete
+            print "Incomplete forms ", ex.message
+            alert_msg = "<div class=\"alert alert-error\"><b>Incomplete Forms!</b> Please go back and complete them.</div>"
+            fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/edit-tmp-sample-submission-4.html')
+            t = Template(fp.read())
+            fp.close()
+            tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+            tssuserform = TempSSDNAOrderAppUserForm()
+            c = Context({
+                            'alert_msg': alert_msg,
+                            'tssid' : tssid,
+                            'tempuserlist_all': tempuserlist_all,
+                            'tssuserform': tssuserform
+            })
+            return HttpResponse(t.render(c))
 
-        print "Check userproject table to see if it has been saved properly."
-        print "Successfully added a project"
-        alert_msg = "<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>"
+
+    return render(request, 'order/edit-tmp-sample-submission-5.html', {
+        'tss' : tss,
+        'tssphenolist_all' : tssphenolist_all,
+        'tssai' : tssai,
+        'tssdnaorderappuserlist_all' : tssdnaorderappuserlist_all,
+        'tssid' : tssid,
+        'ssid' : ssid
+        })
+
+
+def tss_page_5(request, action=None, tssid=None):
+    print "in tss page 5"
+    print "tssid", tssid
+    if action == 'FINAL_SUBMIT':
+        # Submit everything from temporary database to actual database
+        # Display the new row in the main page with the information
+        print "in post - tss page 5"
+        ss = SampleSubmission()
+
+        # Setting up all the objects needed
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+        tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+
+        print "TYPE TSSAI TMP AI NAME", "ai_name = '" + tssai.tmp_ai_name +"'"
+        try:
+            ai = AffiliatedInstitute.objects.get(ai_name=tssai.tmp_ai_name)
+            print ai 
+        except ObjectDoesNotExist:
+            # Creating the associated affiliated institute object (foreign key)
+            #if affiliated institute does not exist in the database
+            print "in not ai - tss page 5"
+            ai = AffiliatedInstitute()
+            ai.ai_name = tssai.tmp_ai_name 
+            ai.ai_description = tssai.tmp_ai_description
+            ai.save()
+
+        ss.affiliated_institute = ai
+
+        try:
+            up = UserProject.objects.get(project_name=tss.tmp_project_name)
+        except ObjectDoesNotExist:
+            # Foreign key project_name
+            up = UserProject()
+            up.username = DNAOrderAppUser.objects.get(username=request.user)
+            up.project_name = tss.tmp_project_name
+            up.save()
+
+        ss.project_name = up
+
+        try:
+            ss.sample_submission_name = tss.tmp_sample_submission_name
+            ss.sample_num = tss.tmp_sample_num
+        except IntegrityError as e:
+            print "Integrity Error :", e
+
+        # Need to save before adding to many to many relationships
+        ss.save()
+
+        # Many to Many relationship
+        for tsspheno in tssphenolist_all:
+
+            try: 
+                pheno = Phenotype.objects.get(phenotype_name=tsspheno.tmp_phenotype_name, phenotype_type=tsspheno.tmp_phenotype_type)
+            except ObjectDoesNotExist:
+                pheno = Phenotype()
+                pheno.phenotype_name = tsspheno.tmp_phenotype_name 
+                pheno.phenotype_type = tsspheno.tmp_phenotype_type
+                pheno.phenotype_description = tsspheno.tmp_phenotype_description
+                pheno.phenotype_definition = tsspheno.tmp_phenotype_definition
+                pheno.save()
+            
+            ss.phenotype_list.add(pheno)
+            del pheno
+
+        for tssuser in tssdnaorderappuserlist_all:
+            ss.contact_list.add(tssuser)
+
+        
+        ss.save()
+        print "Check Sample Submission to see if it is saved - tss page 5"
+        print "Deleting the temporary rows"
+
+        # Deleting all the associated temporary rows
+        tss.delete() 
+        tssphenolist_all.delete()
+        tssai.delete()
+        tssdnaorderappuserlist_all.delete()
+
+        return HttpResponseRedirect(reverse("fmprojectlist"))
+
 
     else:
-        print "userproject not valid ", userprojectform, " ", userproject
-        print e
-        alert_msg = '<div class="alert alert-error"><b>Uh Oh!</b> No project was added. Invalid Form. </div>'
+        print "in the else - tss page 5"
+        # first time web page is being called or being called by GET method
+        try:
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            tssphenolist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+            tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssdnaorderappuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+        except ObjectDoesNotExist, ex:
+            # If some forms are incomplete
+            print "Incomplete forms ", ex.message
+            alert_msg = "<div class=\"alert alert-error\"><b>Incomplete Forms!</b> Please go back and complete them.</div>"
+            fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/tmp-sample-submission-4.html')
+            t = Template(fp.read())
+            fp.close()
+            tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+            tssuserform = TempSSDNAOrderAppUserForm()
+            c = Context({
+                            'alert_msg': alert_msg,
+                            'tssid' : tssid,
+                            'tempuserlist_all': tempuserlist_all,
+                            'tssuserform': tssuserform
+            })
+            return HttpResponse(t.render(c))
+            
 
+
+    return render(request, 'order/tmp-sample-submission-5.html', {
+        'tss' : tss,
+        'tssphenolist_all' : tssphenolist_all,
+        'tssai' : tssai,
+        'tssdnaorderappuserlist_all' : tssdnaorderappuserlist_all,
+        'tssid' : tssid
+        })
+
+def tss_page_4(request, tssid=None):
+    print "in tss page 4"
+    # At present we don't know what the external collaborator's authentication system 
+    # is going to be like. So we're ignoring the cases where we need to create the collab's user account.
+    # Only caring about user that exists in the system already.
+
+    if request.method == "POST":
+        print "in post - tss page 4"
+        tssuserform = TempSSDNAOrderAppUserForm(request.POST)
+
+        if tssuserform.is_valid():
+            try:
+                tssuser = tssuserform.save(commit=False)
+                tssuser.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tssuser.save()
+                print "saved tssuser"
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+    else:
+        #first time webpage is being called or from a GET method
+        print "not in post - tss page 4"
+
+    # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tssid)
+    # tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__tmp_project_name=tssid)
+    tempuserlist_all = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__id=tssid)
+    tssuserform = TempSSDNAOrderAppUserForm()
+
+    return render(request, 'order/tmp-sample-submission-4.html', {
+        'tssuserform' : tssuserform,
+        'tempuserlist_all' : tempuserlist_all,
+        'tssid' : tssid
+        })
+
+
+def tss_page_2(request, tssid=None):
+    print "in tss page 2"
+    if request.method == "POST":
+        print "in post"
+        tssphenoform = TempSSPhenotypeForm(request.POST)
+
+        if tssphenoform.is_valid():
+            try:
+                tsspheno = tssphenoform.save(commit=False)
+                tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tsspheno.save()
+                print "saved tsspheno"
+
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+    else:
+        #first time webpage is being called or from a GET method
+        print "not in post - tss page 2"
+        print "tssid", tssid
+        try:
+            #if a tsspheno exist
+            tsspheno_old = TempSSPhenotype.objects.get(pk=tssid)
+            
+            data = {    
+                        'tmp_ss' : tsspheno_old.tmp_ss.id,
+                        'tmp_phenotype_name': tsspheno_old.tmp_phenotype_name,
+                        'tmp_phenotype_type': tsspheno_old.tmp_phenotype_type.id,
+                        'tmp_phenotype_description': tsspheno_old.tmp_phenotype_description,
+                        'tmp_phenotype_definition': tsspheno_old.tmp_phenotype_definition
+                    }
+            tssphenoform = TempSSPhenotypeForm(data)
+            print "check if tssform is bound:", tssphenoform.is_bound
+            print "check if tssform is valid: ", tssphenoform.is_valid()
+            print tssphenoform.errors
+        except ObjectDoesNotExist:
+            if not tssid:
+                print "FAIL - MEANING TEMP SAMPLE SUBMISSION DID NOT SAVE. impossible."
+            #if tsspheno does not exist
+            tssphenoform = TempSSPhenotypeForm()
+
+
+    tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
+
+    return render(request, 'order/tmp-sample-submission-2.html', {
+        'tssphenoform': tssphenoform,
+        'tssid' : tssid,
+        'tempphenotypelist_all' : tempphenotypelist_all
+        })
+
+def tss_page_3(request, tssid=None):
+    print "in tss page 3"
+
+    if request.method == "POST":
+        print "in post - tss page 3"
+        
+        #if tssai exists already and just want to update
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        print 'request.post', request.POST, ' ', request.POST['tmp_ai_name']
+        print "hi",TempSSAffiliatedInstitute.objects.filter(tmp_ss=tss)
+        print "hello",TempSSAffiliatedInstitute.objects.filter(tmp_ai_name=request.POST['tmp_ai_name'])
+        instance = TempSSAffiliatedInstitute.objects.filter(tmp_ss=tss) or TempSSAffiliatedInstitute.objects.filter(tmp_ai_name=request.POST['tmp_ai_name'])
+        if not instance:
+            print "hello"
+            tssaiform = TempSSAffiliatedInstituteForm(request.POST)
+        else:
+            print "in else"
+            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance[0])
+        print "tssaiform? "
+        
+        if tssaiform.is_valid():
+            try:
+                tssai = tssaiform.save(commit=False)
+                tss = TempSampleSubmission.objects.get(pk=tssid)
+                tssai.tmp_ss = tss 
+                tssai.save()
+                print "in valid - tss page 3", tssai.id
+                return HttpResponseRedirect(reverse('tss-page-4', args=[tssid]))
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown - tss page 3:", e
+        else:
+            print "invalid form", tssaiform.errors
+    else:
+        #first time webpage is being called, using GET
+        print "not in post - tss page 3"
+        try:
+            #if a tssai exist for tss
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            tssai_old = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            data = {    'tmp_ss': tssai_old.tmp_ss,
+                        'tmp_ai_name': tssai_old.tmp_ai_name,
+                        'tmp_ai_description': tssai_old.tmp_ai_description 
+                    }
+            tssaiform = TempSSAffiliatedInstituteForm(data) #instantiate it with a form, allows user to update
+            print "check if tssaiform is bound:", tssaiform.is_bound
+            print "check if tssaiform is valid: ", tssaiform.is_valid()
+            print tssaiform.errors
+        except ObjectDoesNotExist:
+            tssaiform = TempSSAffiliatedInstituteForm() #unbound form, no associated data, empty form
+
+    return render(request, 'order/tmp-sample-submission-3.html', {
+        'tssid' : tssid,
+        'tssaiform' : tssaiform
+        })
+
+def edit_tss_page_3(request, ssid=None, tssid=None):
+    print "in edit tss page 3"
+
+    if request.method == "POST":
+        print "in the post - edit tss page 3"
+        try:
+            #if tssai exists already and just want to update
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            instance = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssaiform = TempSSAffiliatedInstituteForm(data=request.POST, instance=instance)
+        except ObjectDoesNotExist:
+            tssaiform = TempSSAffiliatedInstituteForm(request.POST)
+
+        if tssaiform.is_valid():
+            try:
+                tssai = tssaiform.save(commit=False)
+                tss = TempSampleSubmission.objects.get(pk=tssid)
+                tssai.tmp_ss = tss
+                tssai.save()
+                return HttpResponseRedirect(reverse('edit-ss-fmpage', kwargs={'ssid':ssid, 'tssid':tss.id}))
+                # return HttpResponseRedirect(reverse('edit-tss-page-4', kwargs={'ssid':ssid, 'tssid': tss.id}))
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown - edit tss page 3: ", e
+        else:
+            # If the form is invalid ie. missing fields, invalid inputs - should generate an alert message 
+            # and stay on the form
+            print "invalid form", tssaiform.errors
+    else:
+        #first time webpage is being called, using GET
+        print "not in post - edit tss page 3"
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+        tssaiform = TempSSAffiliatedInstituteForm(instance=tssai)
+
+        # DEPRECATED!!!
+        # ss = SampleSubmission.objects.get(pk=ssid)
+        # tss = TempSampleSubmission.objects.get(pk=tssid)
+        # data = {   
+        #             'tmp_ss' : tss,
+        #             'tmp_ai_name' : ss.affiliated_institute.ai_name, 
+        #             'tmp_ai_description' : ss.affiliated_institute.ai_description
+        # }
+        # tssaiform = TempSSAffiliatedInstituteForm(data)
+    return render(request, 'order/edit-tmp-sample-submission-3.html', {
+        'tssid' : tssid,
+        'ssid' : ssid,
+        'tssaiform' : tssaiform
+        })
+
+def edit_tss_page_4(request, ssid=None, tssid=None):
+    print "in edit tss page 4"
+
+    if request.method == "POST":
+        print "in post - edit tss page 4"
+        tssuserform = TempSSDNAOrderAppUserForm(request.POST)
+
+        if tssuserform.is_valid():
+            try:
+                tssuser = tssuserform.save(commit=False)
+                tssuser.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tssuser.save()
+                print "saved tssuser"
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+    else:
+        # first time webpage is being called or from a GET method
+        print "in the else - edit tss page 4"
+        pass
+        
+    tss = TempSampleSubmission.objects.get(pk=tssid)
+    tssuserlist = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tss)
+    tssuserform = TempSSDNAOrderAppUserForm()
+
+        # Taking the contact list from existing sample submission and created tempssdnaorderappuser
+    #     ss = SampleSubmission.objects.get(pk=ssid)
+    #     for user in ss.contact_list.all():
+    #         tssuser = TempSSDNAOrderAppUser()
+    #         tssuser.tmp_ss = tss
+    #         tssuser.tmp_dnaorderappuser = user
+
+    # ss = SampleSubmission.objects.get(pk=ssid)
+    # tempuserlist_all = ss.contact_list.all()
+
+    # tssuserform = TempSSDNAOrderAppUserForm()
+
+    return render(request, 'order/edit-tmp-sample-submission-4.html', {
+        'tssuserform' : tssuserform,
+        'tssuserlist' : tssuserlist,
+        'tssid' : tssid,
+        'ssid' : ssid
+        })
+
+def edit_tss_page_2(request, ssid=None, tssid=None):
+    print "in edit tss page 2"
+    if request.method == "POST":
+        print "in the post - edit tss page 2"
+        tssphenoform = TempSSPhenotypeForm(request.POST)
+
+        if tssphenoform.is_valid():
+            try:
+                print "in try"
+                tsspheno = tssphenoform.save(commit=False)
+                tsspheno.tmp_ss = TempSampleSubmission.objects.get(pk=tssid)
+                tsspheno.save()
+                tssphenoform = TempSSPhenotypeForm()
+            except ObjectDoesNotExist:
+                print "TempSampleSubmission does not exist"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+            # shows the error messages
+    else:
+        #first time webpage is being called or from a GET method
+        # Creating temp phenotypes from existing sample submission's phenotype list
+        print "not in post - edit tss page 2"
+        tssphenoform = TempSSPhenotypeForm()
+
+    try:
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        tssphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss=tss)
+    except ObjectDoesNotExist:
+        print "TempSampleSubmission does not exist!"
+
+    # DEPRECATED!!!!!
+    #     ss = SampleSubmission.objects.get(pk=ssid)
+    #     tss = TempSampleSubmission.objects.get(pk=tssid)
+        
+    #     if not TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid):
+    #         for pheno in ss.phenotype_list.all():
+    #             tsspheno = TempSSPhenotype()
+    #             tsspheno.tmp_ss = tss 
+    #             tsspheno.tmp_phenotype_name = pheno.phenotype_name
+    #             tsspheno.tmp_phenotype_type = pheno.phenotype_type
+    #             tsspheno.tmp_phenotype_description = pheno.phenotype_description
+    #             tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
+    #             tsspheno.save()
+    #             del tsspheno
+
+    # tssphenoform = TempSSPhenotypeForm()
+    # tempphenotypelist_all = TempSSPhenotype.objects.filter(tmp_ss__pk__exact=tssid)
+
+    return render(request, 'order/edit-tmp-sample-submission-2.html', {
+        'tssphenoform': tssphenoform,
+        'tssid' : tssid,
+        'ssid' : ssid,
+        'tssphenotypelist_all' : tssphenotypelist_all
+        })
+
+
+def edit_tss_page_1(request, projid=None, ssid=None, tssid=None):
+    # The idea is, using the sample temp format to change the existing sample submission.
+    # I only need projid, not for samplesubmission but because TempSampleSubmissionForm needs it. 
+    # After this point, I don't need it anymore. I only need ssid and tssid
+    print "in edit tss page 1"
+    print "ssid", ssid
+
+    if request.method == "POST":
+        print "in post - edit tss page 1"
+        print 'tssid ', tssid
+        print 'ssid ', ssid
+        print 'projid ', projid
+        # this creates a new TempSampleSubmission and allows user to modify the TempSampleSubmission
+        try:
+            print "in try - edit tss page 1"
+            # proj = UserProject.objects.get(pk=projid)
+            # instance = TempSampleSubmission.objects.get(tmp_project_name=proj)
+            instance = TempSampleSubmission.objects.get(pk=tssid)
+            print 'instance', instance
+            tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
+            print "after tssform request instance - edit tss page 1"
+        except ObjectDoesNotExist:
+            print "object does not exist - edit tss page 1"
+            #if TempSampleSubmission does not exist...or project does not exist
+            # using try-except statements as an 'if else' format is not the best practice, will change if time permits.
+            tssform = TempSampleSubmissionForm(request.POST)
+
+        if tssform.is_valid():
+            try:
+                print "in is valid"
+                tss = tssform.save(commit=False)
+                proj = UserProject.objects.get(pk=projid)
+                tss.tmp_project_name = proj 
+                tss.save()
+                print "it's saved! ", tss
+                print "ssid", ssid, "tssid ", tss.id
+                return HttpResponseRedirect(reverse('edit-ss-fmpage', kwargs={'ssid':ssid, 'tssid':tss.id}))
+            except ObjectDoesNotExist:
+                print "User Project does not exist"
+            except ValueError:
+                print "Invalid tss form"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form", tssform.errors 
+    else:
+        print "in the else edit tss page 1"
+        # Using try-except as an 'if-else' format. It's not best practice, will change if time permits.
+        try:
+            print "in the else - try"
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            print tss
+            data = {    'tmp_project_name' : tss.tmp_project_name,
+                        'tmp_sample_submission_name' : tss.tmp_sample_submission_name,
+                        'tmp_sample_num' : tss.tmp_sample_num
+            }
+        except ObjectDoesNotExist:
+            print "object does not exist"
+            ss = SampleSubmission.objects.get(pk=ssid)
+            data = {    'tmp_project_name' : ss.project_name,
+                        'tmp_sample_submission_name' : ss.sample_submission_name,
+                        'tmp_sample_num' : ss.sample_num
+            }
+        tssform = TempSampleSubmissionForm(data)
+        print 'tssid ', tssid
+        print 'ssid ', ssid
+        print 'projid ', projid
+        print 'tssform ', tssform
+
+    return render(request, 'order/edit-tmp-sample-submission-1.html', {
+        'tssform' : tssform,
+        'projid' : projid,
+        'ssid' : ssid,
+        'tssid' : tssid
+    })
+
+def tss_page_1(request, projid=None):
+    print "in tss page 1"
+    print "this projid ", projid
+
+    if request.method == "POST":
+        print "in post?" #Allows user to modify 
+        try:
+            proj = UserProject.objects.get(pk=projid)
+            instance = TempSampleSubmission.objects.get(tmp_project_name=proj, tmp_add_flag=True)
+            tssform = TempSampleSubmissionForm(data=request.POST, instance=instance)
+            print "tss form?"
+        except ObjectDoesNotExist:
+            #If TempSampleSubmission does not exist
+            print "tss did not exist yet, creating one"
+            tssform = TempSampleSubmissionForm(request.POST)
+
+        if tssform.is_valid():
+            try:
+                tss = tssform.save(commit=False)
+                proj = UserProject.objects.get(pk=projid)
+                tss.tmp_project_name = proj
+                tss.tmp_add_flag = True
+                tss.save()
+                print "in valid", tss.id
+                return HttpResponseRedirect(reverse('tss-page-2', args=[tss.id]))
+            except ObjectDoesNotExist:
+                print "User Project does not exist"
+            except ValueError:
+                print "Invalid tss form"
+            except Exception as e:
+                print "General exception being thrown: ", e
+        else:
+            print "invalid form"
+            # alert_msg="<div class=\"alert alert-error\"><b>", type(tssform['tmp_sample_submission_name'].errors), \
+                    # tssform['tmp_sample_num'].errors, "</b></div>"
+            alert_msg=""
+            # print "alert_msg", alert_msg
+            return render(request, 'order/tmp-sample-submission-1.html', {
+                            'tssform' : tssform,
+                            'projid' : projid,
+                            'alert_msg' : alert_msg
+                    })
+    else:
+        print "not in post"
+
+        try:
+            # if Temporary sample submission already exists already
+            proj = UserProject.objects.get(pk=projid)
+            tss = TempSampleSubmission.objects.get(tmp_project_name=proj, tmp_add_flag=True)
+            tssid = tss.id
+            tssform = TempSampleSubmissionForm(instance=tss)
+        except ObjectDoesNotExist:
+            # else create a temporary sample submission, with the known project
+            # first time webpage is being called, using GET
+            tssform = TempSampleSubmissionForm()
+            tssid = None
+
+        # if TempSampleSubmission.objects.filter(pk=tssid).count() == 0:
+        #     # if no temporary sample submission exists, create one.
+        # else:
+        #     try:
+        #         #if a tss exist for projid = (user, project), UserProject
+        #         proj = UserProject.objects.get(pk=projid)
+        #         tss_old = TempSampleSubmission.objects.get(tmp_project_name=proj) #if tss exists
+        #         data = {    'tmp_project_name' : tss_old.tmp_project_name,
+        #                     'tmp_sample_submission_name' : tss_old.tmp_sample_submission_name, 
+        #                     'tmp_sample_num' : tss_old.tmp_sample_num }
+
+        #         tssform = TempSampleSubmissionForm(data) #instantiate it with a form, allows user to update
+        #         print "check if tssform is bound:", tssform.is_bound
+        #         print "check if tssform is valid: ", tssform.is_valid()
+        #         print tssform.errors
+        #     except ObjectDoesNotExist:
+        #         tssform = TempSampleSubmissionForm() #unbound form, no associated data, empty form
+    return render(request, 'order/tmp-sample-submission-1.html', {
+        'tssform' : tssform,
+        'projid' : projid,
+        'tssid' : tssid
+        })
+
+
+@transaction.commit_on_success
+def edit_ss_fmpage(request, ssid=None, tssid=None):
+    print 'in edit ss fmpage'
+    print 'ssid', ssid, 'tssid', tssid
+
+    if request.method == "POST":
+        print "in the post - edit_ss_fmpage"
+
+        # Idea is check if there's any changes, if there is, then update Sample Submission
+        tss = TempSampleSubmission.objects.get(pk=tssid)
+        print 'tss',tss
+        tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+        print 'tssai', tssai
+        tssuserlist = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tss)
+        print 'tssuserlist', tssuserlist
+        tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
+        print 'tssphenolist', tssphenolist
+
+        ss = SampleSubmission.objects.get(pk=ssid)
+        print 'ss', ss
+        print 'ss project name before', ss.project_name
+        ss.project_name = tss.tmp_project_name
+        print 'ss project name after', ss.project_name
+        print 'ss sample submission name before', ss.sample_submission_name
+        ss.sample_submission_name = tss.tmp_sample_submission_name
+        print 'ss sample submission name after', ss.sample_submission_name
+        print 'ss sample num before', ss.sample_num
+        ss.sample_num = tss.tmp_sample_num
+        print 'ss sample num after', ss.sample_num
+        print 'ss ai before', ss.affiliated_institute
+
+        try:
+            ai = AffiliatedInstitute.objects.get(ai_name=tssai.tmp_ai_name)
+        except ObjectDoesNotExist:
+            ai = AffiliatedInstitute()
+            ai.ai_name = tssai.tmp_ai_name
+            ai.ai_description = tssai.tmp_ai_description
+            ai.save()
+
+        ss.affiliated_institute = ai
+        del ai
+        print 'ss ai after', ss.affiliated_institute
+
+        print 'ss contact list before', ss.contact_list
+        # compare contact list
+        newuser_list = list(set(tssuserlist) - set(ss.contact_list.all()))
+
+        for nw in newuser_list:
+            # User exists, because there's no way to create new users at the moment
+            ss.contact_list.add(nw)
+        print 'ss contact list after', ss.contact_list
+
+        # You have the phenotype list from the sample submission
+        # you have the tss list from tsspheno
+        # Need to associate sample submission to the new phenotype from tsspheno
+        # somehow make tss comparable to phenotypes, so then to create the new phenotypes and associate it to the present ss.
+        # phenotype is unique by name and type
+        # tempssphenotype is unique by name, ss, type
+        # so compare name and type only
+        psslist = ss.phenotype_list.all().values_list('phenotype_name', 'phenotype_type_id')
+        print "after psslist"
+        tptsslist = TempSSPhenotype.objects.filter(tmp_ss=tss).values_list('tmp_phenotype_name','tmp_phenotype_type')
+        print "after tptsslist"
+        newphenotype_list = list(set(tptsslist)-set(psslist))
+        print "made a remaining list ", newphenotype_list
+
+        for np in newphenotype_list:
+            try:
+                print "before temppsspheno"
+                tempsspheno = TempSSPhenotype.objects.get(tmp_phenotype_name=np[0],tmp_phenotype_type=np[1])
+                print "After tempsspheno"
+
+                # Check if these phenotypes exist first, it just might not be associated with the present sample submission
+                pheno = Phenotype.objects.get(phenotype_name=np[0],phenotype_type=np[1])
+                print "after pheno is made"
+                ss.phenotype_list.add(pheno)
+                print "add to ss phenotype list"
+            except TempSSPhenotype.DoesNotExist:
+                print "TempSSPhenotype does not exist!"
+            except Phenotype.DoesNotExist:
+                print "in phenotype does not exist"
+                pheno = Phenotype()
+                pheno.phenotype_name = tempsspheno.tmp_phenotype_name
+                pheno.phenotype_type = tempsspheno.tmp_phenotype_type
+                pheno.phenotype_description = tempsspheno.tmp_phenotype_description
+                pheno.phenotype_definition = tempsspheno.tmp_phenotype_definition
+                pheno.save()
+                ss.phenotype_list.add(pheno)
+                print "add ss.phenotypelist"
+                del pheno 
+        
+        print "before saving ss"
+        ss.save()
+
+        print "tssai before"
+        tssai.delete()
+        print "tssai after"
+        print "tss phenolist before"
+        tssphenolist.delete()
+        print "tss phenolist after"
+        print "tssdnaorderappuser before"
+        TempSSDNAOrderAppUser.objects.filter(tmp_ss=tss).delete()
+        print "tssdnaorderappuser after"
+        print "tss before"
+        tss.delete()
+        print "tss after"
+        
+        return HttpResponseRedirect(reverse('fmprojectlist'))
+    else:
+        print "in the else - edit_ss_fmpage"
+        # first time being called, GET
+        ss = SampleSubmission.objects.get(pk=ssid)
+        print "ss", ss
+
+        # I'm using filter and count here because I didn't want to use get, which causes an ObjectDoesNotExist
+        if TempSampleSubmission.objects.filter(pk=tssid).count() == 0:
+            # No Temp Sample Submission made for this sample submission yet. So create all the 
+            # associated temporary tables for it.
+            print "tempss when 0"
+            with transaction.commit_on_success():
+                try:
+                    # Some reason fmpage refreshes and 'Edit' is clicked, no tssid is provided in that scenario
+                    # But its temporary sample submission has already been created.
+                    tss = TempSampleSubmission.objects.get(tmp_sample_submission_name=ss.sample_submission_name)
+                    tssid = tss.id
+                except ObjectDoesNotExist:
+                    print "before tss"
+                    tss = TempSampleSubmission()
+                    print "after tss"
+                    tss.tmp_project_name = ss.project_name
+                    print "after project name", ss.project_name, " and ", tss.tmp_project_name
+                    tss.tmp_sample_submission_name = ss.sample_submission_name
+                    print "after tssname"
+                    tss.tmp_sample_num = ss.sample_num
+                    print "after tss num"
+                    print tss
+                    tss.save()
+                    print "saving !!!! "
+                    tssid = tss.id
+                    print "tssid", tssid
+
+                # instantiate tsspheno
+                tssphenolist = []
+                for pheno in ss.phenotype_list.all():
+                    try:
+                        print "in try tsspheno"
+                        tsspheno = TempSSPhenotype.objects.get(tmp_ss=tss, tmp_phenotype_name=pheno.phenotype_name, tmp_phenotype_type=pheno.phenotype_type)
+                    except ObjectDoesNotExist:
+                        print "in tsspheno doesnotexist"
+                        tsspheno = TempSSPhenotype()
+                        tsspheno.tmp_ss = tss 
+                        tsspheno.tmp_phenotype_name = pheno.phenotype_name
+                        tsspheno.tmp_phenotype_type = pheno.phenotype_type
+                        tsspheno.tmp_phenotype_description = pheno.phenotype_description
+                        tsspheno.tmp_phenotype_definition = pheno.phenotype_definition
+                        tsspheno.save()
+                    tssphenolist.append(tsspheno)
+                    del tsspheno
+                print "tsspheno after"
+
+                # instantiate tempssaffiliatedinstitute 
+                try:
+                    print "in try tssai"
+                    tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+                except ObjectDoesNotExist:
+                    print "in tssai does not exist"
+                    tssai = TempSSAffiliatedInstitute()
+                    tssai.tmp_ss = tss 
+                    tssai.tmp_ai_name = ss.affiliated_institute.ai_name
+                    tssai.tmp_ai_description = ss.affiliated_institute.ai_description
+                    tssai.save()
+                print "after tssai"
+
+                # instantitate tempssdnaorderappuser so to create a filled form
+                tssuserlist = []
+                for user in ss.contact_list.all():
+                    try:
+                        print "in tssdoauser in try"
+                        tssdoauser = TempSSDNAOrderAppUser.objects.get(tmp_ss=tss, tmp_dnaorderappuser=user)
+                    except ObjectDoesNotExist:
+                        print "in tssodauser does not exist"
+                        tssdoauser = TempSSDNAOrderAppUser()
+                        tssdoauser.tmp_ss = tss 
+                        tssdoauser.tmp_dnaorderappuser = user
+                        tssdoauser.save()
+                    tssuserlist.append(tssdoauser.tmp_dnaorderappuser)
+                    del tssdoauser
+                print "after tssusrlist"
+        else:
+            print "not 0"
+            tss = TempSampleSubmission.objects.get(pk=tssid)
+            tssid = tss.id
+            tssphenolist = TempSSPhenotype.objects.filter(tmp_ss=tss)
+            tssai = TempSSAffiliatedInstitute.objects.get(tmp_ss=tss)
+            tssuserlist = DNAOrderAppUser.objects.filter(tempssdnaorderappuser__tmp_ss__exact=tss)
+
+    return render(request, 'order/edit-ss-fmpage.html', {
+        'tss' : tss,
+        'tssai' : tssai,
+        'tssphenolist' : tssphenolist,
+        'tssuserlist' : tssuserlist,
+        'ssid' : ssid,
+        'tssid' : tssid
+        })
+
+
+def handle_tss_pages(request, action=None, projid=None, tssid=None):
+    print "in handle_tss_pages"
+    if action == "TSS1":
+        print "TSS1 - sample submission name and desc"
+        return tss_page_1(request, projid)
+    elif action == "TSS2":
+        print "TSS2 - phenotypes"
+        return tss_page_2(request, tssid)
+    elif action == "TSS3":
+        print "TSS3 - affiliated institute"
+        return tss_page_3(request, tssid)
+    elif action == "TSS4":
+        print "TSS4 - personnels"
+        return tss_page_4(request)
+    else:
+        return HttpResponse("Everything failed! - phenotype")
+
+
+def add_project_fmpage(request):
+    print "adding a project - fmproject"
+
+    if request.method == "POST":
+        print "in post - fmproject"
+        userprojectform = UserProjectForm(request.POST)
+        if userprojectform.is_valid():
+            userprojectform.save()
+        else:
+            print "invalid form - adding a project, errors :", userprojectform.errors
+    else:
+        print "not in post - adding a project - fmproject"
 
     # Make a dictionary with Project as key, and sample submission as value
     projectlist = get_projectlist(request.user)
-    print "PROJECTLIST:", projectlist
 
-    ss_pheno_dict = {}
     proj_ss_dict = {}
+    ss_pheno_dict = {}
     for project in projectlist:
-        print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
         proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
-        print "proj_ss_dict: ", proj_ss_dict
         ss_pheno_dict.update(get_phenolist_cp(project))
 
     #Phenotype
-    phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+    # phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
 
     #Project
-    userprojectform = UserProjectForm_FM(initial={'username': request.user, 'project_name': "HELLO!"}) #unbound form, no associated data, empty form
+    # userprojectform = UserProjectForm_FM(initial={'username': request.user, 'project_name': "HELLO!"}) #unbound form, no associated data, empty form
 
     # it should return just the updated table
     fp = open('/Users/aw18/Project/ENV/DNAOrderApp/DNAOrderApp/order/templates/order/project-table-fmpage.html')
-    print "fp:" ,fp
     t1 = fp.read()
-    print "template", t1
     try:
         t = Template(t1)
+        fp.close()
     except Exception as e:
         print e.message
-    print "after Template"
-    fp.close()
     c = Context({
             'username' : request.user,
-            'myprojectlist' : projectlist,
             'proj_ss_dict' : proj_ss_dict,
-            'phenotypeform' : phenotypeform,
+            # 'phenotypeform' : phenotypeform,
             'ss_pheno_dict' : ss_pheno_dict,
-            'userprojectform' : userprojectform,
-            'alert_msg': alert_msg,
+            # 'userprojectform' : userprojectform,
         })
-    print HttpResponse(t.render(c))
     return HttpResponse(t.render(c))
+
         
 
 def handle_project_fmpage(request, action=None, id=None):
@@ -632,6 +1691,54 @@ def handle_project_fmpage(request, action=None, id=None):
     else:
         return HttpResponse("Everything failed! - handle project")
 
+
+def add_contact_fmpage(request):
+    print "in add_contact_fmpage"
+    alert_msg = ""
+
+    d = DNAOrderAppUser.objects.create_user(username="johnlennon",)
+
+
+
+
+def handle_contact_fmpage(request, action=None, id=None):
+    print "in handle_contact_fmpage"
+    if action == "DELETE":
+        if id != None:
+            pass
+    elif action == "ADD":
+        print "adding a contact"
+        return add_contact_fmpage(request)
+    else:
+        return HttpResponse("Everything failed - handle contact fmpage")
+
+
+def get_contactlist_cp(proj_name):
+    print "in get_contactlist_cp"
+    ss_list = SampleSubmission.objects.filter(project_name__project_name__exact=proj_name)
+    print "ss_list", ss_list
+
+    ss_contacts_dict={}
+    for ss in ss_list:
+        username = [doauser.encode("utf8") for doauser in DNAOrderAppUser.objects.filter(samplesubmission__pk__exact=ss.id).values_list('username', flat=True)]
+        print "username", username
+        ss_contacts_dict[ss] = username
+
+    return ss_contacts_dict
+
+
+def set_request_sent_ss(request, ssid=None):
+    print "in set-request-sent-ss"
+    print "ssid ", ssid 
+
+    ss = SampleSubmission.objects.get(pk=ssid)
+    ss.date_request_sent = datetime.datetime.now()
+    ss.request_sent = True
+    ss.save()
+
+    return HttpResponseRedirect(reverse('fmprojectlist'))
+
+
 def fm_page(request):
 
     # CHECK IF USER HAS BEEN LOGGED IN
@@ -644,29 +1751,33 @@ def fm_page(request):
     print "PROJECTLIST:", projectlist
 
     ss_pheno_dict = {}
+    ss_contacts_dict = {}
     proj_ss_dict = {}
     for project in projectlist:
         print "project: ", project, " samplesubmission: ", SampleSubmission.objects.filter(project_name__project_name__exact=project)
         proj_ss_dict[project] = SampleSubmission.objects.filter(project_name__project_name__exact=project)
         print "proj_ss_dict: ", proj_ss_dict
         ss_pheno_dict.update(get_phenolist_cp(project))
+        ss_contacts_dict.update(get_contactlist_cp(project))
+        print "ss_contacts_dict ", ss_contacts_dict
 
     #Phenotype
     phenotypeform = PhenotypeForm() #unbound form, no associated data, empty form
+    phenolist = Phenotype.objects.all() #for autocomplete
 
     #Project
     print "this is request.user", request.user
     userprojectform = UserProjectForm_FM(initial={'username': request.user}) #unbound form, no associated data, empty form
 
-    #Sample Submission form
-    samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
-
     #Contact list
     contact_list = DNAOrderAppUser.objects.all()
 
-    #Affiliated Institute List
-    affiliated_institute_list = AffiliatedInstitute.objects.all()
-    print "this is affiliated_institute list", affiliated_institute_list
+    #Sample Submission form
+    samplesubmissionform = SampleSubmissionForm() #unbound form, no associated data, empty form
+
+    #Affiliated Institute
+    affiliatedinstitutelist = AffiliatedInstitute.objects.all() #for autocomplete
+
 
 
 #---------------------------------------------------------------------------------------------
@@ -720,21 +1831,45 @@ def fm_page(request):
         'username' : request.user,
         'myprojectlist' : projectlist,
         'proj_ss_dict' : proj_ss_dict,
+        'ss_contacts_dict' : ss_contacts_dict,
         'phenotypeform' : phenotypeform,
         'ss_pheno_dict' : ss_pheno_dict,
         'userprojectform' : userprojectform,
         'samplesubmissionform' : samplesubmissionform,
         'contact_list' : contact_list,
-        'affiliated_institute_list' : affiliated_institute_list
+        'phenolist' : phenolist,
+        'affiliatedinstitutelist' : affiliatedinstitutelist
         })
+
 
 def collab_page(request):
+    
+    # CHECK IF USER HAS BEEN LOGGED IN
+    if not request.user.is_authenticated():
+        print request.user, "is not authenticated."
+        return HttpResponseRedirect(reverse('failed_signin'))
 
-    # Who requested it
-    # Requested Sample Submissions
+
 
     return render(request, 'order/collab-page.html', {
+        'username' : request.user
         })
+
+
+def well_filling_1(request):
+    return render(request, 'order/well-filling-1.html', {})
+
+def well_filling_2(request):
+    return render(request, 'order/well-filling-2.html', {})
+
+def well_filling_2_customize(request):
+    return render(request, 'order/well-filling-2-customize.html', {})
+
+def well_filling_3_manual(request):
+    return render(request, 'order/well-filling-3-manual.html', {})
+
+def well_filling_3_robot(request):
+    return render(request, 'order/well-filling-3-robot.html', {})
 
 def lab_tech_page(request):
     return render(request, 'order/lab-tech-page.html', {
