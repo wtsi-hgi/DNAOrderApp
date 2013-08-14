@@ -175,6 +175,8 @@ class SampleSubmission(models.Model):
     # order_status = models.CharField(max_length=100, choices=STATUS, default='Incomplete Phenotype List')
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+    date_request_sent = models.DateTimeField(null=True)
+    request_sent = models.BooleanField()
 
     def __unicode__(self):
         return self.sample_submission_name
@@ -228,7 +230,13 @@ class DatePhenotypeValue(models.Model):
     def __unicode__(self):
         return u'%s' % self.phenotype_value
 
-"""ADDED AFTER THE MANIFEST WAS SHOWN TO JAMES"""
+"""SAMPLE CHARACTERISTICS"""
+
+class Unit(models.Model):
+    unit_name = models.CharField(max_length=100, unique=True)
+
+    def __unicode__(self):
+        return self.unit_name
 
 class PlatformType(models.Model):
     platform_type = models.CharField(max_length=100, unique=True)
@@ -299,7 +307,7 @@ class AffectionStatusSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.SmallIntegerField()
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     # # phenotype.db_index = True
@@ -311,7 +319,7 @@ class QualitativeSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.CharField(max_length=200)
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -322,7 +330,7 @@ class QuantitativeSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DecimalField(max_digits=10, decimal_places=2)
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -333,7 +341,7 @@ class DateSampleFeatureValue(models.Model):
     sample_feature = models.ForeignKey(SampleFeature)
     sample = models.ForeignKey(Sample)
     sample_feature_value = models.DateField()
-    sample_unit = models.CharField(max_length=100)
+    sample_unit = models.ForeignKey(Unit)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -417,8 +425,7 @@ class Display(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
-class Unit(models.Model):
-    unit_name = models.CharField(max_length=100, unique=True)
+
 
 
 
@@ -493,6 +500,7 @@ class PhenotypeForm(ModelForm):
 class SampleSubmissionForm(ModelForm):
     class Meta:
         model = SampleSubmission
+        exclude = ['date_request_sent', 'request_sent']
         # exclude = ['affiliated_institute', 'contact_list', 'phenotype_list', 'project_name']
 
 class TempSampleSubmissionForm(ModelForm):
