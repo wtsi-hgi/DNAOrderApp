@@ -11,6 +11,9 @@ from DNAOrderApp.order.models import Document, Sample, Study, Display, Phenotype
 from DNAOrderApp.order.models import UserProject, AffiliatedInstitute, PhenotypeType, DNAOrderAppUser, TempSSAffiliatedInstitute
 from DNAOrderApp.order.models import TempSSDNAOrderAppUser, TempSSDNAOrderAppUserForm
 
+# Lab Tech
+from DNAOrderApp.order.models import SampleFeature, SampleFeatureType, Sample
+
 from DNAOrderApp.order.models import PhenotypeForm, SampleSubmissionForm, UserProjectForm, UserForm, UserProjectForm_FM, TempSSPhenotype
 from DNAOrderApp.order.models import DNAOrderAppUserForm, AffiliatedInstituteForm, TempSampleSubmissionForm, TempSampleSubmission, TempSSPhenotypeForm
 from DNAOrderApp.order.forms import DocumentForm
@@ -21,7 +24,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import base64
 from django.template import Template, Context, RequestContext
 
-import csv, string, re
+import csv, string, re, datetime
 
 formfile = ""
 
@@ -426,10 +429,78 @@ def admin_page(request, table=None, pkid=None):
         p1 = PhenotypeType(phenotype_type="AffectionStatus")
         p2 = PhenotypeType(phenotype_type="Qualitative")
         p3 = PhenotypeType(phenotype_type="Quantitative")
+        p4 = PhenotypeType(phenotype_type="Date")
 
         p1.save()
         p2.save()
         p3.save()
+        p4.save()
+
+    if not SampleFeatureType.objects.all():
+        sft1 = SampleFeatureType(sample_feature_type="Boolean")
+        sft2 = SampleFeatureType(sample_feature_type="Qualitative")
+        sft3 = SampleFeatureType(sample_feature_type="Quantitative")
+        sft4 = SampleFeatureType(sample_feature_type="Date")
+
+        sft1.save()
+        sft2.save()
+        sft3.save()
+        sft4.save()
+
+    # initial data (not using fixtures) - standard sample characteristics
+    samplefeaturelist_quant = [     "Sample Plate ID",
+                                    "Sanger Sample ID",
+                                    "Volume (ul)",
+                                    "Concentration (ng/ul)",
+                                    "Sample Accession Number (optional)"
+    ]
+
+    samplefeaturelist_qual = [
+                                    "Supplier Sample Name",
+                                    "DNA Source (i.e. Blood)",
+                                    "DNA Extraction Method",
+                                    "Purification method",
+                                    "Concentration determined by",
+                                    "DNA Storage Conditions",
+                                    "Public Name",
+                                    "Sample Description",
+                                    "Sample Visibility",
+                                    "Sample Type"
+    ]
+
+    samplefeaturelist_bool = [      "Is Sample a Control",
+                                    "Is Re-submitted sample?",
+                                    "Sample purified?"
+    ]
+
+    samplefeaturelist_date = [      "Date of Sample Collection (mm/yy or yyyy only)",
+                                    "Date of DNA Extraction (mm/yy or yyyy only)"
+    ]
+
+    if not SampleFeature.objects.all():
+        for sf in samplefeaturelist_quant:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Quantitative")
+            s.save()
+
+        for sf in samplefeaturelist_qual:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Qualitative")
+            s.save()
+
+        for sf in samplefeaturelist_bool:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Boolean")
+            s.save()
+
+        for sf in samplefeaturelist_date:
+            s = SampleFeature()
+            s.sample_feature_name = sf
+            s.sample_feature_type = SampleFeatureType.objects.get(sample_feature_type="Date")
+            s.save()
 
 
     ucf = UserCreationForm()
@@ -1655,6 +1726,19 @@ def get_contactlist_cp(proj_name):
 
     return ss_contacts_dict
 
+
+def set_request_sent_ss(request, ssid=None):
+    print "in set-request-sent-ss"
+    print "ssid ", ssid 
+
+    ss = SampleSubmission.objects.get(pk=ssid)
+    ss.date_request_sent = datetime.datetime.now()
+    ss.request_sent = True
+    ss.save()
+
+    return HttpResponseRedirect(reverse('fmprojectlist'))
+
+
 def fm_page(request):
 
     # CHECK IF USER HAS BEEN LOGGED IN
@@ -1765,6 +1849,22 @@ def collab_page(request):
 
     return render(request, 'order/collab-page.html', {
         })
+
+
+def well_filling_1(request):
+    return render(request, 'order/well-filling-1.html', {})
+
+def well_filling_2(request):
+    return render(request, 'order/well-filling-2.html', {})
+
+def well_filling_2_customize(request):
+    return render(request, 'order/well-filling-2-customize.html', {})
+
+def well_filling_3_manual(request):
+    return render(request, 'order/well-filling-3-manual.html', {})
+
+def well_filling_3_robot(request):
+    return render(request, 'order/well-filling-3-robot.html', {})
 
 def lab_tech_page(request):
     return render(request, 'order/lab-tech-page.html', {

@@ -492,35 +492,19 @@ function saveEditButton(data){
 $(document).ready(function() {
 	$(".collapse").collapse();
 
-/////////////////////////////////
-
-// function refreshPhenotypeList() {
-//   $("#current-list").empty();
-//   for(i=0; i< source.length; i++)
-//     $("#current-list").append("<li class=\"active\"><a href=\"#\">" + source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-// }
-
-console.log({{ contact_list|get_all_contacts|safe }});
-var contact_list_source = {{ contact_list|get_all_contacts|safe }};
-// Refresh Contact List
-function refreshContactList(projid){
-	$("#current-contact-list-"+projid).empty();
-	for(i=0; i<contact_list_source.length; i++){
-		$("#current-contact-list-"+projid).append("<li><a href=\"#\">" + contact_list_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-	}
-}
-
-//Refresh Affiliated Institute List
-//DEPRECATED: THERE IS NO MULTIPLE AFFILIATED INSTITUTES ASSOCIATED TO SAMPLE SUBMISSION ANYMORE. JUST ONE. SINCE IT IS BY FOREIGN KEY NOT M2M.
-var affiliated_institute_source = {{ affiliated_institute_list|get_all_affiliated_institute|safe }};
-console.log(affiliated_institute_source);
-// function refreshAffiliatedInstituteList(projid){
-// 	$("#current-affiliated-institute-list-"+projid).empty();
-// 	for(i=0; i<affiliated_institute_source.length; i++)
-// 		$("#current-affiliated-institute-list-"+projid).append("<li><a href=\"#\">" + affiliated_institute_source[i] + "<i class=\"icon-remove close\" data-dismiss=\"alert\"></i></a></li>");
-// }
-
-////////////////////////////////
+	//clicking on Send Request button
+	$('.send-request-button').click( function(data){
+		data.preventDefault();
+		var ssid = $(this).attr("value");
+		$.get('collab-page/set-request-sent/'+ssid, function(data){
+			var newDoc = document.open("text/html", "replace");
+			newDoc.write(data);
+			newDoc.close();
+		})
+		.fail(function(){
+			$("#request-sent-tag-"+ssid).html("<span id=\"warning-tag-"+ssid+" class=\"label label-warning\"><i class=\"icon-repeat\"></i> Please Try Again.</span>");
+		});
+	});
 
 	//clicking on the [+] Sample Submission 
 	$('.add-ss-button').click( function(data){
@@ -780,117 +764,6 @@ console.log(affiliated_institute_source);
 									'border': 'solid',
 	});
 
-	//For each project section
-	$("tr[name='project-section']").each(function(){
-		var projid = $(this).attr("value");
-		console.log(projid);
-
-		//Contact List
-		$('#contact-list-input-'+projid).typeahead({
-			source : contact_list_source,
-			items: 16
-		});
-
-		$('#contact-list-form-'+projid).submit(function(e) {
-
-    		e.preventDefault(); // don't submit the form
-
-    		var txt = $('#contact-list-input-'+projid).val(); // get the current item
-    		console.log(txt);
-    		$('#contact-list-input-'+projid).val(""); // clean the input
-    		contact_list_source.push(txt); // add it to the source
-
-    	// AJAX SUBMIT to add contact into dnaorderuser
-  //   	$("#contact-list-form-"+projid).ajaxSubmit({
-		// 										url: '/order/api/handle_contact_fmpage/ADD/'+txt,
-		// 										type: "POST",
-		// 										resetForm : true,
-		// 										headers : {"X-CSRFToken" : csrftoken},
-		// 										success : function(data) {
-		// 																	console.log('test' + data);
-		// 																	$('#project-section').replaceWith(data);
-		// 																	$('div#alert-signs').html("<div class=\"alert alert-success\"><b>Good Job!</b> You have successfully added a project!</div>");
-		// 																	$(".collapse").collapse();
-		// 										},
-		// 										error : function(data) {
-		// 																	$('div#alert-signs').html("<div class=\"alert alert-error\"><b>Uh Oh! </b> Ajax Failed! </div>");
-		// 										}
-		// });
-
-			refreshContactList(projid);
-    		// refreshPhenotypeList(); // refresh the list
-
-    	});
-
-		refreshContactList(projid);
-	// refreshPhenotypeList();
-
-/////////////// THIS CODE /////////////////////////////////////////////////
-	//check to see if browser supports placeholder function
-	// jQuery.support.placeholder = (function(){
-	// 	var i = document.createElement('input');
-	// 	return 'placeholder' in i;
-	// })();
-	// jQuery.support.placeholder = false;
-
-	// $("#affiliated-institute-title").click(function(event){
-	// 	if (jQuery.support.placeholder){
-	// 		console.log("inside if");
-	// 		$(this).html("<input name='ai' id='ai-title-input' type='text' data-provide='typeahead' placeholder='Insert Affiliated Institute...' autocomplete='off'>");
-	// 	}
-	// 	else{
-	// 		console.log("else ");
-	// 		$(this).html("<input name='ai' id='ai-title-input' type='text' data-provide='typeahead' autocomplete='off'>");
-	// 		$('#ai-title-input').watermark('Insert Affiliated Institute...');
-	// 	}
- //    });
-   
- //    $("#affiliated-institute-description").click(function(event){
- //    	if (jQuery.support.placeholder){
- //    		$(this).html("<input name='ai' id='ai-description-input' type=\"text\" data-provide=\"typeahead\" placeholder='Insert description...' autocomplete='off'>");
- //    	}
- //    	else{
- //    		$(this).html("<input name='ai' id='ai-description-input' type=\"text\" data-provide=\"typeahead\" placeholder='Insert description...' autocomplete='off'>");
- //    		$('#ai-description-input').watermark('Insert description...');
- //    	}
- //    });
-
-//////////////////////END OF THIS CODE////////////////////////////////////////
-
-
-	//Affiliated Institute
-	$('.affiliated-institute-title-input').typeahead({
-		source : affiliated_institute_source,
-		items: 16
-	});
-
-	// !!!!!! this helps add onto the list of affiliated institute
-	// best to have a function that updates the 'querying' the affiliated institute list 
-	// to update the affiliated_institute_source.!!!!
-
-	//So as of this moment - this is deprecated. need to renew this function.
-	// $('#affiliated-institute-form-'+projid).submit(function(e) {
-
- //    		e.preventDefault(); // don't submit the form
-
- //    		var txt = $('#affiliated-institute-input-'+projid).val(); // get the current item
- //    		console.log(txt);
- //    		$('#affiliated-institute-input-'+projid).val(""); // clean the input
- //    		affiliated_institute_source.push(txt); // add it to the source
- //    		refreshAffiliatedInstituteList(projid);
-
- //    	});
-
-	// refreshAffiliatedInstituteList(projid);
-
-	$('.affiliated-institute-description-input').typeahead({
-		source: [
-			'is a genome research institute primarily funded by the Wellcome Trust.',
-			'is a world renowned teaching hospital in Cambridge, England, with strong affiliations to the University of Cambridge.',
-			'is Hello World.'
-		]
-	});
-});
 });
 
 // Add Temporary Contact - from ADD
@@ -1090,7 +963,7 @@ border:solid 1px #c3c3c3;
 				</td>
 				{% if sslist|length == 0 %}
 				<td>
-					<span class="label label-warning"><i class="icon-warning-sign"></i> No Sample Submissions</span>
+					<span class="label label-info"><i class="icon-warning-sign"></i> No Sample Submissions</span>
 				</td>
 				{% else %}
 				<td>
@@ -1112,6 +985,8 @@ border:solid 1px #c3c3c3;
 									<th> # of Samples </th>
 									<th> Date Created </th>
 									<th> Last Updated </th>
+									<th> Request Sent On </th>
+									<th> Send Request </th>
 								</tr>
 								{% for ss in sslist %}
 								<tr>
@@ -1162,6 +1037,19 @@ border:solid 1px #c3c3c3;
 											<td>{{ ss.sample_num }}</td>
 											<td>{{ ss.date_created }}</td>
 											<td>{{ ss.last_updated }}</td>
+											<td>{{ ss.date_request_sent }}</td>
+											<td>
+												{% if ss.request_sent %}
+													<button class="send-request-button" id="send-request-button-{{ss.pk}}" value="{{ss.pk}}" disabled>Send Request</button>
+													<br />
+													<span id="success-tag-{{ss.pk}}" class="label label-success"><i class="icon-ok"></i> Successfully sent</span>
+
+												{% else %}
+													<button class="send-request-button" id="send-request-button-{{ss.pk}}" value="{{ss.pk}}">Send Request</button>
+													<br />
+												{% endif %}
+												<div id="request-sent-tag-{{ss.pk}}"></div>
+											</td>
 										</tr>
 										
 									<!-- {{ samplesubmissionform }} -->

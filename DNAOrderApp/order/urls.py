@@ -45,6 +45,14 @@ urlpatterns = patterns('',
 
     # Collaborator PI page
     url(r'^collab-page$', views.collab_page, name='collab-page'),
+    url(r'^collab-page/set-request-sent/(?P<ssid>\d+)/?$', views.set_request_sent_ss, name="set-request-sent"),
+
+    # Well-filling pages
+    url(r'^well-filling-1$', views.well_filling_1, name='well-filling-1'), # choose way of well filling
+    url(r'^well-filling-2$', views.well_filling_2, name='well-filling-2'), # choose order of well filling
+    url(r'^well-filling-2-customize$', views.well_filling_2_customize, name='well-filling-2-customize'), # customize order of well filling
+    url(r'^well-filling-3-manual$', views.well_filling_3_manual, name='well-filling-3-manual'), # well filling procedure - manual
+    url(r'^well-filling-3-robot$', views.well_filling_3_robot, name='well-filling-3-robot'), # well filling procedure - robot
 
     # Lab Technician page
     url(r'^lab-tech-page$', views.lab_tech_page, name='lab-tech-page'),
@@ -76,7 +84,7 @@ url(r'^preview$', views.preview, name='preview'),
 url(r'^test$', views.test, name='base_template'),
 url(r'^pheno-list$', views.pheno_list, name='pheno-list' ),
 url(r'^welcome-collaborator$', views.welcome_collab, name='welcome-collab'),
-url(r'^96plate.html$', views._96plate, name='96plate'),
+url(r'^96plate.html$', views._96plate, name='96plate'), #GONE
 
 
 # BOOTSTRAP TUTORIAL
