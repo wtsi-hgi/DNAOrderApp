@@ -1843,11 +1843,16 @@ def fm_page(request):
 
 
 def collab_page(request):
+    
+    # CHECK IF USER HAS BEEN LOGGED IN
+    if not request.user.is_authenticated():
+        print request.user, "is not authenticated."
+        return HttpResponseRedirect(reverse('failed_signin'))
 
-    # Who requested it
-    # Requested Sample Submissions
+
 
     return render(request, 'order/collab-page.html', {
+        'username' : request.user
         })
 
 
