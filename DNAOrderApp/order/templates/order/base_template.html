@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -16,26 +17,26 @@
 		</style>
 
 		<!-- TESTING -->
-		<script src="{{ STATIC_URL }}bootstrap/js/jquery-1.9.1.js"></script>
-		<script src="{{ STATIC_URL }}bootstrap/js/jquery.form.js"></script> 
+		<script src="{% static "bootstrap/js/jquery-1.9.1.js" %}"></script>
+		<script src="{% static "bootstrap/js/jquery.form.js" %}"></script> 
 		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 		{% block extra_css_js %}{% endblock extra_css_js %}
 		
 		
 		<!-- Bootstrap CSS Toolkit styles-->
-		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
-		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet" media="screen">
+		<link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
 
 		<!-- Generic page styles by TS -->
-		<!--<link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">-->
+		<!--<link rel="stylesheet" href="{% static "css/style.css" %}">-->
 
 		<!-- Bootstrap styles for responsive website layout, different screen sizes -->
-		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet" type="text/css">
-		<script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+		<link href="{% static "bootstrap/css/bootstrap-responsive.css" %}" rel="stylesheet" type="text/css">
+		<script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
 
 		<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-    	<!--<link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap-image-gallery.min.css">-->
-    	<!-- <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/jquery.fileupload-ui.css"> -->
+    	<!--<link rel="stylesheet" href="{% static "bootstrap/css/bootstrap-image-gallery.min.css" %}">-->
+    	<!-- <link rel="stylesheet" href="{% static "bootstrap/css/jquery.fileupload-ui.css" %}"> -->
 
 		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     	<!--[if lt IE 9]>
@@ -43,7 +44,7 @@
     	<![endif]-->
 
     	<!-- resizeable icons from http://fortawesome.github.io/Font-Awesome/ -->
-		<link rel="stylesheet" href="{{ STATIC_URL }}font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="{% static "font-awesome/css/font-awesome.min.css" %}">
 		<!--[if IE 7]>
   			<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome-ie7.min.css">
 		<![endif]-->

@@ -5,22 +5,23 @@
 {% load get_affiliated_institute_list %}
 {% load create_formset_list %}
 {% load create_aiform %}
+{% load staticfiles %}
 
 {% block title %}Project List{% endblock title %}
 
 
 {% block extra_css_js %}
-<link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
-<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
-<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
-<!-- <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" /> -->
-</script>
+
+<link href="{% static "bootstrap-modal/css/bootstrap-modal.css" %}" rel="stylesheet" media="screen">
+<link href="{% static "bootstrap-modal/js/bootstrap-modalmanager.js" %}" rel="text/javascript" media="screen">
+<link href="{% static "bootstrap-modal/js/bootstrap-modal.js" %}" rel="text/javascript" media="screen">
+
+<script src="{% static "jquery.watermark-3.1.4/jquery.watermark.js" %}" rel="text/javascript" media="screen"></script>
 
 <!-- JQUERY AUTOCOMPLETE PLUGIN -->
 <meta charset="utf-8" />
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-
 
 
 <style>

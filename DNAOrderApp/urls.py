@@ -22,10 +22,13 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^/?admin/', include(admin.site.urls)),
     
-    url(r'^order/', include('DNAOrderApp.order.urls')),
+    url(r'^/?order/', include('DNAOrderApp.order.urls')),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+urlpatterns += staticfiles_urlpatterns()
 
 # Django does not serve MEDIA_ROOT by default, that would be dangerous in production
 # environment. But in development stage, we could cut short. Pay attention to the 
