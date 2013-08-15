@@ -1,0 +1,12 @@
+<table class="table table-hover" id="ai-table">
+		<tr>
+			<th> Affiliated Institute Name </th>
+			<th> Affiliated Institute Description </th>
+		</tr>
+		{% for u in ailist_all %}
+		<tr id="{{u.pk}}">
+			<td>{{ u.ai_name }}</td>
+			<td>{{ u.ai_description }}</td>
+		</tr>
+		{% endfor %}
+	</table>

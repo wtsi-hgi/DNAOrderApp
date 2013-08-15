@@ -14,10 +14,7 @@
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
 <link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
 <!-- <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" /> -->
-<script src="{{ STATIC_URL }}jquery.watermark-3.1.4/jquery.watermark.js" rel="text/javascript" media="screen"></script>
-<!--https://code.google.com/p/jquery-watermark/-->
-<!-- <script src="{{ STATIC_URL }}twitter-bootstrap-typeahead/js/bootstrap-typeahead.js" rel="text/javascript" media="screen"></script> -->
-<!-- https://github.com/tcrosen/twitter-bootstrap-typeahead -->
+</script>
 
 <!-- JQUERY AUTOCOMPLETE PLUGIN -->
 <meta charset="utf-8" />
@@ -1018,7 +1015,7 @@ border:solid 1px #c3c3c3;
 															{% for p in phenolist %}
 															<tr id="{{p.pk}}">
 																<td>{{ p.phenotype_name }}</td>
-																<td>{{ p.phenotype_type_id|get_phenotype_type_by_id }}</td>
+																<td>{{ p.phenotype_type.phenotype_type }}</td>
 																<td>{{ p.phenotype_description }}</td>
 																<td>{{ p.phenotype_definition }}</td>
 															</tr>

@@ -1,0 +1,45 @@
+{% load render_table from django_tables2 %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Preview of the Manifest </title>
+</head>
+<body>
+	<div id="extract-panel">
+		<h4> The following is what's extracted from the manifest: </h4>
+		<p>Study Name: {{ study_name }} </p>
+		<p>Supplier Name: {{ supplier_name }} </p>
+		<p>Number of Plates: {{ num_of_plates }}</p>
+
+		<h3> Top 5 Rows </h3>
+		<table border="1" id="top5">
+			<tr>
+				{% for heading in headings %}
+				<th>{{ heading }}</th>
+				{% endfor %}
+			</tr>
+			{% for x, y in top5 %}
+			<tr>
+				<td> {{ x }} </td>
+				<td> {{ y }} </td>
+			</tr>
+			{% endfor %}
+		</table>
+
+		<h3> Bottom 5 Rows </h3>
+		<table border="1" id="bottom5">
+			<tr>
+				{% for heading in headings %}
+				<th>{{ heading }}</th>
+				{% endfor %}
+			</tr>
+			{% for x, y in bottom5 %}
+			<tr>
+				<td> {{ x }} </td>
+				<td> {{ y }} </td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div> 
+</body>
+</html>

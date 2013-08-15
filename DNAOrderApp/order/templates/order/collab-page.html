@@ -1,0 +1,98 @@
+{% extends "base_template.html" %}
+
+{% block title %}Collab Page{% endblock title %}
+
+{% block extra_css_js %}
+<link href="{{ STATIC_URL }}bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modalmanager.js" rel="text/javascript" media="screen">
+<link href="{{ STATIC_URL }}bootstrap-modal/js/bootstrap-modal.js" rel="text/javascript" media="screen">
+<!-- <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" /> -->
+
+
+<style>
+img{
+	height: 42;
+	width: 42;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	//clicking start well-filling
+	$('.start-well-filling').click( function(data){
+		$.get('well-filling-1', function(data){
+			alert("hi");
+			$("#well-filling-modal-body").replaceWith(data);
+		});
+	});
+}
+</script>
+
+{% endblock extra_css_js %}
+
+{% block extrahead %}
+{% endblock extrahead %}
+
+{% block active-navbar %}
+{% endblock active-navbar %}
+
+{% block content %}
+<div class="container">
+{% block section_title %}<h1> Welcome {{username}} to the Collaborator/Lab Technician Page </h1>{% endblock section_title %}
+	<div class="container" id="collab-orders-section">
+
+		<div id="alert-signs">
+			{{ alert_msg|safe }}
+		</div>
+		<br />
+		<h3> Sample Submissions List of Orders </h3>
+
+		<table class="table table-striped" id="project-table">
+			<tr>
+				<th></th>
+				<th>Project Name</th>
+				<th>Sample Submission Name</th>
+				<th>Requested On</th>
+				<th>From Whom</th>
+				<th># Samples</th>
+				<th>Which Lab technician</th>
+				<th>Phenotype values (a link to upload file or a form to fill out the values)</th>
+				<th>Well-filling Process</th>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>
+					<button id="start-well-filling-button" role="button" class="start-well-filling" data-toggle="modal" project-id="{{proj.pk}}" data-target="#well-filling-modal-body">Start Well-filling</button>
+				</td>
+			</tr>
+		</table>
+
+		<!--*********************************** MODAL FOR WELL FILLING ********************************************-->
+		<div id="well-filling-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="well-filling-label" aria-hidden="true">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3 id="well-filling-label">Well-filling - Step 1</h3>
+			</div>
+			<div class="modal-body" id="well-filling-modal-body">
+				hello!
+			</div>
+			<div class="modal-footer">
+				<button id="next-tss-button" role="button" class="btn" onclick="nextButton(this)" frombutton="">Next</button>
+				<button id="final-submission-tss-button" role="button" class="btn btn-primary" onclick="finalSubmitButton(this)" style="display: none">Submit</button>
+			</div>
+		</div>
+		
+
+		<!--***************************************** END OF MODAL ************************************************************-->
+
+	</div>
+</div>
+{% endblock content %}
